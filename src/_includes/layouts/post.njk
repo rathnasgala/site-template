@@ -1,0 +1,11 @@
+---
+layout: layouts/base.njk
+---
+{% from "components/ui.njk" import engagementSummary, languageSwitcher, shareControl %}
+<article>
+  {% if post.publicationState == "published" %}<h1>{{ post.frontmatter.title }}</h1>{% endif %}
+  {% if post.publicationState == "published" %}{{ languageSwitcher(hreflangLinks, post.language) }}{% endif %}
+  {{ content | safe }}
+  {% if post.publicationState == "published" %}{{ engagementSummary(post.id, engagement) }}{% endif %}
+  {% if post.publicationState == "published" %}{{ shareControl(post.canonicalUrl) }}{% endif %}
+</article>

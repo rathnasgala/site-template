@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="{{ post.language or site.site.defaultLanguage }}" data-theme="{{ site.design.theme }}" data-palette="{{ site.design.palette }}" data-mode="system">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>(function(){try{var m=localStorage.getItem('gala-color-mode');if(m==='light'||m==='dark'||m==='system')document.documentElement.dataset.mode=m}catch(e){}})();</script>
+    <title>{{ post.frontmatter.title or title }} · {{ site.site.name }}</title>
+    {% if post %}<link rel="canonical" href="{{ post.canonicalUrl }}">{% endif %}
+    {% for alternate in hreflangLinks %}<link rel="alternate" hreflang="{{ alternate.hreflang }}" href="{{ alternate.href }}">{% endfor %}
+    {% for feed in feedLinks %}<link rel="alternate" type="application/atom+xml" hreflang="{{ feed.language }}" title="{{ feed.title }}" href="{{ feed.href }}">{% endfor %}
+    {% if seo %}
+    <meta name="description" content="{{ seo.description }}">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ seo.title }}">
+    <meta property="og:description" content="{{ seo.description }}">
+    <meta property="og:url" content="{{ seo.canonicalUrl }}">
+    {% if seo.imageUrl %}<meta property="og:image" content="{{ seo.imageUrl }}">{% endif %}
+    <meta name="twitter:card" content="{{ seo.twitterCard }}">
+    <meta name="twitter:title" content="{{ seo.title }}">
+    <meta name="twitter:description" content="{{ seo.description }}">
+    {% if seo.imageUrl %}<meta name="twitter:image" content="{{ seo.imageUrl }}">{% endif %}
+    <script type="application/ld+json">{{ seo.structuredDataJson | safe }}</script>
+    {% endif %}
+    {% if post.publicationState == "tombstoned" %}<meta name="robots" content="noindex">{% endif %}
+    <link rel="stylesheet" href="{{ '/assets/theme.css' | url }}">
+    <link rel="stylesheet" href="{{ '/custom.css' | url }}">
+    <script src="{{ '/assets/theme-mode.js' | url }}" defer></script>
+    <script src="{{ '/assets/preferences.js' | url }}" defer></script>
+    <script src="{{ '/assets/interactions.js' | url }}" defer></script>
+    {% if searchPage %}<script src="{{ '/assets/search.js' | url }}" defer></script>{% endif %}
+  </head>
+  <body>
+    <header>
+      <button type="button" data-theme-mode-toggle aria-label="Color mode: system. Activate for light.">Theme: system</button>
+      <a href="{{ '/settings/' | url }}">Settings</a>
+      <a href="{{ '/search/' | url }}">Search</a>
+    </header>
+    <main id="main-content">{{ content | safe }}</main>
+  </body>
+</html>

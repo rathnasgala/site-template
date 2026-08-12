@@ -1,0 +1,27 @@
+schemaVersion: 1
+site:
+  id: unavailable
+  name: New Gala Site
+  author: New Gala Site
+  defaultLanguage: en
+  timezone: UTC
+hosting:
+  provider: github-pages
+  topology: provider-default
+  canonicalBaseUrl: unavailable
+  pathPrefix: /unavailable
+design:
+  theme: editorial
+  layout: article-first
+  palette: default
+  typography: system
+  spacing: comfortable
+  radius: soft
+  density: comfortable
+  motion: subtle
+  componentStyle: quiet
+  colorMode: system
+sharing:
+  targets: []
+  socialProfiles: {}
+canonicalPolicy: self

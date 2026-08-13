@@ -52,7 +52,7 @@ export async function stageThemePackage(destination) {
     },
     files: ['payload'],
     publishConfig: { access: 'public', provenance: true },
-    engines: { node: '>=18' }
+    engines: { node: '>=20' }
   }, null, 2)}\n`);
   return { output, name: identity.name, version: identity.version, fileCount: Object.keys(manifest.files).length };
 }

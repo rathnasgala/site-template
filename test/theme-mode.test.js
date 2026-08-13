@@ -12,7 +12,8 @@ function browserHarness(initialValue, { storageThrows = false } = {}) {
     attributes: {},
     textContent: '',
     addEventListener(type, listener) { listeners[type] = listener; },
-    setAttribute(name, value) { this.attributes[name] = value; }
+    setAttribute(name, value) { this.attributes[name] = value; },
+    querySelector() { return null; }
   };
   let ready;
   const context = {

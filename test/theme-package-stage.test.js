@@ -15,6 +15,7 @@ test('stages a public no-scripts theme artifact with managed site bytes under pa
   assert.equal(staged.name, '@rathnasgala/theme');
   assert.equal(packageJson.name, '@rathnasgala/theme');
   assert.equal(packageJson.version, manifest.themePackage.version);
+  assert.equal(packageJson.engines.node, '>=20');
   assert.deepEqual(packageJson.repository, {
     type: 'git', url: 'git+https://github.com/rathnasgala/site-template.git'
   });

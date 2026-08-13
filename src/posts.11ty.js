@@ -1,4 +1,4 @@
-import { markdownLibrary } from '../lib/render-markdown.js';
+import { renderMarkdownDocument } from '../lib/render-markdown.js';
 import { articleHreflang, postSeo } from '../lib/seo.js';
 import { engagementFor } from '../lib/engagement-snapshot.js';
 
@@ -19,8 +19,11 @@ export default class ValidatedPostPages {
           return articleHreflang(buildManifest.posts, site).get(post.source) ?? [];
         },
         engagement: ({ engagementSnapshot, post }) => engagementFor(engagementSnapshot, post.id),
+        postTableOfContents: ({ post }) => post?.publicationState === 'published'
+          ? renderedDocument(post).tableOfContents
+          : [],
         seo: ({ post, site }) => post?.publicationState === 'published'
-          ? postSeo({ post, site, renderedHtml: markdownLibrary.render(post.body) })
+          ? postSeo({ post, site, renderedHtml: renderedDocument(post).html })
           : null
       }
     };
@@ -30,6 +33,17 @@ export default class ValidatedPostPages {
     if (post.publicationState === 'tombstoned') {
       return `<p>POST deleted on ${post.frontmatter.deleteDate}</p>`;
     }
-    return markdownLibrary.render(post.body);
+    return renderedDocument(post).html;
   }
+}
+
+const renderedDocuments = new WeakMap();
+
+function renderedDocument(post) {
+  let document = renderedDocuments.get(post);
+  if (!document) {
+    document = renderMarkdownDocument(post.body);
+    renderedDocuments.set(post, document);
+  }
+  return document;
 }

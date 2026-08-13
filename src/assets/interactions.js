@@ -8,6 +8,22 @@ function selectableFallback(control) {
 }
 
 document.addEventListener('click', async (event) => {
+  const dialogControl = event.target.closest('[data-open-dialog]');
+  if (dialogControl) {
+    const dialog = document.getElementById(dialogControl.dataset.openDialog);
+    if (dialog instanceof HTMLDialogElement) dialog.showModal();
+    return;
+  }
+
+  const moreComments = event.target.closest('[data-comments-cursor]');
+  if (moreComments) {
+    const region = moreComments.closest('[data-engagement-url]');
+    if (!region) return;
+    moreComments.disabled = true;
+    await refreshEngagement(region, moreComments.dataset.commentsCursor, true);
+    return;
+  }
+
   const share = event.target.closest('[data-copy-url]');
   if (share) {
     const value = share.dataset.copyUrl;
@@ -52,3 +68,158 @@ codeBlocks.forEach((pre) => {
   control.setAttribute('aria-label', 'Copy code block');
   wrapper.prepend(control);
 });
+
+function textElement(name, text, className) {
+  const element = document.createElement(name);
+  element.textContent = text;
+  if (className) element.className = className;
+  return element;
+}
+
+function engagementCounts(data) {
+  const reactionTotal = Object.values(data.reactions ?? {})
+    .reduce((total, count) => total + (Number.isSafeInteger(count) ? count : 0), 0);
+  return [
+    ['Reactions', reactionTotal],
+    ['Comments', Number.isSafeInteger(data.comments?.totalCount) ? data.comments.totalCount : 0],
+    ['Views', Number.isSafeInteger(data.views?.count) ? data.views.count : 0]
+  ];
+}
+
+function commentList(items) {
+  const roots = document.createElement('ol');
+  roots.className = 'gala-comments';
+  const nodes = new Map();
+  for (const comment of items) {
+    const item = document.createElement('li');
+    item.dataset.commentId = comment.commentId;
+    const author = comment.author?.displayName ?? '[deleted]';
+    item.append(textElement('strong', author));
+    item.append(textElement('p', comment.deleted ? '[deleted]' : comment.body));
+    nodes.set(comment.commentId, item);
+  }
+  for (const comment of items) {
+    const item = nodes.get(comment.commentId);
+    const parent = comment.parentCommentId ? nodes.get(comment.parentCommentId) : null;
+    if (!parent) {
+      roots.append(item);
+      continue;
+    }
+    let replies = parent.querySelector(':scope > ol');
+    if (!replies) {
+      replies = document.createElement('ol');
+      replies.className = 'gala-comment-replies';
+      parent.append(replies);
+    }
+    replies.append(item);
+  }
+  return roots;
+}
+
+function renderEngagement(region, payload, appendComments = false) {
+  const data = payload?.data;
+  if (!data || typeof data !== 'object') throw new TypeError('Engagement data is invalid');
+  const live = region.querySelector('[data-engagement-live]');
+  if (!live) return;
+  if (!appendComments) live.replaceChildren();
+
+  if (!appendComments && data.profile) {
+    const profile = document.createElement('section');
+    profile.className = 'gala-engagement-profile';
+    profile.setAttribute('aria-label', 'Author profile');
+    profile.append(textElement('h2', data.profile.displayName));
+    if (data.profile.username) profile.append(textElement('p', `@${data.profile.username}`));
+    if (Number.isSafeInteger(data.profile.followerCount)) {
+      profile.append(textElement('p', `${data.profile.followerCount} followers`));
+    }
+    live.append(profile);
+  }
+
+  if (!appendComments) {
+    const summary = document.createElement('dl');
+    for (const [label, value] of engagementCounts(data)) {
+      const item = document.createElement('div');
+      item.append(textElement('dt', label), textElement('dd', String(value)));
+      summary.append(item);
+    }
+    live.append(summary);
+  }
+
+  if (Array.isArray(data.comments?.items) && data.comments.items.length > 0) {
+    live.append(commentList(data.comments.items));
+  }
+  live.querySelector('[data-comments-cursor]')?.remove();
+  if (data.comments?.nextCursor) {
+    const more = textElement('button', 'Load more comments');
+    more.type = 'button';
+    more.dataset.commentsCursor = data.comments.nextCursor;
+    live.append(more);
+  }
+  region.querySelector('[data-engagement-snapshot]')?.remove();
+  region.querySelector('.gala-engagement__placeholder')?.remove();
+}
+
+async function refreshEngagement(region, commentsCursor = '', appendComments = false) {
+  const status = region.querySelector('[data-engagement-status]');
+  try {
+    const requestUrl = new URL(region.dataset.engagementUrl);
+    if (commentsCursor) requestUrl.searchParams.set('commentsCursor', commentsCursor);
+    const response = await fetch(requestUrl, {
+      headers: { Accept: 'application/json' },
+      credentials: 'omit'
+    });
+    if (!response.ok) throw new Error(`Engagement returned HTTP ${response.status}`);
+    const payload = await response.json();
+    renderEngagement(region, payload, appendComments);
+    if (status) status.textContent = payload.errors?.length
+      ? 'Some engagement data is temporarily unavailable.' : '';
+  } catch {
+    if (status) status.textContent = 'Live engagement data is temporarily unavailable.';
+  }
+}
+
+function viewCampaign() {
+  const query = new URL(window.location.href).searchParams;
+  const campaign = {};
+  for (const name of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']) {
+    const value = query.get(name);
+    if (value && [...value].length <= 128) campaign[name] = value;
+  }
+  return campaign;
+}
+
+function recordView(region) {
+  const requestUrl = new URL(region.dataset.engagementUrl);
+  requestUrl.pathname = requestUrl.pathname.replace(/\/engagement$/, '/views');
+  fetch(requestUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      language: document.documentElement.lang || undefined,
+      referrer: document.referrer || undefined,
+      campaign: viewCampaign()
+    }),
+    credentials: 'omit',
+    keepalive: true
+  }).catch(() => {});
+}
+
+document.querySelectorAll('[data-engagement-url]').forEach((region) => {
+  refreshEngagement(region);
+  recordView(region);
+});
+
+const sessionFrame = document.querySelector('[data-gala-session-frame]');
+if (sessionFrame) {
+  const sessionOrigin = new URL(sessionFrame.src).origin;
+  window.addEventListener('message', (event) => {
+    if (event.origin !== sessionOrigin || event.source !== sessionFrame.contentWindow
+        || event.data?.type !== 'gala-session') return;
+    const control = document.querySelector('[data-user-control]');
+    if (!control) return;
+    const displayName = event.data.user?.displayName;
+    control.setAttribute('aria-label', displayName
+      ? `Account: ${displayName}` : 'Sign in or view account');
+    control.title = displayName ? `Account: ${displayName}` : 'Account';
+  });
+}

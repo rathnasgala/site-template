@@ -15,6 +15,14 @@ test('design contract exposes every scaffold-level design dimension', () => {
   ]);
 });
 
+test('stores exact managed theme identity separately from the visual theme', () => {
+  assert.deepEqual(config.framework.themePackage, {
+    name: '@rathnasgala/theme',
+    version: '0.0.1'
+  });
+  assert.equal(config.design.theme, 'editorial');
+});
+
 test('hosting provider is fixed to GitHub Pages in v1', () => {
   assert.equal(config.hosting.provider, 'github-pages');
 });

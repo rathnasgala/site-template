@@ -10,7 +10,7 @@
     ".gitignore": "b5fa24e10155097a0d372926fd2e59e6072e7cc2cb6399bbfb4beb8b33ea315b",
     ".gala/publish.yml.template": "73080241d89bd09964b797a8bcc8e18471412e11bc873efad76305b60f497d08",
     "eleventy.config.js": "0b8c753a28afecdf733ea650cab5fd0691a87f996bc186820c5f949003891cc9",
-    "package.json": "fcb348330eb3f2607cecd7f3cbd167c4b0e1111cea5f13ebc14de669a59a7753",
+    "package.json": "86e1e9922fda15122fe4eb5325d30d145cbdb2877e24307914702d0b64cf1ce9",
     "package-lock.json": "92372b1bfbdeedf53a8942b3a4e774da3f708ebbf177d92f2b6280e83981df67",
     "lib/build-manifest.js": "88949f0112d683ca809bb67ca969e15634792423559a67bc79a534cd807e5535",
     "lib/site-config.js": "9eebf302e1ee5e7fa7b41e50cd0540cf71f917fda25c511fe1db3b035359b091",

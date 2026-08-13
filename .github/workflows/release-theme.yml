@@ -34,7 +34,9 @@ jobs:
           npm ci --ignore-scripts
           npm test
           npm run lint
-          npm run lint:theme-release
+          node --check scripts/stage-theme-package.js
+          node --check test/theme-package-stage.test.js
+          node --check test/theme-release-workflow.test.js
           staging="$(mktemp -d)"
           trap 'rm -rf -- "$staging"' EXIT
           node scripts/stage-theme-package.js "$staging"

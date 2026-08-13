@@ -46,6 +46,10 @@ export async function stageThemePackage(destination) {
     version: identity.version,
     description: 'Managed Gala static-site theme payload',
     license: 'MIT',
+    repository: {
+      type: 'git',
+      url: 'git+https://github.com/rathnasgala/site-template.git'
+    },
     files: ['payload'],
     publishConfig: { access: 'public', provenance: true },
     engines: { node: '>=18' }

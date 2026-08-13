@@ -18,7 +18,7 @@ test('design contract exposes every scaffold-level design dimension', () => {
 test('stores exact managed theme identity separately from the visual theme', () => {
   assert.deepEqual(config.framework.themePackage, {
     name: '@rathnasgala/theme',
-    version: '0.0.1'
+    version: '0.0.2'
   });
   assert.equal(config.design.theme, 'editorial');
 });

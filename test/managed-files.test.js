@@ -48,7 +48,7 @@ test('managed manifest covers exactly immutable framework runtime files', async 
   assert.equal(manifest.schemaVersion, 1);
   assert.deepEqual(manifest.themePackage, {
     name: '@rathnasgala/theme',
-    version: '0.0.1',
+    version: '0.0.2',
     availableDesignThemes: ['editorial'],
     securityAdvisories: []
   });

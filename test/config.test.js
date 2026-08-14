@@ -28,6 +28,8 @@ test('stores exact managed theme identity separately from the visual theme', () 
 
 test('hosting provider is fixed to GitHub Pages in v1', () => {
   assert.equal(config.hosting.provider, 'github-pages');
+  assert.equal(config.hosting.canonicalPolicy, 'self');
+  assert.equal(config.canonicalPolicy, undefined);
 });
 
 test('scaffolds author-owned uncompressed performance budgets', () => {
@@ -36,6 +38,10 @@ test('scaffolds author-owned uncompressed performance budgets', () => {
     managedCssBytes: 16384,
     ordinaryHtmlBytes: 32768
   });
+});
+
+test('scaffolds private author-owned public view-count visibility', () => {
+  assert.deepEqual(config.statistics, { publicViewCounts: false });
 });
 
 test('loads an action-selected checkout-relative config and rejects traversal', async () => {
@@ -68,5 +74,36 @@ test('rejects missing, unknown, non-integer, and non-positive performance budget
     const root = await mkdtemp(path.join(tmpdir(), 'gala-config-invalid-'));
     await writeFile(path.join(root, 'site.config.yml'), `schemaVersion: 1\n${performance}`);
     await assert.rejects(() => loadSiteConfiguration({ root }), /performance\.budgets|Unsupported performance/);
+  }
+});
+
+test('defaults absent statistics to private and rejects unknown or non-boolean settings', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'gala-config-statistics-'));
+  await writeFile(path.join(root, 'site.config.yml'), `schemaVersion: 1
+performance:
+  budgets:
+    managedJavaScriptBytes: 32768
+    managedCssBytes: 16384
+    ordinaryHtmlBytes: 32768
+`);
+  assert.deepEqual((await loadSiteConfiguration({ root })).statistics, {
+    publicViewCounts: false
+  });
+  for (const statistics of [
+    'statistics: true\n',
+    'statistics:\n  publicViewCounts: yes\n',
+    'statistics:\n  publicViewCounts: false\n  audienceProfiles: true\n'
+  ]) {
+    await writeFile(path.join(root, 'site.config.yml'), `schemaVersion: 1
+performance:
+  budgets:
+    managedJavaScriptBytes: 32768
+    managedCssBytes: 16384
+    ordinaryHtmlBytes: 32768
+${statistics}`);
+    await assert.rejects(
+      () => loadSiteConfiguration({ root }),
+      /statistics|Unsupported statistics/
+    );
   }
 });

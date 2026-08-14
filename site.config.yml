@@ -4,7 +4,7 @@ schemaVersion: 1
 framework:
   themePackage:
     name: "@rathnasgala/theme"
-    version: 0.0.5
+    version: 0.0.6
 site:
   id: unavailable
   name: New Gala Site
@@ -16,6 +16,7 @@ hosting:
   topology: provider-default
   canonicalBaseUrl: unavailable
   pathPrefix: /unavailable
+  canonicalPolicy: self
 design:
   theme: editorial
   layout: article-first
@@ -30,6 +31,10 @@ design:
 sharing:
   targets: []
   socialProfiles: {}
+# Author-owned. Public access exposes only aggregate view counts; unique-visitor
+# estimates and audience dimensions always remain owner-only.
+statistics:
+  publicViewCounts: false
 # Author-owned, scaffold-initialized uncompressed byte ceilings for Gala-managed
 # assets and ordinary HTML. Authored media and third-party analytics are excluded;
 # their performance impact remains the author's responsibility under FR-1903.
@@ -38,4 +43,3 @@ performance:
     managedJavaScriptBytes: 32768
     managedCssBytes: 16384
     ordinaryHtmlBytes: 32768
-canonicalPolicy: self

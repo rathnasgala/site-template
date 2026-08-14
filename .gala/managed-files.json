@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "availableDesignThemes": [
       "editorial"
     ],
@@ -15,7 +15,7 @@
     "package.json": "cccea6fc4edf4b4b653bd5cfc0901ab20dd92ac8975408fb01ae3670005da641",
     "package-lock.json": "c97a6a2f794aef083a39a8d2628eccc4a3c484e1c6225899b77ec1fb7c466d9e",
     "lib/build-manifest.js": "88949f0112d683ca809bb67ca969e15634792423559a67bc79a534cd807e5535",
-    "lib/site-config.js": "83aa8ea678e06ae0e85096c841a2d6084ee23c7f236191ea426bbeda99567d16",
+    "lib/site-config.js": "59579cc3253529c7201002ab40435eeaeb4359ca82ddbb473a026bc317f62fcb",
     "lib/performance-budget.js": "124c43494c092a956accec46d1463ea063ed73363d0db01f24aaea987459d683",
     "lib/engagement-snapshot.js": "298c11b1ab135a3a98a4e31b6320ab60dfd7fda6a9d9053df37d86282a5a6687",
     "lib/publication-state.js": "1b59c29a18bbb1193bddea898dac3a4fb832c7bc4751263be086f3d64392dea0",

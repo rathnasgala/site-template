@@ -8,5 +8,5 @@ layout: layouts/base.njk
   {% if postTableOfContents.length %}{{ tableOfContents(postTableOfContents) }}{% endif %}
   {{ content | safe }}
   {% if post.publicationState == "published" %}{{ engagementSummary(post.id, engagement, site.platform.apiBaseUrl or "https://api.gala67.com") }}{% endif %}
-  {% if post.publicationState == "published" %}{{ shareControl(post.canonicalUrl) }}{% endif %}
+  {% if post.publicationState == "published" %}{{ shareControl(post.canonicalUrl, shareTargets) }}{% endif %}
 </article>

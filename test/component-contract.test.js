@@ -53,4 +53,6 @@ test('share control uses links and a selectable readonly fallback', async () => 
   assert.match(source, /readonly aria-label="Canonical URL"/);
   assert.match(source, /rel="noopener noreferrer"/);
   assert.doesNotMatch(source, /<script|<iframe/);
+  const postLayout = await readFile(new URL('../src/_includes/layouts/post.njk', import.meta.url), 'utf8');
+  assert.match(postLayout, /shareControl\(post\.canonicalUrl, shareTargets\)/);
 });

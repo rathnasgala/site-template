@@ -27,13 +27,43 @@ test('hosting provider is fixed to GitHub Pages in v1', () => {
   assert.equal(config.hosting.provider, 'github-pages');
 });
 
+test('scaffolds author-owned uncompressed performance budgets', () => {
+  assert.deepEqual(config.performance.budgets, {
+    managedJavaScriptBytes: 32768,
+    managedCssBytes: 16384,
+    ordinaryHtmlBytes: 32768
+  });
+});
+
 test('loads an action-selected checkout-relative config and rejects traversal', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'gala-config-'));
   await mkdir(path.join(root, 'fixtures'));
-  await writeFile(path.join(root, 'fixtures', 'site.yml'), 'schemaVersion: 1\nsite:\n  name: Alternate\n');
+  await writeFile(path.join(root, 'fixtures', 'site.yml'), `schemaVersion: 1
+site:
+  name: Alternate
+performance:
+  budgets:
+    managedJavaScriptBytes: 32768
+    managedCssBytes: 16384
+    ordinaryHtmlBytes: 32768
+`);
   assert.equal((await loadSiteConfiguration({ root, configPath: 'fixtures/site.yml' })).site.name, 'Alternate');
   await assert.rejects(
     () => loadSiteConfiguration({ root, configPath: '../site.yml' }),
     /within the checkout/
   );
+});
+
+test('rejects missing, unknown, non-integer, and non-positive performance budgets', async () => {
+  const invalid = [
+    'performance: {}\n',
+    'performance:\n  budgets:\n    managedJavaScriptBytes: 32768\n    managedCssBytes: 16384\n    ordinaryHtmlBytes: 32768\n    transferBytes: 1\n',
+    'performance:\n  budgets:\n    managedJavaScriptBytes: 1.5\n    managedCssBytes: 16384\n    ordinaryHtmlBytes: 32768\n',
+    'performance:\n  budgets:\n    managedJavaScriptBytes: 32768\n    managedCssBytes: 0\n    ordinaryHtmlBytes: 32768\n'
+  ];
+  for (const performance of invalid) {
+    const root = await mkdtemp(path.join(tmpdir(), 'gala-config-invalid-'));
+    await writeFile(path.join(root, 'site.config.yml'), `schemaVersion: 1\n${performance}`);
+    await assert.rejects(() => loadSiteConfiguration({ root }), /performance\.budgets|Unsupported performance/);
+  }
 });

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
-import { cp, mkdir, mkdtemp, readFile, symlink, unlink, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, stat, symlink, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -10,6 +10,15 @@ import { promisify } from 'node:util';
 const execute = promisify(execFile);
 const templateRoot = fileURLToPath(new URL('..', import.meta.url));
 const eleventy = path.join(templateRoot, 'node_modules', '@11ty', 'eleventy', 'cmd.cjs');
+const PERFORMANCE_BUDGETS = {
+  managedJavaScriptBytes: 32_768,
+  managedCssBytes: 16_384,
+  ordinaryHtmlBytes: 32_768
+};
+
+async function bytes(file) {
+  return (await stat(file)).size;
+}
 
 async function fixture({ manifest = true } = {}) {
   const root = await mkdtemp(path.join(tmpdir(), 'gala-eleventy-manifest-'));
@@ -37,6 +46,11 @@ design:
 sharing:
   targets: []
   socialProfiles: {}
+performance:
+  budgets:
+    managedJavaScriptBytes: ${PERFORMANCE_BUDGETS.managedJavaScriptBytes}
+    managedCssBytes: ${PERFORMANCE_BUDGETS.managedCssBytes}
+    ordinaryHtmlBytes: ${PERFORMANCE_BUDGETS.ordinaryHtmlBytes}
 `);
   await writeFile(path.join(root, 'package.json'), '{"type":"module"}\n');
   await symlink(path.join(templateRoot, 'node_modules'), path.join(root, 'node_modules'), 'dir');
@@ -210,7 +224,8 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
     'utf8'
   );
   assert.match(withoutSnapshot, /class="gala-engagement__placeholder" role="status"/);
-  assert.match(withoutSnapshot, /Engagement data unavailable/);
+  assert.match(withoutSnapshot, /Loading engagement data/);
+  assert.match(withoutSnapshot, /data-engagement-live/);
   assert.doesNotMatch(withoutSnapshot, /<dd>0<\/dd>/);
   assert.match(
     withoutSnapshot,
@@ -251,6 +266,30 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   assert.match(settings, /option value="en"/);
   assert.match(settings, /option value="fr"/);
   assert.match(settings, /page URL always controls the content/);
+  for (const relative of [
+    'index.html',
+    path.join('en', 'validated', 'index.html'),
+    path.join('search', 'index.html'),
+    path.join('settings', 'index.html')
+  ]) {
+    assert.ok(
+      await bytes(path.join(root, '_site', relative)) <= PERFORMANCE_BUDGETS.ordinaryHtmlBytes,
+      `${relative} exceeds the ordinary HTML performance budget`
+    );
+  }
+  const managedJavaScriptBytes = await Promise.all([
+    'interactions.js', 'preferences.js', 'search.js', 'theme-mode.js'
+  ].map((asset) => bytes(path.join(root, '_site', 'assets', asset))));
+  assert.ok(
+    managedJavaScriptBytes.reduce((total, size) => total + size, 0)
+      <= PERFORMANCE_BUDGETS.managedJavaScriptBytes,
+    'managed JavaScript exceeds its performance budget'
+  );
+  assert.ok(
+    await bytes(path.join(root, '_site', 'assets', 'theme.css'))
+      <= PERFORMANCE_BUDGETS.managedCssBytes,
+    'managed CSS exceeds its performance budget'
+  );
   const englishFeed = await readFile(path.join(root, '_site', 'feed', 'en.xml'), 'utf8');
   assert.match(englishFeed, /<updated>2026-06-15T12:30:00\.000Z<\/updated>/);
   assert.match(englishFeed, /<id>urn:gala:article:01K00000000000000000000000:en<\/id>/);

@@ -4,7 +4,7 @@ schemaVersion: 1
 framework:
   themePackage:
     name: "@rathnasgala/theme"
-    version: 0.0.2
+    version: 0.0.3
 site:
   id: unavailable
   name: New Gala Site
@@ -30,4 +30,12 @@ design:
 sharing:
   targets: []
   socialProfiles: {}
+# Author-owned, scaffold-initialized uncompressed byte ceilings for Gala-managed
+# assets and ordinary HTML. Authored media and third-party analytics are excluded;
+# their performance impact remains the author's responsibility under FR-1903.
+performance:
+  budgets:
+    managedJavaScriptBytes: 32768
+    managedCssBytes: 16384
+    ordinaryHtmlBytes: 32768
 canonicalPolicy: self

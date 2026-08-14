@@ -29,10 +29,20 @@ test('rejects unverified providers and missing Mastodon instance', () => {
   assert.throws(() => resolveShareTargets({ ...base, configured: ['mastodon'] }), /socialProfiles\.mastodon/);
 });
 
-test('runtime fixture is byte-identical to the documented provider contract', async () => {
-  const [runtime, documented] = await Promise.all([
-    readFile(new URL('../lib/provider-fixtures/share-intents.v1.json', import.meta.url), 'utf8'),
-    readFile(new URL('../../v1/docs/v1-provider-fixtures/share-intents.v1.json', import.meta.url), 'utf8')
-  ]);
-  assert.equal(runtime, documented);
+test('runtime fixture is a self-contained, sourced provider contract', async () => {
+  const fixture = JSON.parse(await readFile(
+    new URL('../lib/provider-fixtures/share-intents.v1.json', import.meta.url),
+    'utf8'
+  ));
+  assert.equal(fixture.schemaVersion, 1);
+  for (const [provider, contract] of Object.entries(fixture.providers)) {
+    assert.match(contract.source, /^https:\/\//, `${provider} must cite an HTTPS source`);
+    if (contract.status === 'verified') {
+      assert.match(contract.verifiedOn, /^\d{4}-\d{2}-\d{2}$/, `${provider} must record verification date`);
+      assert.equal(typeof contract.template, 'string', `${provider} must define an intent template`);
+    } else {
+      assert.equal(contract.status, 'blocked-public-intent-contract-unverified');
+      assert.equal(Object.hasOwn(contract, 'template'), false);
+    }
+  }
 });

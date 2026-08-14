@@ -23,6 +23,8 @@ async function verifiedMediaSource(postSource, mediaSource) {
 
 export default async function (eleventyConfig) {
   const [manifest, site] = await Promise.all([readBuildManifest(), loadSiteConfiguration()]);
+  const attributionTier = process.env.GALA_ATTRIBUTION_TIER === 'PAID' ? 'PAID' : 'FREE';
+  eleventyConfig.addGlobalData('attributionTier', attributionTier);
   eleventyConfig.setLibrary('md', markdownLibrary);
   eleventyConfig.addPassthroughCopy({ static: '/' });
   eleventyConfig.addPassthroughCopy({ 'src/assets': 'assets' });

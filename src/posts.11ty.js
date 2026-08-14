@@ -52,6 +52,9 @@ function renderedDocument(post) {
   let document = renderedDocuments.get(post);
   if (!document) {
     document = renderMarkdownDocument(post.body);
+    for (const warning of document.warnings) {
+      console.warn(`${post.source}: warning: ${warning}`);
+    }
     renderedDocuments.set(post, document);
   }
   return document;

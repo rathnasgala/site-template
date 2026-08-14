@@ -8,6 +8,26 @@ function selectableFallback(control) {
 }
 
 document.addEventListener('click', async (event) => {
+  const embed = event.target.closest('[data-gala-embed-load]');
+  if (embed) {
+    const container = embed.closest('[data-gala-embed]');
+    const source = embed.dataset.galaEmbedSrc;
+    const provider = embed.dataset.galaEmbedLoad;
+    if (!container || !source || !['youtube', 'codepen'].includes(provider)) return;
+    const frame = document.createElement('iframe');
+    frame.src = source;
+    frame.title = provider === 'youtube' ? 'YouTube video' : 'CodePen example';
+    frame.loading = 'eager';
+    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+    frame.setAttribute('sandbox', 'allow-forms allow-popups allow-presentation allow-same-origin allow-scripts');
+    frame.setAttribute('allow', provider === 'youtube'
+      ? 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share'
+      : 'fullscreen');
+    frame.setAttribute('allowfullscreen', '');
+    container.replaceChildren(frame);
+    return;
+  }
+
   const dialogControl = event.target.closest('[data-open-dialog]');
   if (dialogControl) {
     const dialog = document.getElementById(dialogControl.dataset.openDialog);
@@ -374,8 +394,9 @@ function engagementErrorMessage(code) {
   if (code === 'AUTHENTICATION_REQUIRED' || code === 'INVALID_BEARER_TOKEN'
       || code === 'REAUTHENTICATION_REQUIRED') return 'Sign in again to continue.';
   if (code === 'ENGAGEMENT_RATE_LIMITED') return 'You are posting too quickly; try again shortly.';
+  if (code === 'CONTACT_RATE_LIMITED') return 'You are sending too quickly; try again later.';
   if (code === 'RESOURCE_NOT_FOUND') return 'That item is no longer available.';
-  if (code === 'INVALID_ENGAGEMENT_WRITE' || code === 'INVALID_REQUEST') return 'Check your entry and try again.';
+  if (code === 'INVALID_ENGAGEMENT_WRITE' || code === 'INVALID_CONTACT_SUBMISSION' || code === 'INVALID_REQUEST') return 'Check your entry and try again.';
   if (code === 'ACCESS_DENIED') return 'That action is not available for this account.';
   if (code === 'IDEMPOTENCY_CONFLICT' || code === 'ENGAGEMENT_STATE_CONFLICT') return 'The item changed; reload and try again.';
   return 'The action could not be completed. Try again.';
@@ -391,6 +412,33 @@ function sendEngagementWrite(operation, payload) {
     }, new URL(sessionFrame.src).origin);
   });
 }
+
+document.addEventListener('submit', async (event) => {
+  const form = event.target.closest('[data-contact-form] form');
+  if (!form) return;
+  event.preventDefault();
+  const region = form.closest('[data-contact-form]');
+  const status = region.querySelector('[data-contact-status]');
+  if (!sessionUser) {
+    status.textContent = 'Sign in with the account button before sending.';
+    return;
+  }
+  const data = new FormData(form);
+  try {
+    status.textContent = 'Sending…';
+    await sendEngagementWrite('contact.submit', {
+      siteId: region.dataset.siteId,
+      subject: data.get('subject'),
+      message: data.get('message'),
+      website: data.get('website') || null,
+      phone: data.get('phone') || null
+    });
+    form.reset();
+    status.textContent = 'Message sent.';
+  } catch (error) {
+    status.textContent = engagementErrorMessage(error.message);
+  }
+});
 
 async function mutateEngagement(region, operation, payload) {
   const status = region.querySelector('[data-engagement-status]');

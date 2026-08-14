@@ -44,6 +44,36 @@ test('scaffolds private author-owned public view-count visibility', () => {
   assert.deepEqual(config.statistics, { publicViewCounts: false });
 });
 
+test('scaffolds author-owned contact settings disabled by default', () => {
+  assert.deepEqual(config.contact, {
+    enabled: false,
+    websiteEnabled: false,
+    phoneEnabled: false
+  });
+});
+
+test('accepts only the implemented layout and palette identities', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'gala-config-design-'));
+  const writeDesign = (layout, palette) => writeFile(path.join(root, 'site.config.yml'), `schemaVersion: 1
+design:
+  layout: ${layout}
+  palette: ${palette}
+performance:
+  budgets:
+    managedJavaScriptBytes: 32768
+    managedCssBytes: 16384
+    ordinaryHtmlBytes: 32768
+`);
+  await writeDesign('portfolio', 'ocean');
+  assert.deepEqual((await loadSiteConfiguration({ root })).design, {
+    layout: 'portfolio', palette: 'ocean'
+  });
+  await writeDesign('magazine', 'ocean');
+  await assert.rejects(() => loadSiteConfiguration({ root }), /Unsupported design\.layout/);
+  await writeDesign('article-first', 'sunset');
+  await assert.rejects(() => loadSiteConfiguration({ root }), /Unsupported design\.palette/);
+});
+
 test('loads an action-selected checkout-relative config and rejects traversal', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'gala-config-'));
   await mkdir(path.join(root, 'fixtures'));
@@ -105,5 +135,30 @@ ${statistics}`);
       () => loadSiteConfiguration({ root }),
       /statistics|Unsupported statistics/
     );
+  }
+});
+
+test('defaults absent contact settings to disabled and rejects unsupported settings', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'gala-config-contact-'));
+  const base = `schemaVersion: 1
+performance:
+  budgets:
+    managedJavaScriptBytes: 32768
+    managedCssBytes: 16384
+    ordinaryHtmlBytes: 32768
+`;
+  await writeFile(path.join(root, 'site.config.yml'), base);
+  assert.deepEqual((await loadSiteConfiguration({ root })).contact, {
+    enabled: false,
+    websiteEnabled: false,
+    phoneEnabled: false
+  });
+  for (const contact of [
+    'contact: true\n',
+    'contact:\n  enabled: true\n  destinationEmail: author@example.com\n',
+    'contact:\n  enabled: false\n  unknown: true\n'
+  ]) {
+    await writeFile(path.join(root, 'site.config.yml'), `${base}${contact}`);
+    await assert.rejects(() => loadSiteConfiguration({ root }), /contact/);
   }
 });

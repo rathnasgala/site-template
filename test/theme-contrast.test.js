@@ -23,9 +23,12 @@ function contrast(left, right) {
   return (values[0] + 0.05) / (values[1] + 0.05);
 }
 
-function explicitModeTokens(mode) {
-  const block = css.match(new RegExp(`:root\\[data-mode='${mode}'\\] \\{([^}]+)\\}`))?.[1];
-  assert.ok(block, `missing ${mode} token block`);
+function explicitModeTokens(mode, palette = null) {
+  const selector = palette == null
+    ? `:root\\[data-mode='${mode}'\\]`
+    : `:root\\[data-palette='${palette}'\\]\\[data-mode='${mode}'\\]`;
+  const block = css.match(new RegExp(`${selector} \\{([^}]+)\\}`))?.[1];
+  assert.ok(block, `missing ${palette ?? 'default'} ${mode} token block`);
   return Object.fromEntries(
     [...block.matchAll(/--gala-color-([a-z]+):\s*(#[0-9a-f]+);/gi)]
       .map((match) => [match[1], match[2]])
@@ -35,6 +38,16 @@ function explicitModeTokens(mode) {
 test('default palette meets WCAG AA contrast in explicit light and dark modes', () => {
   for (const mode of ['light', 'dark']) {
     const tokens = explicitModeTokens(mode);
+    assert.ok(contrast(tokens.text, tokens.background) >= 4.5, `${mode} body text contrast`);
+    assert.ok(contrast(tokens.text, tokens.surface) >= 4.5, `${mode} surface text contrast`);
+    assert.ok(contrast(tokens.accent, tokens.background) >= 4.5, `${mode} link contrast`);
+    assert.ok(contrast(tokens.border, tokens.background) >= 3, `${mode} control boundary contrast`);
+  }
+});
+
+test('ocean palette meets WCAG AA contrast in explicit light and dark modes', () => {
+  for (const mode of ['light', 'dark']) {
+    const tokens = explicitModeTokens(mode, 'ocean');
     assert.ok(contrast(tokens.text, tokens.background) >= 4.5, `${mode} body text contrast`);
     assert.ok(contrast(tokens.text, tokens.surface) >= 4.5, `${mode} surface text contrast`);
     assert.ok(contrast(tokens.accent, tokens.background) >= 4.5, `${mode} link contrast`);

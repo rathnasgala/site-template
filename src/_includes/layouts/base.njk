@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ post.language or site.site.defaultLanguage }}" data-theme="{{ site.design.theme }}" data-palette="{{ site.design.palette }}" data-mode="system">
+<html lang="{{ post.language or site.site.defaultLanguage }}" data-theme="{{ site.design.theme }}" data-layout="{{ site.design.layout }}" data-palette="{{ site.design.palette }}" data-mode="system">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,6 +35,9 @@
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
       </a>
       <nav class="gala-site-header__actions" aria-label="Site controls">
+        {% if site.contact.enabled %}<a class="gala-icon-control" href="{{ '/contact/' | url }}" aria-label="Contact author" title="Contact">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 5h18v14H3V5Zm2 2v.4l7 5 7-5V7H5Zm14 10V9.8l-7 5-7-5V17h14Z"/></svg>
+        </a>{% endif %}
         <button class="gala-icon-control" type="button" data-theme-mode-toggle aria-label="Color mode: system. Activate for light." title="Appearance">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18V3Zm0 2v14a7 7 0 0 1 0-14Z"/></svg>
           <span class="gala-visually-hidden" data-theme-mode-label>Theme: system</span>
@@ -51,6 +54,10 @@
       </nav>
     </header>
     <main id="main-content">{{ content | safe }}</main>
+    <footer class="gala-page-footer">
+      <p>&copy; {{ site.site.name }}</p>
+      {% if attributionTier != 'PAID' %}<p><a href="https://gala67.com/?utm_source=gala-site&amp;utm_medium=referral" rel="external">Built with Gala</a></p>{% endif %}
+    </footer>
     <dialog id="gala-settings-dialog" class="gala-dialog" aria-labelledby="gala-settings-title">
       <form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close settings">Close</button></form>
       <h2 id="gala-settings-title">Reader settings</h2>
@@ -84,7 +91,7 @@
     <dialog id="gala-account-dialog" class="gala-dialog gala-account-dialog" aria-labelledby="gala-account-title">
       <form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close account">Close</button></form>
       <h2 id="gala-account-title">Gala account</h2>
-      <iframe data-gala-session-frame title="Gala account and sign in" src="{{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}/v1/widget/session?siteId={{ site.site.id | escape }}"></iframe>
+      <iframe data-gala-session-frame title="Gala account and sign in" allow="identity-credentials-get" src="{{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}/v1/widget/session?siteId={{ site.site.id | escape }}"></iframe>
     </dialog>
     {% endif %}
   </body>

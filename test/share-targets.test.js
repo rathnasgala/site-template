@@ -6,13 +6,13 @@ import { resolveShareTargets } from '../lib/share-targets.js';
 
 test('renders every verified provider with encoded canonical inputs', () => {
   const targets = resolveShareTargets({
-    configured: ['x', 'bluesky', 'hacker-news', 'email', 'mastodon'],
+    configured: ['x', 'bluesky', 'linkedin', 'whatsapp', 'hacker-news', 'email', 'mastodon'],
     title: 'Gala & safety',
     canonicalUrl: 'https://author.example/en/post/?a=1&b=2',
     socialProfiles: { mastodon: 'https://social.example/@author' }
   });
   assert.deepEqual(targets.map(({ provider }) => provider),
-    ['x', 'bluesky', 'hacker-news', 'email', 'mastodon']);
+    ['x', 'bluesky', 'linkedin', 'whatsapp', 'hacker-news', 'email', 'mastodon']);
   for (const target of targets) {
     assert.ok(target.label);
     assert.match(target.url, /^(?:https:|mailto:)/);
@@ -20,12 +20,14 @@ test('renders every verified provider with encoded canonical inputs', () => {
   }
   assert.match(targets[0].url, /text=Gala(?:%20|\+)%26(?:%20|\+)safety/);
   assert.match(targets[0].url, /url=https%3A%2F%2Fauthor\.example%2Fen%2Fpost%2F%3Fa%3D1%26b%3D2/);
-  assert.match(targets[4].url, /^https:\/\/social\.example\/share\?/);
+  assert.match(targets[2].url, /^https:\/\/www\.linkedin\.com\/sharing\/share-offsite\/\?url=/);
+  assert.match(targets[3].url, /^https:\/\/wa\.me\/\?text=Gala/);
+  assert.match(targets[6].url, /^https:\/\/social\.example\/share\?/);
 });
 
 test('rejects unverified providers and missing Mastodon instance', () => {
   const base = { title: 'Post', canonicalUrl: 'https://author.example/en/post/' };
-  assert.throws(() => resolveShareTargets({ ...base, configured: ['linkedin'] }), /no verified/);
+  assert.throws(() => resolveShareTargets({ ...base, configured: ['reddit'] }), /no verified/);
   assert.throws(() => resolveShareTargets({ ...base, configured: ['mastodon'] }), /socialProfiles\.mastodon/);
 });
 

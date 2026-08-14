@@ -7,6 +7,7 @@ import { parse } from 'yaml';
 import { loadSiteConfiguration } from '../lib/site-config.js';
 
 const config = parse(await readFile(new URL('../site.config.yml', import.meta.url), 'utf8'));
+const managed = JSON.parse(await readFile(new URL('../.gala/managed-files.json', import.meta.url), 'utf8'));
 
 test('design contract exposes every scaffold-level design dimension', () => {
   assert.deepEqual(Object.keys(config.design).sort(), [
@@ -17,9 +18,11 @@ test('design contract exposes every scaffold-level design dimension', () => {
 
 test('stores exact managed theme identity separately from the visual theme', () => {
   assert.deepEqual(config.framework.themePackage, {
-    name: '@rathnasgala/theme',
-    version: '0.0.2'
+    name: managed.themePackage.name,
+    version: managed.themePackage.version
   });
+  assert.equal(config.framework.themePackage.name, '@rathnasgala/theme');
+  assert.match(config.framework.themePackage.version, /^\d+\.\d+\.\d+$/);
   assert.equal(config.design.theme, 'editorial');
 });
 

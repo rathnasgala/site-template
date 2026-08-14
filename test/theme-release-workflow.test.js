@@ -48,7 +48,7 @@ test('push requires exactly one non-empty commit message before changing the the
 test('theme release uses trusted publishing from an exact tag-matched staged artifact', () => {
   assert.match(workflow, /id-token: write/);
   assert.match(workflow, /environment: npm-theme-release/);
-  assert.match(workflow, /npm@12\.0\.2/);
+  assert.match(workflow, /npm@11\.19\.0/);
   assert.match(workflow, /node scripts\/stage-theme-package\.js/);
   assert.match(workflow, /test "\$actual" = "\$expected"/);
   assert.match(workflow, /npm publish "\$staging" --access public --provenance/);

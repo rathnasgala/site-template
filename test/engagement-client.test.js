@@ -64,3 +64,30 @@ test('live totals use the aggregate comment count rather than first-page length'
     ['Reactions', 3], ['Comments', 41], ['Views', 7]
   ]);
 });
+
+test('authenticated writes use only the typed platform-frame protocol', () => {
+  for (const operation of [
+    'comment.create', 'comment.edit', 'comment.delete',
+    'reaction.add', 'reaction.remove', 'follow.add', 'follow.remove'
+  ]) {
+    assert.match(behavior, new RegExp(operation.replace('.', '\\.')));
+  }
+  assert.match(behavior, /type: 'gala-engagement-write', requestId, operation, payload/);
+  assert.match(behavior, /event\.origin !== sessionOrigin/);
+  assert.match(behavior, /event\.source !== sessionFrame\.contentWindow/);
+  assert.match(behavior, /event\.data\?\.type === 'gala-engagement-result'/);
+  assert.match(behavior, /crypto\.randomUUID\(\)/);
+  assert.doesNotMatch(behavior, /Authorization|Bearer|gala-reader-session|localStorage/);
+});
+
+test('reader controls are accessible and include all low-risk write classes', () => {
+  assert.match(components, /data-comment-create/);
+  assert.match(components, /maxlength="5000" required/);
+  assert.match(components, /data-follow-article aria-pressed="false"/);
+  assert.match(components, /\['like', 'love', 'insightful', 'curious', 'celebrate', 'support'\]/);
+  assert.match(components, /data-reaction="{{ reaction }}"/);
+  assert.match(behavior, /data-reply-comment/);
+  assert.match(behavior, /data-edit-comment/);
+  assert.match(behavior, /data-delete-comment/);
+  assert.match(behavior, /textContent = engagementErrorMessage/);
+});

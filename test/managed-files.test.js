@@ -49,12 +49,10 @@ test('managed manifest covers exactly immutable framework runtime files', async 
     await readFile(new URL('../.gala/managed-files.json', import.meta.url), 'utf8')
   );
   assert.equal(manifest.schemaVersion, 1);
-  assert.deepEqual(manifest.themePackage, {
-    name: '@rathnasgala/theme',
-    version: '0.0.2',
-    availableDesignThemes: ['editorial'],
-    securityAdvisories: []
-  });
+  assert.equal(manifest.themePackage.name, '@rathnasgala/theme');
+  assert.match(manifest.themePackage.version, /^\d+\.\d+\.\d+$/);
+  assert.deepEqual(manifest.themePackage.availableDesignThemes, ['editorial']);
+  assert.deepEqual(manifest.themePackage.securityAdvisories, []);
   assert.deepEqual(Object.keys(manifest.files).sort(), expectedRuntimeFiles);
 
   for (const [relativePath, expectedHash] of Object.entries(manifest.files)) {

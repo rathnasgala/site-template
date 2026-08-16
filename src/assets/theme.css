@@ -180,6 +180,10 @@ button:focus-visible {
 .gala-comments li { padding: 1rem; background: var(--gala-color-surface); border-radius: var(--gala-radius-control); }
 .gala-engagement-actions { display: grid; gap: 1rem; margin-block-start: 1.5rem; }
 .gala-engagement-actions[hidden] { display: none; }
+/* Shown only when signing in interrupted something the reader had already decided to do, so it
+   reassures rather than sells. Hidden for anyone who opened the account dialog deliberately. */
+.gala-account-dialog__invite { margin-block: 0 1rem; max-inline-size: 34rem; }
+.gala-account-dialog__invite[hidden] { display: none; }
 .gala-reaction-actions,
 .gala-comment-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .gala-engagement-actions form,

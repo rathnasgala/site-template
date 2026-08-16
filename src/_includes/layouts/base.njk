@@ -91,6 +91,7 @@
     <dialog id="gala-account-dialog" class="gala-dialog gala-account-dialog" aria-labelledby="gala-account-title">
       <form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close account">Close</button></form>
       <h2 id="gala-account-title">Gala account</h2>
+      <p class="gala-account-dialog__invite" data-account-invite hidden>Takes a couple of clicks to authenticate yourself. No passwords, no spam.</p>
       <iframe data-gala-session-frame title="Gala account and sign in" allow="identity-credentials-get" src="{{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}/v1/widget/session?siteId={{ site.site.id | escape }}"></iframe>
     </dialog>
     {% endif %}

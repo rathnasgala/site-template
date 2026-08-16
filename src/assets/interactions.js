@@ -39,6 +39,7 @@ document.addEventListener('click', async (event) => {
   if (reaction) {
     const region = reaction.closest('[data-engagement-url]');
     if (!region) return;
+    if (!sessionUser) return requestSession({ kind: 'reaction', element: reaction });
     const active = reaction.getAttribute('aria-pressed') !== 'true';
     const saved = await mutateEngagement(region, active ? 'reaction.add' : 'reaction.remove', {
       articleId: region.dataset.articleId,
@@ -53,6 +54,7 @@ document.addEventListener('click', async (event) => {
   if (follow) {
     const region = follow.closest('[data-engagement-url]');
     if (!region) return;
+    if (!sessionUser) return requestSession({ kind: 'follow', element: follow });
     const active = follow.getAttribute('aria-pressed') !== 'true';
     const saved = await mutateEngagement(region, active ? 'follow.add' : 'follow.remove', {
       targetType: 'articles', targetId: region.dataset.articleId
@@ -351,6 +353,14 @@ function recordView(region) {
   }).catch(() => {});
 }
 
+// Asked at the moment of intent: the reader reaches for the comment box, and only then are they
+// asked who they are — never as a wall in front of something they have not decided to do.
+document.addEventListener('focusin', (event) => {
+  if (sessionUser || pendingIntent) return;
+  const field = event.target.closest('[data-comment-create] textarea, [data-comment-editor] textarea');
+  if (field) requestSession({ kind: 'comment', element: field });
+});
+
 document.addEventListener('submit', async (event) => {
   const create = event.target.closest('[data-comment-create]');
   const editor = event.target.closest('[data-comment-editor]');
@@ -360,6 +370,9 @@ document.addEventListener('submit', async (event) => {
   const region = form.closest('[data-engagement-url]');
   const body = form.elements.body?.value;
   if (!region || typeof body !== 'string' || body.trim() === '') return;
+  if (!sessionUser) {
+    return requestSession({ kind: 'comment', element: form.querySelector('textarea') });
+  }
   if (create) {
     const saved = await mutateEngagement(region, 'comment.create', {
       articleId: region.dataset.articleId,
@@ -381,7 +394,54 @@ document.addEventListener('submit', async (event) => {
 });
 
 let sessionUser = null;
+// The reader the current engagement render was built for: null until the frame reports, and
+// null again for a signed-out reader, so an anonymous load never re-requests.
+let renderedSessionUser = null;
 const pendingEngagementWrites = new Map();
+
+/**
+ * What the reader was doing when we had to ask who they are. Signing in is an interruption, so
+ * the interruption has to end exactly where it started: the reaction they pressed gets applied,
+ * and the comment they were typing keeps its text and its caret.
+ */
+let pendingIntent = null;
+
+function requestSession(intent) {
+  const dialog = document.getElementById('gala-account-dialog');
+  const field = intent.element;
+  pendingIntent = {
+    kind: intent.kind,
+    element: field,
+    // Held here rather than left in the DOM, because signing in re-renders the region.
+    draft: field && 'value' in field ? field.value : null,
+    caret: field && 'selectionStart' in field ? field.selectionStart : null
+  };
+  if (!(dialog instanceof HTMLDialogElement)) return;
+  const invite = dialog.querySelector('[data-account-invite]');
+  if (invite) invite.hidden = false;
+  if (field && typeof field.blur === 'function') field.blur();
+  if (!dialog.open) dialog.showModal();
+}
+
+/** Puts the reader back exactly where the sign-in interrupted them. */
+function resumeIntent() {
+  const intent = pendingIntent;
+  pendingIntent = null;
+  if (!intent) return;
+  const element = intent.element;
+  if (!element || !element.isConnected) return;
+  if (intent.kind === 'comment') {
+    if ('value' in element && intent.draft != null && element.value === '') element.value = intent.draft;
+    element.focus();
+    if (intent.caret != null && 'setSelectionRange' in element) {
+      element.setSelectionRange(intent.caret, intent.caret);
+    }
+    return;
+  }
+  // A reaction or follow was a completed decision, so carry it out rather than make them press
+  // the same thing twice.
+  element.click();
+}
 
 document.querySelectorAll('[data-engagement-url]').forEach((region) => {
   refreshEngagement(region);
@@ -475,12 +535,21 @@ if (sessionFrame) {
         ? `Account: ${displayName}` : 'Sign in or view account');
       control.title = displayName ? `Account: ${displayName}` : 'Account';
     }
+    // The session frame reports on every page load, signed in or not. Re-reading engagement
+    // then duplicated the request made on load and returned an identical payload for anyone
+    // who was not signed in. Only a change of reader can change what the API answers.
+    const changed = renderedSessionUser !== (sessionUser?.id ?? null);
+    renderedSessionUser = sessionUser?.id ?? null;
     document.querySelectorAll('[data-engagement-url]').forEach((region) => {
-      const actions = region.querySelector('[data-engagement-actions]');
-      const signIn = region.querySelector('[data-engagement-sign-in]');
-      if (actions) actions.hidden = !sessionUser;
-      if (signIn) signIn.hidden = Boolean(sessionUser);
-      refreshEngagement(region);
+      if (changed) refreshEngagement(region);
     });
+    // Signed in on the back of an interrupted action: close the interruption and finish it.
+    if (sessionUser && pendingIntent) {
+      const dialog = document.getElementById('gala-account-dialog');
+      const invite = dialog?.querySelector('[data-account-invite]');
+      if (invite) invite.hidden = true;
+      if (dialog instanceof HTMLDialogElement && dialog.open) dialog.close();
+      resumeIntent();
+    }
   });
 }

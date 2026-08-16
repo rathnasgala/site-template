@@ -17,7 +17,9 @@
 <section class="gala-engagement" aria-label="Engagement" data-article-id="{{ articleId | escape }}" data-engagement-url="{{ apiBaseUrl | escape }}/v1/articles/{{ articleId | escape }}/engagement">
   {% if engagement.available %}<dl data-engagement-snapshot><div><dt>Reactions</dt><dd>{{ engagement.reactions }}</dd></div><div><dt>Comments</dt><dd>{{ engagement.comments }}</dd></div><div><dt>Views</dt><dd>{{ engagement.views }}</dd></div></dl>{% else %}<p class="gala-engagement__placeholder" role="status">Loading engagement data.</p>{% endif %}
   <div data-engagement-live></div>
-  <section class="gala-engagement-actions" aria-label="Reader actions" data-engagement-actions hidden>
+  {# Readers see what they can do before they are asked who they are. Signing in is requested
+     at the moment of intent, and the intent is replayed once they are back. #}
+  <section class="gala-engagement-actions" aria-label="Reader actions" data-engagement-actions>
     <div class="gala-reaction-actions" role="group" aria-label="React to this article">
       {% for reaction in ['like', 'love', 'insightful', 'curious', 'celebrate', 'support'] %}<button type="button" data-reaction="{{ reaction }}" aria-pressed="false">{{ reaction | capitalize }}</button>{% endfor %}
     </div>
@@ -29,7 +31,6 @@
       <button type="button" data-cancel-reply hidden>Cancel reply</button>
     </form>
   </section>
-  <p data-engagement-sign-in>Sign in from the account menu to comment, react, or follow.</p>
   <output data-engagement-status aria-live="polite"></output>
 </section>
 {% endmacro %}

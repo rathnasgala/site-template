@@ -4,7 +4,7 @@ schemaVersion: 1
 framework:
   themePackage:
     name: "@rathnasgala/theme"
-    version: 0.0.10
+    version: 0.0.11
 site:
   id: unavailable
   name: New Gala Site

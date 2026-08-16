@@ -56,7 +56,11 @@
     <main id="main-content">{{ content | safe }}</main>
     <footer class="gala-page-footer">
       <p>&copy; {{ site.site.name }}</p>
-      {% if attributionTier != 'PAID' %}<p><a href="https://gala67.com/?utm_source=gala-site&amp;utm_medium=referral" rel="external">Built with Gala</a></p>{% endif %}
+      {# Which footer the click came from, which language it was read in, and whose site it was.
+         site.id is the identifier available to a built page and resolves to its owner. #}
+      {% set galaLinkPlacement = 'article-footer' if post else 'site-footer' %}
+      {% set galaLinkLanguage = post.language or site.site.defaultLanguage %}
+      {% if attributionTier != 'PAID' %}<p><a href="https://gala67.com/?utm_source=gala-site&amp;utm_medium=referral&amp;utm_campaign=built-with-gala&amp;utm_content={{ galaLinkPlacement | urlencode }}&amp;utm_term={{ galaLinkLanguage | urlencode }}&amp;utm_id={{ site.site.id | urlencode }}" rel="external">Built with Gala</a></p>{% endif %}
     </footer>
     <dialog id="gala-settings-dialog" class="gala-dialog" aria-labelledby="gala-settings-title">
       <form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close settings">Close</button></form>
@@ -91,7 +95,6 @@
     <dialog id="gala-account-dialog" class="gala-dialog gala-account-dialog" aria-labelledby="gala-account-title">
       <form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close account">Close</button></form>
       <h2 id="gala-account-title">Gala account</h2>
-      <p class="gala-account-dialog__invite" data-account-invite hidden>Takes a couple of clicks to authenticate yourself. No passwords, no spam.</p>
       <iframe data-gala-session-frame title="Gala account and sign in" allow="identity-credentials-get" src="{{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}/v1/widget/session?siteId={{ site.site.id | escape }}"></iframe>
     </dialog>
     {% endif %}

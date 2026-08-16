@@ -407,7 +407,6 @@ const pendingEngagementWrites = new Map();
 let pendingIntent = null;
 
 function requestSession(intent) {
-  const dialog = document.getElementById('gala-account-dialog');
   const field = intent.element;
   pendingIntent = {
     kind: intent.kind,
@@ -416,11 +415,20 @@ function requestSession(intent) {
     draft: field && 'value' in field ? field.value : null,
     caret: field && 'selectionStart' in field ? field.selectionStart : null
   };
-  if (!(dialog instanceof HTMLDialogElement)) return;
-  const invite = dialog.querySelector('[data-account-invite]');
-  if (invite) invite.hidden = false;
+  // One window, not three. Asking used to open a modal, containing a frame, containing a
+  // button, that opened a popup. The popup is the only part that has to exist, because it is
+  // the only one running at the top level on the origin the identity providers accept.
+  const frame = document.querySelector('[data-gala-session-frame]');
+  const status = document.querySelector('[data-engagement-status]');
+  if (!frame) return;
+  const source = new URL(frame.getAttribute('src'), window.location.href);
+  const signIn = new URL('/v1/widget/session/sign-in', source.origin);
+  signIn.searchParams.set('siteId', source.searchParams.get('siteId') ?? '');
   if (field && typeof field.blur === 'function') field.blur();
-  if (!dialog.open) dialog.showModal();
+  if (!window.open(signIn, 'gala-sign-in', 'popup,width=520,height=680')) {
+    pendingIntent = null;
+    if (status) status.textContent = 'Allow pop-ups for this site to sign in, then try again.';
+  }
 }
 
 /** Puts the reader back exactly where the sign-in interrupted them. */
@@ -543,13 +551,7 @@ if (sessionFrame) {
     document.querySelectorAll('[data-engagement-url]').forEach((region) => {
       if (changed) refreshEngagement(region);
     });
-    // Signed in on the back of an interrupted action: close the interruption and finish it.
-    if (sessionUser && pendingIntent) {
-      const dialog = document.getElementById('gala-account-dialog');
-      const invite = dialog?.querySelector('[data-account-invite]');
-      if (invite) invite.hidden = true;
-      if (dialog instanceof HTMLDialogElement && dialog.open) dialog.close();
-      resumeIntent();
-    }
+    // Signed in on the back of an interrupted action: finish what they were doing.
+    if (sessionUser && pendingIntent) resumeIntent();
   });
 }

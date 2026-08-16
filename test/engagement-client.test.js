@@ -84,8 +84,16 @@ test('reader controls are accessible and include all low-risk write classes', ()
   assert.match(components, /data-comment-create/);
   assert.match(components, /maxlength="5000" required/);
   assert.match(components, /data-follow-article aria-pressed="false"/);
-  assert.match(components, /\['like', 'love', 'insightful', 'curious', 'celebrate', 'support'\]/);
-  assert.match(components, /data-reaction="{{ reaction }}"/);
+  // Exactly the six the platform stores (io.gala.api.engagement.ReactionType). The template
+  // used to offer love/curious/support, which the API has never accepted: three of the six
+  // buttons returned INVALID_ENGAGEMENT_WRITE on every click.
+  for (const reaction of ['like', 'insightful', 'celebrate', 'funny', 'mind-blown', 'thank-you']) {
+    assert.match(components, new RegExp(`value: '${reaction}'`));
+  }
+  for (const unsupported of ['love', 'curious', 'support']) {
+    assert.doesNotMatch(components, new RegExp(`value: '${unsupported}'`));
+  }
+  assert.match(components, /data-reaction="{{ reaction.value }}"/);
   assert.match(behavior, /data-reply-comment/);
   assert.match(behavior, /data-edit-comment/);
   assert.match(behavior, /data-delete-comment/);

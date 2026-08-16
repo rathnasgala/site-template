@@ -21,7 +21,16 @@
      at the moment of intent, and the intent is replayed once they are back. #}
   <section class="gala-engagement-actions" aria-label="Reader actions" data-engagement-actions>
     <div class="gala-reaction-actions" role="group" aria-label="React to this article">
-      {% for reaction in ['like', 'love', 'insightful', 'curious', 'celebrate', 'support'] %}<button type="button" data-reaction="{{ reaction }}" aria-pressed="false">{{ reaction | capitalize }}</button>{% endfor %}
+      {# The six the platform actually stores (io.gala.api.engagement.ReactionType). Offering
+         any other name renders a button that can only ever fail on the way to the API. #}
+      {% for reaction in [
+        { value: 'like', label: 'Like' },
+        { value: 'insightful', label: 'Insightful' },
+        { value: 'celebrate', label: 'Celebrate' },
+        { value: 'funny', label: 'Funny' },
+        { value: 'mind-blown', label: 'Mind blown' },
+        { value: 'thank-you', label: 'Thank you' }
+      ] %}<button type="button" data-reaction="{{ reaction.value }}" aria-pressed="false">{{ reaction.label }}</button>{% endfor %}
     </div>
     <button type="button" data-follow-article aria-pressed="false">Follow article</button>
     <form data-comment-create>

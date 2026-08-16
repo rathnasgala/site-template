@@ -39,7 +39,10 @@ document.addEventListener('click', async (event) => {
   if (reaction) {
     const region = reaction.closest('[data-engagement-url]');
     if (!region) return;
-    if (!sessionUser) return requestSession({ kind: 'reaction', element: reaction });
+    if (!sessionUser) {
+      return requestSession({ kind: 'reaction', region,
+        selector: `[data-reaction="${reaction.dataset.reaction}"]` });
+    }
     const active = reaction.getAttribute('aria-pressed') !== 'true';
     const saved = await mutateEngagement(region, active ? 'reaction.add' : 'reaction.remove', {
       articleId: region.dataset.articleId,
@@ -54,7 +57,9 @@ document.addEventListener('click', async (event) => {
   if (follow) {
     const region = follow.closest('[data-engagement-url]');
     if (!region) return;
-    if (!sessionUser) return requestSession({ kind: 'follow', element: follow });
+    if (!sessionUser) {
+      return requestSession({ kind: 'follow', region, selector: '[data-follow-article]' });
+    }
     const active = follow.getAttribute('aria-pressed') !== 'true';
     const saved = await mutateEngagement(region, active ? 'follow.add' : 'follow.remove', {
       targetType: 'articles', targetId: region.dataset.articleId
@@ -358,7 +363,13 @@ function recordView(region) {
 document.addEventListener('focusin', (event) => {
   if (sessionUser || pendingIntent) return;
   const field = event.target.closest('[data-comment-create] textarea, [data-comment-editor] textarea');
-  if (field) requestSession({ kind: 'comment', element: field });
+  if (!field) return;
+  const region = field.closest('[data-engagement-url]');
+  const form = field.closest('[data-comment-create], [data-comment-editor]');
+  if (!region || !form) return;
+  requestSession({ kind: 'comment', region,
+    selector: `${form.matches('[data-comment-create]') ? '[data-comment-create]' : '[data-comment-editor]'} textarea`,
+    field });
 });
 
 document.addEventListener('submit', async (event) => {
@@ -371,7 +382,9 @@ document.addEventListener('submit', async (event) => {
   const body = form.elements.body?.value;
   if (!region || typeof body !== 'string' || body.trim() === '') return;
   if (!sessionUser) {
-    return requestSession({ kind: 'comment', element: form.querySelector('textarea') });
+    return requestSession({ kind: 'comment', region,
+      selector: `${create ? '[data-comment-create]' : '[data-comment-editor]'} textarea`,
+      field: form.querySelector('textarea') });
   }
   if (create) {
     const saved = await mutateEngagement(region, 'comment.create', {
@@ -407,13 +420,14 @@ const pendingEngagementWrites = new Map();
 let pendingIntent = null;
 
 function requestSession(intent) {
-  const field = intent.element;
+  const field = intent.field;
   pendingIntent = {
     kind: intent.kind,
-    element: field,
+    region: intent.region,
+    selector: intent.selector,
     // Held here rather than left in the DOM, because signing in re-renders the region.
-    draft: field && 'value' in field ? field.value : null,
-    caret: field && 'selectionStart' in field ? field.selectionStart : null
+    draft: field ? field.value : null,
+    caret: field ? field.selectionStart : null
   };
   // One window, not three. Asking used to open a modal, containing a frame, containing a
   // button, that opened a popup. The popup is the only part that has to exist, because it is
@@ -424,7 +438,7 @@ function requestSession(intent) {
   const source = new URL(frame.getAttribute('src'), window.location.href);
   const signIn = new URL('/v1/widget/session/sign-in', source.origin);
   signIn.searchParams.set('siteId', source.searchParams.get('siteId') ?? '');
-  if (field && typeof field.blur === 'function') field.blur();
+  if (field) field.blur();
   if (!window.open(signIn, 'gala-sign-in', 'popup,width=520,height=680')) {
     pendingIntent = null;
     if (status) status.textContent = 'Allow pop-ups for this site to sign in, then try again.';
@@ -434,14 +448,19 @@ function requestSession(intent) {
 /** Puts the reader back exactly where the sign-in interrupted them. */
 function resumeIntent() {
   const intent = pendingIntent;
-  pendingIntent = null;
   if (!intent) return;
-  const element = intent.element;
-  if (!element || !element.isConnected) return;
+  // The sign-in window is still closing at the moment the session arrives, so focus set now
+  // would be handed straight back to it. Wait until this page actually holds focus.
+  if (!document.hasFocus()) return;
+  // Re-found rather than remembered: signing in re-renders the engagement region, so a node
+  // captured before the interruption may no longer be the one on the page.
+  const element = intent.region?.querySelector(intent.selector);
+  if (!element) return;
+  pendingIntent = null;
   if (intent.kind === 'comment') {
-    if ('value' in element && intent.draft != null && element.value === '') element.value = intent.draft;
+    if (intent.draft != null && element.value === '') element.value = intent.draft;
     element.focus();
-    if (intent.caret != null && 'setSelectionRange' in element) {
+    if (intent.caret != null && typeof element.setSelectionRange === 'function') {
       element.setSelectionRange(intent.caret, intent.caret);
     }
     return;
@@ -450,6 +469,12 @@ function resumeIntent() {
   // the same thing twice.
   element.click();
 }
+
+// Signing in happens in another window, so the moment this one is focused again is the moment
+// the reader is back and the interrupted action can be finished.
+window.addEventListener('focus', () => {
+  if (sessionUser && pendingIntent) resumeIntent();
+});
 
 document.querySelectorAll('[data-engagement-url]').forEach((region) => {
   refreshEngagement(region);

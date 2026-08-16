@@ -7,6 +7,8 @@ framework:
     version: 0.0.12
 site:
   id: unavailable
+  ownerId: unavailable
+  repository: unavailable
   name: New Gala Site
   author: New Gala Site
   defaultLanguage: en

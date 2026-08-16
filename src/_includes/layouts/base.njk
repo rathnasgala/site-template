@@ -56,11 +56,14 @@
     <main id="main-content">{{ content | safe }}</main>
     <footer class="gala-page-footer">
       <p>&copy; {{ site.site.name }}</p>
-      {# Which footer the click came from, which language it was read in, and whose site it was.
-         site.id is the identifier available to a built page and resolves to its owner. #}
+      {# Which repository sent the traffic, which footer the click came from, which language it
+         was read in, and which author owns it. Sites registered before these managed values
+         existed fall back rather than emitting the literal placeholder. #}
       {% set galaLinkPlacement = 'article-footer' if post else 'site-footer' %}
       {% set galaLinkLanguage = post.language or site.site.defaultLanguage %}
-      {% if attributionTier != 'PAID' %}<p><a href="https://gala67.com/?utm_source=gala-site&amp;utm_medium=referral&amp;utm_campaign=built-with-gala&amp;utm_content={{ galaLinkPlacement | urlencode }}&amp;utm_term={{ galaLinkLanguage | urlencode }}&amp;utm_id={{ site.site.id | urlencode }}" rel="external">Built with Gala</a></p>{% endif %}
+      {% set galaLinkSource = site.site.repository if site.site.repository and site.site.repository != 'unavailable' else 'gala-site' %}
+      {% set galaLinkOwner = site.site.ownerId if site.site.ownerId and site.site.ownerId != 'unavailable' else site.site.id %}
+      {% if attributionTier != 'PAID' %}<p><a href="https://gala67.com/?utm_source={{ galaLinkSource | urlencode }}&amp;utm_medium=referral&amp;utm_campaign=built-with-gala&amp;utm_content={{ galaLinkPlacement | urlencode }}&amp;utm_term={{ galaLinkLanguage | urlencode }}&amp;utm_id={{ galaLinkOwner | urlencode }}" rel="external">Built with Gala</a></p>{% endif %}
     </footer>
     <dialog id="gala-settings-dialog" class="gala-dialog" aria-labelledby="gala-settings-title">
       <form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close settings">Close</button></form>

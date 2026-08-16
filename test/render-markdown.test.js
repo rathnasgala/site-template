@@ -191,7 +191,7 @@ test('ships the exact canonical dated provider fixture', async () => {
     new URL('../lib/provider-fixtures/embeds.v1.json', import.meta.url), 'utf8'
   ));
   const canonical = JSON.parse(await readFile(
-    new URL('../../v1/docs/v1-provider-fixtures/embeds.v1.json', import.meta.url), 'utf8'
+    new URL('../v1/docs/embeds.v1.json', import.meta.url), 'utf8'
   ));
   assert.deepEqual(runtime, canonical);
   assert.deepEqual(runtime.providers.map(({ id, status }) => [id, status]), [

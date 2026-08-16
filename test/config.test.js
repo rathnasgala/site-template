@@ -9,6 +9,19 @@ import { loadSiteConfiguration } from '../lib/site-config.js';
 const config = parse(await readFile(new URL('../site.config.yml', import.meta.url), 'utf8'));
 const managed = JSON.parse(await readFile(new URL('../.gala/managed-files.json', import.meta.url), 'utf8'));
 
+test('shipped example post claims no article identity', async () => {
+  // Every repository generated from this template is byte-identical, so a hardcoded id meant
+  // every site asserted ownership of the same article. The first one to reconcile claimed it
+  // and every publication created afterwards failed permanently with "Article identity is
+  // already bound to another site". Ship no id: the publish run mints a unique one per site.
+  const example = await readFile(
+    new URL('../content/posts/example/index.en.md', import.meta.url), 'utf8'
+  );
+  const frontmatter = /^---\n([\s\S]*?)\n---\n/.exec(example);
+  assert.ok(frontmatter, 'example post must carry a frontmatter block');
+  assert.equal(parse(frontmatter[1]).id, undefined);
+});
+
 test('design contract exposes every scaffold-level design dimension', () => {
   assert.deepEqual(Object.keys(config.design).sort(), [
     'colorMode', 'componentStyle', 'density', 'layout', 'motion',

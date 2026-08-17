@@ -20,6 +20,7 @@ const expectedRuntimeFiles = [
   'package-lock.json',
   'package.json',
   'src/404.njk',
+  'src/cname.11ty.js',
   'src/_data/buildManifest.js',
   'src/_data/engagementSnapshot.js',
   'src/_data/feedLinks.js',

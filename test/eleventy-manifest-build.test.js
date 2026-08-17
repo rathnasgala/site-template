@@ -338,3 +338,24 @@ test('Eleventy refuses a validated media path replaced by a symbolic link', asyn
     /Validated media source is no longer a regular file/
   );
 });
+
+test('a published site carries a custom domain only when the domain is its own', async () => {
+  const root = await fixture();
+  const build = () => execute(process.execPath, [eleventy], {
+    cwd: root, env: { ...process.env, GALA_BUILD_INSTANT: '2026-06-15T12:30:00Z' }
+  });
+  await build();
+
+  // Served at example.com/blog, so GitHub is lending it the domain held by the owner's main
+  // site. Writing CNAME here would override that and move this site to the domain root.
+  await assert.rejects(() => readFile(path.join(root, '_site', 'CNAME')), { code: 'ENOENT' });
+
+  const configuration = path.join(root, 'site.config.yml');
+  await writeFile(configuration,
+    (await readFile(configuration, 'utf8')).replace('pathPrefix: /blog', 'pathPrefix: /'));
+  await build();
+
+  // At the root of its own domain the site must restate it on every publish: the published
+  // branch is force-pushed, so an unwritten CNAME is a custom domain silently dropped.
+  assert.equal(await readFile(path.join(root, '_site', 'CNAME'), 'utf8'), 'example.com\n');
+});

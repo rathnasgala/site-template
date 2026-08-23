@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 const source = await readFile(new URL('../src/assets/theme-mode.js', import.meta.url), 'utf8');
 
-function browserHarness(initialValue, { storageThrows = false } = {}) {
+function browserHarness(initialValue, { storageThrows = false, declared = 'system' } = {}) {
   const values = new Map(initialValue == null ? [] : [['gala-color-mode', initialValue]]);
   const listeners = {};
   const control = {
@@ -18,7 +18,7 @@ function browserHarness(initialValue, { storageThrows = false } = {}) {
   let ready;
   const context = {
     document: {
-      documentElement: { dataset: { mode: 'system' } },
+      documentElement: { dataset: { mode: declared } },
       addEventListener(type, listener) {
         assert.equal(type, 'DOMContentLoaded');
         ready = listener;
@@ -63,4 +63,22 @@ test('invalid or unavailable storage safely resolves to system mode', () => {
     assert.doesNotThrow(() => harness.listeners.click());
     assert.equal(harness.context.document.documentElement.dataset.mode, 'light');
   }
+});
+
+/*
+ * A publication may choose what a reader sees before the reader chooses for themselves. The
+ * server renders that choice onto the element; this used to fall back to `system` regardless, so
+ * `design.colorMode` was a setting that existed everywhere except in the page.
+ */
+test('the publication default applies until the reader chooses', () => {
+  const untouched = browserHarness(null, { declared: 'dark' });
+  assert.equal(untouched.context.document.documentElement.dataset.mode, 'dark');
+
+  // The reader's own choice still wins over it.
+  const chosen = browserHarness('light', { declared: 'dark' });
+  assert.equal(chosen.context.document.documentElement.dataset.mode, 'light');
+
+  // And an unreadable store falls back to the publication's choice, not to system.
+  const blocked = browserHarness(null, { storageThrows: true, declared: 'dark' });
+  assert.equal(blocked.context.document.documentElement.dataset.mode, 'dark');
 });

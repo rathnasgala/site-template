@@ -1,57 +1,181 @@
+/*
+ * A publication should read like a well-set page, not like a product.
+ *
+ * The chrome is quiet, the type carries the hierarchy, and depth comes from surface and space
+ * rather than from an outline around everything. Every value here is a token so that the ten
+ * `design:` choices in site.config.yml can move the whole page by moving a handful of variables,
+ * instead of each component inventing its own spacing and its own grey.
+ */
 :root {
   color-scheme: light dark;
-  --gala-color-background: light-dark(#fff, #111);
-  --gala-color-text: light-dark(#181818, #f5f5f5);
-  --gala-space-page: clamp(1rem, 4vw, 4rem);
-  --gala-radius-control: 0.5rem;
-  --gala-color-surface: light-dark(#f4f4f4, #1d1d1d);
-  --gala-color-accent: light-dark(#174ea6, #8ab4f8);
-  --gala-color-border: light-dark(#6b6b6b, #aaa);
-  --gala-font-body: system-ui, sans-serif;
-  --gala-content-width: 70rem;
+
+  /* Neutrals carry a slight warmth. A pure grey reads as unconsidered; these were picked. */
+  --gala-color-background: light-dark(#fdfcfb, #131211);
+  --gala-color-surface: light-dark(#f6f4f1, #1c1a18);
+  --gala-color-raised: light-dark(#fffffe, #24211f);
+  --gala-color-text: light-dark(#1a1817, #f2efec);
+  --gala-color-muted: light-dark(#6b645e, #a8a099);
+  --gala-color-border: light-dark(#968e86, #6b645e);
+  --gala-color-hairline: light-dark(#e8e3dd, #2a2724);
+  --gala-color-border-strong: light-dark(#c9c2ba, #46413d);
+  --gala-color-accent: light-dark(#8a4b2a, #e8a87c);
+
+  /* Type. One scale, used everywhere, fluid between a phone and a desk. */
+  --gala-font-body: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --gala-font-display: var(--gala-font-body);
+  --gala-font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+  --gala-text-xs: 0.78rem;
+  --gala-text-sm: 0.875rem;
+  --gala-text-base: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --gala-text-lg: clamp(1.15rem, 1.09rem + 0.3vw, 1.3rem);
+  --gala-text-xl: clamp(1.4rem, 1.28rem + 0.6vw, 1.75rem);
+  --gala-text-2xl: clamp(1.75rem, 1.5rem + 1.2vw, 2.4rem);
+  --gala-text-3xl: clamp(2.2rem, 1.7rem + 2.4vw, 3.4rem);
+  --gala-leading-tight: 1.15;
+  --gala-leading-body: 1.65;
+  --gala-tracking-tight: -0.018em;
+  --gala-tracking-wide: 0.08em;
+  --gala-weight-display: 640;
+
+  /* Space, radius, depth, motion. */
+  --gala-step: 1rem;
+  --gala-space-2xs: calc(var(--gala-step) * 0.25);
+  --gala-space-xs: calc(var(--gala-step) * 0.5);
+  --gala-space-sm: calc(var(--gala-step) * 0.75);
+  --gala-space-md: var(--gala-step);
+  --gala-space-lg: calc(var(--gala-step) * 1.75);
+  --gala-space-xl: calc(var(--gala-step) * 3);
+  --gala-space-page: clamp(1.25rem, 5vw, 4.5rem);
+  --gala-radius-control: 0.625rem;
+  --gala-radius-surface: 1rem;
+  --gala-shadow-low: 0 1px 2px light-dark(rgb(26 24 23 / 6%), rgb(0 0 0 / 40%));
+  --gala-shadow-high:
+    0 1px 2px light-dark(rgb(26 24 23 / 5%), rgb(0 0 0 / 35%)),
+    0 12px 28px -12px light-dark(rgb(26 24 23 / 18%), rgb(0 0 0 / 60%));
+  --gala-motion-fast: 120ms;
+  --gala-motion-base: 220ms;
+  --gala-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  --gala-content-width: 72rem;
+  --gala-measure: 68ch;
   --gala-widget-min-block-size: 8rem;
 }
 
+/* An explicit choice must beat the operating system in both directions, so every colour is
+   restated rather than left to `light-dark()`. */
 :root[data-mode='light'] {
   color-scheme: light;
-  --gala-color-background: #fff;
-  --gala-color-text: #181818;
-  --gala-color-surface: #f4f4f4;
-  --gala-color-accent: #174ea6;
-  --gala-color-border: #6b6b6b;
+  --gala-color-background: #fdfcfb;
+  --gala-color-surface: #f6f4f1;
+  --gala-color-raised: #fffffe;
+  --gala-color-text: #1a1817;
+  --gala-color-muted: #6b645e;
+  --gala-color-border: #968e86;
+  --gala-color-hairline: #e8e3dd;
+  --gala-color-border-strong: #c9c2ba;
+  --gala-color-accent: #8a4b2a;
 }
-
 :root[data-mode='dark'] {
   color-scheme: dark;
-  --gala-color-background: #111;
-  --gala-color-text: #f5f5f5;
-  --gala-color-surface: #1d1d1d;
-  --gala-color-accent: #8ab4f8;
-  --gala-color-border: #aaa;
+  --gala-color-background: #131211;
+  --gala-color-surface: #1c1a18;
+  --gala-color-raised: #24211f;
+  --gala-color-text: #f2efec;
+  --gala-color-muted: #a8a099;
+  --gala-color-border: #6b645e;
+  --gala-color-hairline: #2a2724;
+  --gala-color-border-strong: #46413d;
+  --gala-color-accent: #e8a87c;
 }
 
+/* ---------------------------------------------------------------- palettes */
 :root[data-palette='ocean'] {
-  --gala-color-background: light-dark(#f7fbff, #071b2d);
-  --gala-color-text: light-dark(#102a43, #e8f4ff);
-  --gala-color-surface: light-dark(#d9eaf7, #102f49);
-  --gala-color-accent: light-dark(#005ea8, #78c8ff);
-  --gala-color-border: light-dark(#526d82, #8aa8bf);
+  --gala-color-background: light-dark(#f8fbfd, #0b1a24);
+  --gala-color-surface: light-dark(#eef4f9, #12252f);
+  --gala-color-raised: light-dark(#ffffff, #172d39);
+  --gala-color-text: light-dark(#12242f, #eaf3f8);
+  --gala-color-muted: light-dark(#5a6f7d, #98aebb);
+  --gala-color-border: light-dark(#7d8d99, #5f7d8c);
+  --gala-color-hairline: light-dark(#dde7ee, #1d3644);
+  --gala-color-border-strong: light-dark(#bdccd7, #33505f);
+  --gala-color-accent: light-dark(#0f5f7a, #7fd0e8);
 }
-
 :root[data-palette='ocean'][data-mode='light'] {
-  --gala-color-background: #f7fbff;
-  --gala-color-text: #102a43;
-  --gala-color-surface: #d9eaf7;
-  --gala-color-accent: #005ea8;
-  --gala-color-border: #526d82;
+  color-scheme: light;
+  --gala-color-background: #f8fbfd;
+  --gala-color-surface: #eef4f9;
+  --gala-color-raised: #ffffff;
+  --gala-color-text: #12242f;
+  --gala-color-muted: #5a6f7d;
+  --gala-color-border: #7d8d99;
+  --gala-color-hairline: #dde7ee;
+  --gala-color-border-strong: #bdccd7;
+  --gala-color-accent: #0f5f7a;
+}
+:root[data-palette='ocean'][data-mode='dark'] {
+  color-scheme: dark;
+  --gala-color-background: #0b1a24;
+  --gala-color-surface: #12252f;
+  --gala-color-raised: #172d39;
+  --gala-color-text: #eaf3f8;
+  --gala-color-muted: #98aebb;
+  --gala-color-border: #5f7d8c;
+  --gala-color-hairline: #1d3644;
+  --gala-color-border-strong: #33505f;
+  --gala-color-accent: #7fd0e8;
 }
 
-:root[data-palette='ocean'][data-mode='dark'] {
-  --gala-color-background: #071b2d;
-  --gala-color-text: #e8f4ff;
-  --gala-color-surface: #102f49;
-  --gala-color-accent: #78c8ff;
-  --gala-color-border: #8aa8bf;
+/* ---------------------------------------------------------------- typography
+   System stacks rather than a downloaded face: a publication must build and render with no call
+   to anyone, and a webfont is bytes on every reader's first paint. These are the good faces the
+   reader's machine already has. */
+:root[data-typography='editorial'] {
+  --gala-font-body: ui-serif, "Iowan Old Style", Charter, "Source Serif 4", Georgia, serif;
+  --gala-font-display: var(--gala-font-body);
+  --gala-weight-display: 600;
+}
+:root[data-typography='humanist'] {
+  --gala-font-body: Optima, Candara, "Gill Sans", "Trebuchet MS", sans-serif;
+  --gala-font-display: var(--gala-font-body);
+}
+:root[data-typography='mono'] {
+  --gala-font-display: var(--gala-font-mono);
+  --gala-weight-display: 560;
+  --gala-tracking-tight: -0.005em;
+}
+
+/* ---------------------------------------------------------------- density */
+:root[data-density='compact'], :root[data-spacing='compact'] {
+  --gala-step: 0.8rem;
+  --gala-leading-body: 1.5;
+}
+:root[data-density='spacious'], :root[data-spacing='spacious'] {
+  --gala-step: 1.25rem;
+  --gala-leading-body: 1.75;
+}
+
+/* ---------------------------------------------------------------- radius */
+:root[data-radius='sharp'] { --gala-radius-control: 0; --gala-radius-surface: 0; }
+:root[data-radius='round'] { --gala-radius-control: 999px; --gala-radius-surface: 1.5rem; }
+
+/* ---------------------------------------------------------------- motion
+   `none` is honoured for everyone; a reader who asks the operating system for less motion is
+   honoured regardless of what the publication chose. */
+:root[data-motion='none'] { --gala-motion-fast: 0ms; --gala-motion-base: 0ms; }
+:root[data-motion='expressive'] { --gala-motion-base: 340ms; }
+@media (prefers-reduced-motion: reduce) {
+  :root { --gala-motion-fast: 0ms; --gala-motion-base: 0ms; }
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
+
+/* ---------------------------------------------------------------- surfaces
+   `quiet` sits on the page, `outlined` draws its edge, `raised` lifts. One variable decides,
+   so every card, dialog and chip agrees. */
+:root { --gala-surface-border: var(--gala-color-hairline); --gala-surface-shadow: var(--gala-shadow-low); }
+:root[data-component-style='outlined'] { --gala-surface-border: var(--gala-color-border-strong); }
+:root[data-component-style='raised'] {
+  --gala-surface-border: transparent;
+  --gala-surface-shadow: var(--gala-shadow-high);
 }
 
 :root[data-layout='portfolio'] { --gala-content-width: 82rem; }
@@ -62,6 +186,53 @@ body {
   color: var(--gala-color-text);
   background: var(--gala-color-background);
   font-family: var(--gala-font-body);
+  font-size: var(--gala-text-base);
+  line-height: var(--gala-leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings carry the hierarchy, so they get the display face, a tighter measure and tighter
+   tracking — large type set at body tracking is the single clearest sign of an unconsidered page. */
+:where(h1, h2, h3, h4) {
+  font-family: var(--gala-font-display);
+  font-weight: var(--gala-weight-display);
+  line-height: var(--gala-leading-tight);
+  letter-spacing: var(--gala-tracking-tight);
+  text-wrap: balance;
+  margin-block: 0 var(--gala-space-sm);
+}
+:where(h1) { font-size: var(--gala-text-3xl); }
+:where(h2) { font-size: var(--gala-text-2xl); }
+:where(h3) { font-size: var(--gala-text-xl); }
+:where(h4) { font-size: var(--gala-text-lg); }
+:where(p, ul, ol, blockquote) { margin-block: 0 var(--gala-space-md); }
+:where(p) { text-wrap: pretty; }
+
+blockquote {
+  margin-inline: 0;
+  padding-inline-start: var(--gala-space-md);
+  border-inline-start: 2px solid var(--gala-color-accent);
+  color: var(--gala-color-muted);
+}
+
+:where(code, kbd, samp) { font-family: var(--gala-font-mono); font-size: 0.9em; }
+:where(pre) {
+  padding: var(--gala-space-md);
+  overflow-x: auto;
+  background: var(--gala-color-surface);
+  border-radius: var(--gala-radius-control);
+}
+:where(hr) { border: 0; border-block-start: 1px solid var(--gala-color-hairline); margin-block: var(--gala-space-xl); }
+:where(table) { border-collapse: collapse; inline-size: 100%; }
+:where(th, td) { padding: var(--gala-space-xs) var(--gala-space-sm); border-block-end: 1px solid var(--gala-color-hairline); text-align: start; }
+
+/* An uppercase label needs air between the letters or it sets as a solid block. */
+.gala-eyebrow, .gala-comment__meta time, .gala-comment__edited {
+  font-size: var(--gala-text-xs);
+  letter-spacing: var(--gala-tracking-wide);
+  text-transform: uppercase;
+  color: var(--gala-color-muted);
 }
 
 .gala-site-header {
@@ -85,7 +256,12 @@ body {
   border: 0.125rem solid transparent;
   border-radius: 50%;
 }
-.gala-icon-control:hover { background: var(--gala-color-surface); }
+.gala-icon-control {
+  transition: background var(--gala-motion-fast) var(--gala-ease),
+              color var(--gala-motion-fast) var(--gala-ease);
+  color: var(--gala-color-muted);
+}
+.gala-icon-control:hover { background: var(--gala-color-surface); color: var(--gala-color-text); }
 .gala-icon-control:focus-visible { outline: 0.1875rem solid currentcolor; outline-offset: 0.1875rem; }
 /* Stroked, not filled: the icons are drawn on one 24px grid at a single weight, so they read as
    a set rather than as six unrelated silhouettes. */
@@ -98,8 +274,9 @@ body {
   padding: 1.5rem;
   color: var(--gala-color-text);
   background: var(--gala-color-background);
-  border: 0.125rem solid var(--gala-color-border);
-  border-radius: var(--gala-radius-control);
+  border: 1px solid var(--gala-surface-border);
+  border-radius: var(--gala-radius-surface);
+  box-shadow: var(--gala-shadow-high);
 }
 .gala-dialog::backdrop { background: rgb(0 0 0 / 65%); }
 .gala-dialog__close { float: inline-end; }
@@ -115,14 +292,19 @@ a { color: var(--gala-color-accent); }
 
 button {
   min-block-size: 2.75rem;
-  padding-inline: 1rem;
+  padding-inline: var(--gala-space-md);
   color: inherit;
-  background: transparent;
-  border: 0.125rem solid currentcolor;
+  background: var(--gala-color-surface);
+  border: 1px solid var(--gala-color-border);
   border-radius: var(--gala-radius-control);
   font: inherit;
+  font-size: var(--gala-text-sm);
   cursor: pointer;
+  transition: background var(--gala-motion-fast) var(--gala-ease),
+              border-color var(--gala-motion-fast) var(--gala-ease);
 }
+button:hover { border-color: var(--gala-color-border-strong); background: var(--gala-color-raised); }
+button[disabled] { opacity: 0.55; cursor: not-allowed; }
 
 button:focus-visible {
   outline: 0.1875rem solid currentcolor;
@@ -135,8 +317,9 @@ button:focus-visible {
   display: inline-flex;
   align-items: center;
   min-block-size: 2.75rem;
-  border: 0.125rem solid var(--gala-color-border);
+  border: 1px solid var(--gala-color-border);
   border-radius: var(--gala-radius-control);
+  font-size: var(--gala-text-sm);
 }
 
 .gala-badge,
@@ -146,7 +329,7 @@ button:focus-visible {
 .gala-section-heading > :where(h2, p) { margin-block: 0 0.5rem; }
 .gala-hero { display: grid; gap: 1.5rem; align-items: center; }
 .gala-hero__image { inline-size: 100%; block-size: auto; border-radius: var(--gala-radius-control); }
-.gala-page-content { max-inline-size: 70ch; }
+.gala-page-content { max-inline-size: var(--gala-measure); }
 .gala-page-content :where(img, video) { max-inline-size: 100%; block-size: auto; }
 .gala-author-profile { display: flex; gap: 1rem; padding: 1rem; background: var(--gala-color-surface); border-radius: var(--gala-radius-control); }
 .gala-author-profile img { border-radius: 50%; object-fit: cover; }
@@ -156,7 +339,25 @@ button:focus-visible {
 .gala-card-index { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1rem; padding: 0; list-style: none; }
 [data-layout='portfolio'] .gala-card-index { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1.5rem; }
 [data-layout='portfolio'] .gala-card { padding: clamp(1.25rem, 3vw, 2rem); }
-.gala-card { block-size: 100%; box-sizing: border-box; padding: 1.25rem; background: var(--gala-color-surface); border-radius: var(--gala-radius-control); }
+/* The surfaces are where `componentStyle` becomes visible: quiet sits on the page, outlined draws
+   its edge, raised lifts. One variable decides, so cards and dialogs cannot drift apart. */
+.gala-card {
+  block-size: 100%;
+  box-sizing: border-box;
+  padding: var(--gala-space-lg);
+  background: var(--gala-color-surface);
+  border: 1px solid var(--gala-surface-border);
+  border-radius: var(--gala-radius-surface);
+  box-shadow: var(--gala-surface-shadow);
+}
+[data-component-style='raised'] .gala-card { background: var(--gala-color-raised); }
+/* The one place the page moves of its own accord, and so the one place `motion` is legible:
+   `subtle` is a short settle, `expressive` a longer one, `none` no movement at all. */
+.gala-card { transition: transform var(--gala-motion-base) var(--gala-ease),
+                         box-shadow var(--gala-motion-base) var(--gala-ease); }
+.gala-card-index li:hover .gala-card { transform: translateY(-2px); box-shadow: var(--gala-shadow-high); }
+[data-motion='none'] .gala-card { transition: none; }
+[data-motion='none'] .gala-card-index li:hover .gala-card { transform: none; }
 .gala-stats-graph { min-block-size: var(--gala-widget-min-block-size); margin-inline: 0; }
 .gala-stats-graph svg { inline-size: 100%; block-size: 8rem; }
 .gala-stats-graph polyline { fill: none; stroke: var(--gala-color-accent); stroke-width: 2; }
@@ -249,3 +450,75 @@ button:focus-visible {
 @media (prefers-reduced-motion: no-preference) {
   @view-transition { navigation: auto; }
 }
+
+/* ---------------------------------------------------------------- the conversation
+   A thread is a hierarchy, and the indent is the only thing that says so. It is drawn with a
+   rule rather than padding alone, so five levels deep still reads as five levels and not as an
+   accident of margin. */
+.gala-comments-island { margin-block-start: var(--gala-space-xl); }
+.gala-comments__heading {
+  font-size: var(--gala-text-lg);
+  margin-block-end: var(--gala-space-md);
+}
+.gala-comments, .gala-comment-replies { list-style: none; margin: 0; padding: 0; }
+.gala-comment-replies {
+  margin-block-start: var(--gala-space-sm);
+  margin-inline-start: var(--gala-space-xs);
+  padding-inline-start: var(--gala-space-md);
+  border-inline-start: 1px solid var(--gala-color-hairline);
+}
+.gala-comment { padding-block: var(--gala-space-sm); }
+.gala-comment + .gala-comment { border-block-start: 1px solid var(--gala-color-hairline); }
+.gala-comment-replies .gala-comment + .gala-comment { border-block-start: 0; }
+.gala-comment__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gala-space-xs);
+  margin-block-end: var(--gala-space-2xs);
+  font-size: var(--gala-text-sm);
+}
+.gala-comment__meta strong { font-weight: 600; }
+.gala-comment__pending { font-size: var(--gala-text-xs); color: var(--gala-color-muted); }
+.gala-comment__body { margin-block: 0; overflow-wrap: anywhere; }
+
+/* The controls stay out of the way until the comment is worth acting on. */
+.gala-comment-actions {
+  display: flex;
+  gap: var(--gala-space-2xs);
+  margin-block-start: var(--gala-space-2xs);
+  opacity: 0.72;
+  transition: opacity var(--gala-motion-fast) var(--gala-ease);
+}
+.gala-comment:hover > .gala-comment-actions,
+.gala-comment:focus-within > .gala-comment-actions { opacity: 1; }
+.gala-comment-actions button {
+  min-block-size: 2rem;
+  padding-inline: var(--gala-space-xs);
+  font-size: var(--gala-text-xs);
+  background: transparent;
+  border-color: transparent;
+  color: var(--gala-color-muted);
+}
+.gala-comment-actions button:hover { color: var(--gala-color-text); background: var(--gala-color-surface); }
+
+.gala-comment__form { display: grid; gap: var(--gala-space-xs); margin-block: var(--gala-space-sm); }
+.gala-comment__form textarea {
+  inline-size: 100%;
+  box-sizing: border-box;
+  padding: var(--gala-space-sm);
+  color: inherit;
+  background: var(--gala-color-raised);
+  border: 1px solid var(--gala-color-border);
+  border-radius: var(--gala-radius-control);
+  font: inherit;
+  font-size: var(--gala-text-sm);
+  line-height: var(--gala-leading-body);
+  resize: vertical;
+}
+.gala-comment__form textarea:focus-visible { outline: 2px solid var(--gala-color-accent); outline-offset: 1px; }
+.gala-comment__controls { display: flex; gap: var(--gala-space-xs); }
+.gala-comments__status, .gala-comments__empty, .gala-comments__prompt {
+  color: var(--gala-color-muted);
+  font-size: var(--gala-text-sm);
+}
+.gala-comments__more { margin-block-start: var(--gala-space-md); }

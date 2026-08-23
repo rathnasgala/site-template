@@ -12,7 +12,7 @@ const templateRoot = fileURLToPath(new URL('..', import.meta.url));
 const eleventy = path.join(templateRoot, 'node_modules', '@11ty', 'eleventy', 'cmd.cjs');
 const PERFORMANCE_BUDGETS = {
   managedJavaScriptBytes: 65_536,
-  managedCssBytes: 16_384,
+  managedCssBytes: 32_768,
   ordinaryHtmlBytes: 32_768
 };
 

@@ -51,7 +51,8 @@ test('scaffolds author-owned uncompressed performance budgets', () => {
     // Preact runtime of its own rather than fetching one, because a Gala site has to keep working
     // when Gala does not.
     managedJavaScriptBytes: 65536,
-    managedCssBytes: 16384,
+    // Raised with the type scale, the palettes and the six new design knobs.
+    managedCssBytes: 32768,
     ordinaryHtmlBytes: 32768
   });
 });

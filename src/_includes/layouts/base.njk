@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ post.language or site.site.defaultLanguage }}" data-theme="{{ site.design.theme }}" data-layout="{{ site.design.layout }}" data-palette="{{ site.design.palette }}" data-typography="{{ site.design.typography }}" data-density="{{ site.design.density }}" data-spacing="{{ site.design.spacing }}" data-radius="{{ site.design.radius }}" data-motion="{{ site.design.motion }}" data-component-style="{{ site.design.componentStyle }}" data-mode="{{ site.design.colorMode | default('system') }}">
+<html lang="{{ post.language or site.site.defaultLanguage }}" data-theme="{{ site.design.theme | default('modern') }}" data-layout="{{ site.design.layout }}" data-palette="{{ site.design.palette | default('default') }}" data-mode="{{ site.design.colorMode | default('system') }}"{% if site.accent %} style="--gala-accent-light: {{ site.accent.light }}; --gala-accent-dark: {{ site.accent.dark }}"{% endif %}>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">

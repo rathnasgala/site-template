@@ -392,6 +392,16 @@ if (sessionFrame) {
       else pending.reject(new Error(event.data.error?.code || 'ENGAGEMENT_WRITE_FAILED'));
       return;
     }
+    /* The frame is cross-origin, so its content height is not readable from here — it reports
+       its own, and the box is sized to it. Without this the account panel scrolled inside a fixed
+       box, clipping the first line of its own text. */
+    if (event.data?.type === 'gala-session-height') {
+      const height = Number(event.data.height);
+      if (Number.isFinite(height) && height > 0 && height < 2000) {
+        sessionFrame.style.height = `${Math.ceil(height)}px`;
+      }
+      return;
+    }
     if (event.data?.type !== 'gala-session') return;
     sessionUser = event.data.user && typeof event.data.user.id === 'string' ? event.data.user : null;
     const control = document.querySelector('[data-user-control]');

@@ -13,27 +13,24 @@ const config = await readFile(new URL('../lib/site-config.js', import.meta.url),
  * `site.config.yml` while the page hardcoded `data-mode="system"`, and `componentStyle` set two
  * custom properties that no rule read. Both looked complete from every side except the reader's.
  */
+/*
+ * Three decisions, not nine.
+ *
+ * A writer chooses a look, a palette and a colour mode. Everything else — typeface, spacing,
+ * radius, surfaces, motion — belongs to the look and is designed with it. Nine independent knobs
+ * was several hundred combinations, none of them reviewed: `mono` + `round` + `spacious` +
+ * `raised` set a page in monospace inside page-wide pills, and it was four clicks away.
+ */
 const KNOBS = {
-  palette: ['default', 'ocean'],
-  typography: ['system', 'editorial', 'humanist', 'mono'],
-  layout: ['article-first', 'portfolio'],
-  density: ['compact', 'comfortable', 'spacious'],
-  spacing: ['compact', 'comfortable', 'spacious'],
-  radius: ['sharp', 'soft', 'round'],
-  motion: ['none', 'subtle', 'expressive'],
-  componentStyle: ['quiet', 'outlined', 'raised'],
+  theme: ['editorial', 'modern', 'technical'],
+  palette: ['default', 'ocean', 'forest', 'plum'],
   colorMode: ['system', 'light', 'dark'],
 };
 
-/*
- * `componentStyle` is `data-component-style`; `colorMode` is plain `data-mode`, because the
- * reader's own toggle writes that same attribute and the two must be the one switch.
- */
 const ATTRIBUTES = { colorMode: 'data-mode' };
-const attribute = (key) =>
-  ATTRIBUTES[key] ?? `data-${key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`;
+const attribute = (key) => ATTRIBUTES[key] ?? `data-${key}`;
 
-test('every design knob reaches the page', () => {
+test('every choice reaches the page', () => {
   for (const key of Object.keys(KNOBS)) {
     assert.ok(
       layout.includes(`${attribute(key)}="{{ site.design.${key}`),
@@ -45,12 +42,19 @@ test('every design knob reaches the page', () => {
 test('every value a writer may choose changes something', () => {
   for (const [key, values] of Object.entries(KNOBS)) {
     for (const value of values) {
-      // A default may legitimately carry no rule of its own: it is what the base tokens already
-      // describe. Every other value has to be answered somewhere.
-      if (['default', 'system', 'article-first', 'comfortable', 'soft', 'subtle', 'quiet'].includes(value)) continue;
-      const selector = new RegExp(`\\[${attribute(key)}=['"]${value}['"]\\]`);
-      assert.match(css, selector, `${key}: ${value} is offered but no rule answers to it`);
+      // `default` and `system` are what the base tokens already describe.
+      if (['default', 'system'].includes(value)) continue;
+      assert.match(css, new RegExp(`\\[${attribute(key)}=['"]${value}['"]\\]`),
+        `${key}: ${value} is offered but no rule answers to it`);
     }
+  }
+});
+
+test('no orthogonal knob survives', () => {
+  // Each of these was a slider a writer set blind. They are properties of a look now.
+  for (const gone of ['typography', 'density', 'spacing', 'radius', 'motion', 'component-style']) {
+    assert.doesNotMatch(css, new RegExp(`\\[data-${gone}=`),
+      `data-${gone} is still a rule, so it is still a choice nobody designed the combinations for`);
   }
 });
 

@@ -29,8 +29,14 @@ function explicitModeTokens(mode, palette = null) {
     : `:root\\[data-palette='${palette}'\\]\\[data-mode='${mode}'\\]`;
   const block = css.match(new RegExp(`${selector} \\{([^}]+)\\}`))?.[1];
   assert.ok(block, `missing ${palette ?? 'default'} ${mode} token block`);
+  /*
+   * The accent is now `var(--gala-accent-light, #fallback)` — the writer's own colour, with the
+   * palette's as the fallback. What this test checks is the palette, so it reads the fallback.
+   * A colour a writer picks is held to the same 4.5:1 by `lib/accent.js`, which moves its
+   * lightness until it passes; `test/accent.test.js` covers that.
+   */
   return Object.fromEntries(
-    [...block.matchAll(/--gala-color-([a-z]+):\s*(#[0-9a-f]+);/gi)]
+    [...block.matchAll(/--gala-color-([a-z]+):\s*(?:var\(--gala-accent-(?:light|dark),\s*)?(#[0-9a-f]+)/gi)]
       .map((match) => [match[1], match[2]])
   );
 }

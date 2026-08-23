@@ -18,7 +18,9 @@
   --gala-color-border: light-dark(#968e86, #6b645e);
   --gala-color-hairline: light-dark(#e8e3dd, #2a2724);
   --gala-color-border-strong: light-dark(#c9c2ba, #46413d);
-  --gala-color-accent: light-dark(#8a4b2a, #e8a87c);
+  --gala-color-accent: light-dark(
+    var(--gala-accent-light, #8a4b2a),
+    var(--gala-accent-dark, #e8a87c));
 
   /* Type. One scale, used everywhere, fluid between a phone and a desk. */
   --gala-font-body: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
@@ -48,7 +50,6 @@
   --gala-space-page: clamp(1.25rem, 5vw, 4.5rem);
   --gala-radius-control: 0.625rem;
   --gala-radius-surface: 1rem;
-  --gala-shadow-low: 0 1px 2px light-dark(rgb(26 24 23 / 6%), rgb(0 0 0 / 40%));
   --gala-shadow-high:
     0 1px 2px light-dark(rgb(26 24 23 / 5%), rgb(0 0 0 / 35%)),
     0 12px 28px -12px light-dark(rgb(26 24 23 / 18%), rgb(0 0 0 / 60%));
@@ -73,7 +74,7 @@
   --gala-color-border: #968e86;
   --gala-color-hairline: #e8e3dd;
   --gala-color-border-strong: #c9c2ba;
-  --gala-color-accent: #8a4b2a;
+  --gala-color-accent: var(--gala-accent-light, #8a4b2a);
 }
 :root[data-mode='dark'] {
   color-scheme: dark;
@@ -85,7 +86,7 @@
   --gala-color-border: #6b645e;
   --gala-color-hairline: #2a2724;
   --gala-color-border-strong: #46413d;
-  --gala-color-accent: #e8a87c;
+  --gala-color-accent: var(--gala-accent-dark, #e8a87c);
 }
 
 /* ---------------------------------------------------------------- palettes */
@@ -110,7 +111,7 @@
   --gala-color-border: #7d8d99;
   --gala-color-hairline: #dde7ee;
   --gala-color-border-strong: #bdccd7;
-  --gala-color-accent: #0f5f7a;
+  --gala-color-accent: var(--gala-accent-light, #0f5f7a);
 }
 :root[data-palette='ocean'][data-mode='dark'] {
   color-scheme: dark;
@@ -122,60 +123,148 @@
   --gala-color-border: #5f7d8c;
   --gala-color-hairline: #1d3644;
   --gala-color-border-strong: #33505f;
-  --gala-color-accent: #7fd0e8;
+  --gala-color-accent: var(--gala-accent-dark, #7fd0e8);
 }
 
-/* ---------------------------------------------------------------- typography
-   System stacks rather than a downloaded face: a publication must build and render with no call
-   to anyone, and a webfont is bytes on every reader's first paint. These are the good faces the
-   reader's machine already has. */
-:root[data-typography='editorial'] {
+
+/* Two more, because colour is the choice a writer actually wants to make — and the one that is
+   safe to offer, since a palette only swaps values every rule already reads and each is checked
+   for contrast in both modes. */
+:root[data-palette='forest'] {
+  --gala-color-background: light-dark(#fbfcfa, #101410);
+  --gala-color-surface: light-dark(#f0f4ee, #182018);
+  --gala-color-raised: light-dark(#ffffff, #1f271f);
+  --gala-color-text: light-dark(#18201a, #eef3ec);
+  --gala-color-muted: light-dark(#5b665d, #9aa89b);
+  --gala-color-border: light-dark(#849084, #5e685f);
+  --gala-color-hairline: light-dark(#e2e9df, #232b23);
+  --gala-color-border-strong: light-dark(#5b665d, #7d897e);
+  --gala-color-accent: light-dark(#2f6b3f, #8fd3a1);
+}
+:root[data-palette='forest'][data-mode='light'] {
+  color-scheme: light;
+  --gala-color-background: #fbfcfa;
+  --gala-color-surface: #f0f4ee;
+  --gala-color-raised: #ffffff;
+  --gala-color-text: #18201a;
+  --gala-color-muted: #5b665d;
+  --gala-color-border: #849084;
+  --gala-color-hairline: #e2e9df;
+  --gala-color-border-strong: #5b665d;
+  --gala-color-accent: var(--gala-accent-light, #2f6b3f);
+}
+:root[data-palette='forest'][data-mode='dark'] {
+  color-scheme: dark;
+  --gala-color-background: #101410;
+  --gala-color-surface: #182018;
+  --gala-color-raised: #1f271f;
+  --gala-color-text: #eef3ec;
+  --gala-color-muted: #9aa89b;
+  --gala-color-border: #5e685f;
+  --gala-color-hairline: #232b23;
+  --gala-color-border-strong: #7d897e;
+  --gala-color-accent: var(--gala-accent-dark, #8fd3a1);
+}
+:root[data-palette='plum'] {
+  --gala-color-background: light-dark(#fdfbfd, #141016);
+  --gala-color-surface: light-dark(#f5eff5, #1d1720);
+  --gala-color-raised: light-dark(#ffffff, #241d28);
+  --gala-color-text: light-dark(#1f1820, #f2ecf3);
+  --gala-color-muted: light-dark(#665c69, #a99dac);
+  --gala-color-border: light-dark(#948a95, #6b606d);
+  --gala-color-hairline: light-dark(#ebe2ec, #281f2b);
+  --gala-color-border-strong: light-dark(#665c69, #8b7f8d);
+  --gala-color-accent: light-dark(#7a3d76, #dda6d8);
+}
+:root[data-palette='plum'][data-mode='light'] {
+  color-scheme: light;
+  --gala-color-background: #fdfbfd;
+  --gala-color-surface: #f5eff5;
+  --gala-color-raised: #ffffff;
+  --gala-color-text: #1f1820;
+  --gala-color-muted: #665c69;
+  --gala-color-border: #948a95;
+  --gala-color-hairline: #ebe2ec;
+  --gala-color-border-strong: #665c69;
+  --gala-color-accent: var(--gala-accent-light, #7a3d76);
+}
+:root[data-palette='plum'][data-mode='dark'] {
+  color-scheme: dark;
+  --gala-color-background: #141016;
+  --gala-color-surface: #1d1720;
+  --gala-color-raised: #241d28;
+  --gala-color-text: #f2ecf3;
+  --gala-color-muted: #a99dac;
+  --gala-color-border: #6b606d;
+  --gala-color-hairline: #281f2b;
+  --gala-color-border-strong: #8b7f8d;
+  --gala-color-accent: var(--gala-accent-dark, #dda6d8);
+}
+
+/* ---------------------------------------------------------------- the looks
+ *
+ * Three, each designed whole.
+ *
+ * This replaced nine independent knobs — typeface, spacing, density, radius, motion, surfaces,
+ * palette — which a writer set one at a time, blind, and only saw combined after a deploy. Nine
+ * knobs is several hundred looks, and nobody had seen most of them: `mono` + `round` + `spacious`
+ * + `raised` produced monospace headings inside page-wide pills, and it was reachable in four
+ * clicks. A look is a set of decisions that agree with each other, so it is chosen as a set.
+ */
+
+/* Calm, serif, generous. For essays and long reading. */
+:root[data-theme='editorial'] {
   --gala-font-body: ui-serif, "Iowan Old Style", Charter, "Source Serif 4", Georgia, serif;
   --gala-font-display: var(--gala-font-body);
   --gala-weight-display: 600;
+  --gala-step: 1.1rem;
+  --gala-leading-body: 1.7;
+  --gala-radius-control: 0.5rem;
+  --gala-radius-surface: 0.75rem;
+  --gala-measure: 66ch;
+  --gala-surface-border: var(--gala-color-hairline);
+  --gala-surface-shadow: none;
 }
-:root[data-typography='humanist'] {
-  --gala-font-body: Optima, Candara, "Gill Sans", "Trebuchet MS", sans-serif;
+
+/* Crisp, sans, a little tighter. The default, and the safe one. */
+:root[data-theme='modern'] {
+  --gala-font-body: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   --gala-font-display: var(--gala-font-body);
-}
-:root[data-typography='mono'] {
-  --gala-font-display: var(--gala-font-mono);
-  --gala-weight-display: 560;
-  --gala-tracking-tight: -0.005em;
-}
-
-/* ---------------------------------------------------------------- density */
-:root[data-density='compact'], :root[data-spacing='compact'] {
-  --gala-step: 0.8rem;
-  --gala-leading-body: 1.5;
-}
-:root[data-density='spacious'], :root[data-spacing='spacious'] {
-  --gala-step: 1.25rem;
-  --gala-leading-body: 1.75;
+  --gala-weight-display: 640;
+  --gala-step: 1rem;
+  --gala-leading-body: 1.65;
+  --gala-radius-control: 0.625rem;
+  --gala-radius-surface: 1rem;
+  --gala-measure: 70ch;
+  --gala-surface-border: transparent;
+  --gala-surface-shadow: var(--gala-shadow-high);
 }
 
-/* ---------------------------------------------------------------- radius */
-:root[data-radius='sharp'] { --gala-radius-control: 0; --gala-radius-surface: 0; }
-:root[data-radius='round'] { --gala-radius-control: 999px; --gala-radius-surface: 1.5rem; }
+/* For writing about code: mono for the furniture, never for the prose or the headings. */
+:root[data-theme='technical'] {
+  --gala-font-body: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --gala-font-display: var(--gala-font-body);
+  --gala-weight-display: 660;
+  --gala-tracking-tight: -0.022em;
+  --gala-step: 0.9rem;
+  --gala-leading-body: 1.6;
+  --gala-radius-control: 0.375rem;
+  --gala-radius-surface: 0.5rem;
+  --gala-measure: 74ch;
+  --gala-surface-border: var(--gala-color-border-strong);
+  --gala-surface-shadow: none;
+}
+/* Mono is an accent here — labels, counts, metadata — not a face to set a page in. */
+:root[data-theme='technical'] .gala-eyebrow,
+:root[data-theme='technical'] .gala-engagement dt,
+:root[data-theme='technical'] .gala-comment__meta time {
+  font-family: var(--gala-font-mono);
+}
 
-/* ---------------------------------------------------------------- motion
-   `none` is honoured for everyone; a reader who asks the operating system for less motion is
-   honoured regardless of what the publication chose. */
-:root[data-motion='none'] { --gala-motion-fast: 0ms; --gala-motion-base: 0ms; }
-:root[data-motion='expressive'] { --gala-motion-base: 340ms; }
+/* Motion is not a choice a writer has to make; it is a property of a considered page. */
 @media (prefers-reduced-motion: reduce) {
   :root { --gala-motion-fast: 0ms; --gala-motion-base: 0ms; }
   *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
-}
-
-/* ---------------------------------------------------------------- surfaces
-   `quiet` sits on the page, `outlined` draws its edge, `raised` lifts. One variable decides,
-   so every card, dialog and chip agrees. */
-:root { --gala-surface-border: var(--gala-color-hairline); --gala-surface-shadow: var(--gala-shadow-low); }
-:root[data-component-style='outlined'] { --gala-surface-border: var(--gala-color-border-strong); }
-:root[data-component-style='raised'] {
-  --gala-surface-border: transparent;
-  --gala-surface-shadow: var(--gala-shadow-high);
 }
 
 :root[data-layout='portfolio'] { --gala-content-width: 82rem; }
@@ -300,11 +389,16 @@ blockquote {
 .gala-account-dialog iframe {
   display: block;
   inline-size: 100%;
-  min-block-size: 7rem;
+  /* Height is set from the frame's own report; this is only what it shows before that arrives. */
+  block-size: 7rem;
   border: 0;
+  /* The frame owns its layout and reports its size, so it never needs to scroll inside the box. */
+  overflow: hidden;
 }
 /* The close control belongs on the same line as the title, not floated above it. */
-.gala-dialog__close { float: inline-end; margin-inline-start: var(--gala-space-md); }
+.gala-dialog { display: grid; gap: var(--gala-space-sm); }
+.gala-dialog__close { justify-self: end; margin: 0; }
+.gala-dialog > h2 { margin-block: 0; }
 
 main,
 .gala-page-footer {
@@ -374,14 +468,11 @@ button:focus-visible {
   border-radius: var(--gala-radius-surface);
   box-shadow: var(--gala-surface-shadow);
 }
-[data-component-style='raised'] .gala-card { background: var(--gala-color-raised); }
 /* The one place the page moves of its own accord, and so the one place `motion` is legible:
    `subtle` is a short settle, `expressive` a longer one, `none` no movement at all. */
 .gala-card { transition: transform var(--gala-motion-base) var(--gala-ease),
                          box-shadow var(--gala-motion-base) var(--gala-ease); }
 .gala-card-index li:hover .gala-card { transform: translateY(-2px); box-shadow: var(--gala-shadow-high); }
-[data-motion='none'] .gala-card { transition: none; }
-[data-motion='none'] .gala-card-index li:hover .gala-card { transform: none; }
 .gala-stats-graph { min-block-size: var(--gala-widget-min-block-size); margin-inline: 0; }
 .gala-stats-graph svg { inline-size: 100%; block-size: 8rem; }
 .gala-stats-graph polyline { fill: none; stroke: var(--gala-color-accent); stroke-width: 2; }
@@ -398,8 +489,6 @@ button:focus-visible {
 .gala-share__fallback { inline-size: min(100%, 36rem); }
 .gala-engagement__placeholder { display: grid; min-block-size: var(--gala-widget-min-block-size); align-content: center; margin: 0; }
 .gala-engagement-profile > * { margin-block: 0 0.5rem; }
-.gala-comments { display: grid; gap: 1rem; padding-inline-start: 1.5rem; }
-.gala-comments li { padding: 1rem; background: var(--gala-color-surface); border-radius: var(--gala-radius-control); }
 .gala-engagement-actions { display: grid; gap: 1rem; margin-block-start: 1.5rem; }
 .gala-engagement-actions[hidden] { display: none; }
 /* Shown only when signing in interrupted something the reader had already decided to do, so it
@@ -582,7 +671,6 @@ button:focus-visible {
 }
 
 .gala-reaction-actions { display: flex; flex-wrap: wrap; gap: var(--gala-space-2xs); }
-.gala-comment-actions { display: flex; flex-wrap: wrap; gap: var(--gala-space-2xs); }
 .gala-engagement-actions { display: grid; gap: var(--gala-space-sm); justify-items: start; }
 .gala-engagement-actions > [data-follow-article] { inline-size: auto; }
 .gala-share { margin-block-start: var(--gala-space-lg); }

@@ -62,7 +62,12 @@ test('layout and palette configuration select real managed-theme variants', asyn
   const markup = await readFile(layout, 'utf8');
   const styles = await readFile(css, 'utf8');
   assert.match(markup, /data-layout="{{ site\.design\.layout }}"/);
-  assert.match(markup, /data-palette="{{ site\.design\.palette }}"/);
+  // Defaulted, so a publication written before a key existed still renders a real look rather
+  // than an empty attribute no rule answers to.
+  assert.match(markup, /data-palette="{{ site\.design\.palette \| default\('default'\) }}"/);
+  assert.match(markup, /data-theme="{{ site\.design\.theme \| default\('modern'\) }}"/);
+  assert.match(styles, /:root\[data-theme='editorial'\]/);
+  assert.match(styles, /:root\[data-theme='technical'\]/);
   assert.match(styles, /:root\[data-layout='portfolio'\]/);
   assert.match(styles, /:root\[data-palette='ocean'\]/);
   assert.match(styles, /\[data-layout='portfolio'\] \.gala-card-index/);

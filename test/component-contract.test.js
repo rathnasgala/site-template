@@ -32,7 +32,11 @@ test('shared header uses accessible icons and opens search and settings without 
   assert.match(behavior, /dialog\.showModal\(\)/);
   assert.match(behavior, /event\.origin !== sessionOrigin/);
   assert.match(behavior, /event\.source !== sessionFrame\.contentWindow/);
-  assert.match(source, /href="{{ '\/settings\/' \| url }}">Open settings page/);
+  // One settings surface. A modal *and* a page for the same two controls was two things to keep
+  // correct and two places for them to disagree.
+  assert.doesNotMatch(source, /Open settings page/);
+  // And one control per setting: the nav's own toggle, not a second copy inside the modal.
+  assert.equal((source.match(/data-theme-mode-toggle/g) ?? []).length, 1);
   assert.match(source, /href="{{ '\/search\/' \| url }}">Open search page/);
 });
 
@@ -67,7 +71,11 @@ test('layout and palette configuration select real managed-theme variants', asyn
 test('loading and graph surfaces reserve dimensions and transitions are progressive', async () => {
   const source = await readFile(css, 'utf8');
   assert.match(source, /--gala-widget-min-block-size:/);
-  assert.match(source, /\.gala-engagement \{ min-block-size: var\(--gala-widget-min-block-size\)/);
+  // Asserted against the rule, not against where the line breaks fall in it.
+  assert.match(
+    source.match(/\.gala-engagement \{[^}]+\}/)?.[0] ?? '',
+    /min-block-size: var\(--gala-widget-min-block-size\)/,
+  );
   assert.match(source, /\.gala-engagement__placeholder.*min-block-size: var\(--gala-widget-min-block-size\)/);
   assert.match(source, /\.gala-loading[^}]*min-block-size:/s);
   assert.match(source, /\.gala-stats-graph[^}]*min-block-size:/s);
@@ -96,4 +104,30 @@ test('share control uses links and a selectable readonly fallback', async () => 
   assert.doesNotMatch(source, /<script|<iframe/);
   const postLayout = await readFile(new URL('../src/_includes/layouts/post.njk', import.meta.url), 'utf8');
   assert.match(postLayout, /shareControl\(post\.canonicalUrl, shareTargets\)/);
+});
+
+/*
+ * The chrome a reader actually notices. Each of these was reported from a live site, which is a
+ * worse way to find them than a test.
+ */
+test('every page declares an icon, so no reader gets a 404 for one', async () => {
+  const layout = await readFile(new URL('../src/_includes/layouts/base.njk', import.meta.url), 'utf8');
+  assert.match(layout, /rel="icon"/);
+  assert.match(layout, /assets\/favicon\.svg/);
+});
+
+test('the header stays with the reader on a long post', async () => {
+  const css = await readFile(new URL('../src/assets/theme.css', import.meta.url), 'utf8');
+  const header = css.match(/\.gala-site-header \{[^}]+\}/)?.[0] ?? '';
+  assert.match(header, /position: sticky/);
+  assert.match(header, /inset-block-start: 0/);
+  // A transparent sticky bar lets the article scroll through it.
+  assert.match(header, /background:/);
+});
+
+test('the article visibly ends before the conversation begins', async () => {
+  const css = await readFile(new URL('../src/assets/theme.css', import.meta.url), 'utf8');
+  const engagement = css.match(/\.gala-engagement \{[^}]+\}/)?.[0] ?? '';
+  assert.match(engagement, /border-block-start/);
+  assert.match(engagement, /margin-block-start/);
 });

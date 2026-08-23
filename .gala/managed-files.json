@@ -2,11 +2,15 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "0.0.18",
+    "version": "0.0.19",
     "availableDesignThemes": [
       "editorial"
     ],
     "securityAdvisories": []
+  },
+  "requiredBudgets": {
+    "managedJavaScriptBytes": 65536,
+    "managedCssBytes": 32768
   },
   "files": {
     ".gala/publish.yml.template": "73080241d89bd09964b797a8bcc8e18471412e11bc873efad76305b60f497d08",
@@ -31,7 +35,7 @@
     "src/_data/languages.js": "1358748f7fa2f74406d3295a030827d6229a53e94da72cf712e719d7a356aeac",
     "src/_data/site.js": "d9c001f4cc12a34027dd92303530b11b5402d47613459bb997e22c4bcbea326d",
     "src/_includes/components/ui.njk": "23eb647d8658868449ec6bb809e965a85302124a97639f94d5d28af72df56e4c",
-    "src/_includes/layouts/base.njk": "6914da799eb31fea3fc230ab196252129ccca90f27ccb08bbcee81741a91ced4",
+    "src/_includes/layouts/base.njk": "e73be30738535902599e1c060c11afbd128c86332913114f643dc56dea99fcba",
     "src/_includes/layouts/post.njk": "1accd2832064ad19ee7bf18daf5fa1e60569f32c9b7a547934a6361f747d7eb7",
     "src/assets/embed-codepen.svg": "e9def697f38c466fb2b6652535c4c814e8cbbbefc6e052a69f335aeb27e8356b",
     "src/assets/embed-gist.svg": "fcd9bc2bf29a5c118492b853c0a01390b7539c38ddb985da3c2a6e2f246a39f7",
@@ -39,11 +43,12 @@
     "src/assets/embed-youtube.svg": "10d192f2b14b67664fea88c8cf246321d20190def51d59fad5762e552219b067",
     "src/assets/engagement-comments.js": "b20d9268c9d908b4453a42188eaca25349f25534fb04a9293c9e688a982cd8f8",
     "src/assets/engagement-transport.js": "4f9ca0cd669bf8abc25f2909104e3e4b231657ef97d36a17d06e53454d711786",
+    "src/assets/favicon.svg": "8615e3d96fe37ae9ed14afb1886e7c0e690eef5b10be66ca91cccfd085a74bb6",
     "src/assets/interactions.js": "dd4e343505e528d89596ca67db679b52c989e022f93399193e4377db01fc8a08",
     "src/assets/preferences.js": "789127bee013ed6a1bbf8cefd7b9109291c16220e7a6e09314e3c93c54731d1d",
     "src/assets/search.js": "df425f0239277792ad39f2138bc89cb66cc4ecda5ed59042d46abc2f05372088",
     "src/assets/theme-mode.js": "944b29db11a577961a60ddcfa52f07ef2411f3f3631bea85bd79be16428c08be",
-    "src/assets/theme.css": "2a2367f2c875121cc95bc789a0d5889960813e660ca7722b328b39b4ff5068a8",
+    "src/assets/theme.css": "cdd41ddb670fb8c823b3490efa2a887d11dd6a1931afa0264deee53283b684d3",
     "src/assets/vendor/hooks.js": "ae6ec58592683ca64fa4d65b20d40b103df62a673bcc4712515cf165950b07f3",
     "src/assets/vendor/htm.js": "e4dac9bc40a6f2ec590413d787ae30bbcfdfcde4f28971ee65d9578271b7aad4",
     "src/assets/vendor/preact.js": "712517dd2a42c3c22b5ab0264ad7e9a2b1e8be6cf97fa00dbedd98203617e616",
@@ -58,7 +63,6 @@
     "src/redirects.11ty.js": "3c163246a59f5364861db6a6f05ae88afc938a5379d86cf42776d8d49b0031f3",
     "src/search-index.11ty.js": "700dc2a2be0ef20de3a828a4612fcf7a082691eade29c6e1d75f09c24b6c6024",
     "src/search.njk": "63f2e8aeebb63c90da2e375eece639ce096cad1eff7f28628cafc46faf7ceee6",
-    "src/settings.njk": "9e6babf4d2774687558618c4fbd109ddfc0f479f52ec2e5d00c373c44ad16676",
     "src/sitemap.11ty.js": "4f233e94fb4a913ad5659116518432ed264984a7b622eba3558c77b4ec6435dc",
     "static/robots.txt": "16ceb5ee3e0dc13aa9adf31a3ebbe45a1d965b8c2b9f72eaf84e5911e140ed95"
   }

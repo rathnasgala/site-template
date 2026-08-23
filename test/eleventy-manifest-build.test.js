@@ -261,16 +261,22 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   assert.match(search, /data-gala-search/);
   assert.match(search, /data-index-url="\/blog\/search-index\.json"/);
   assert.match(search, /src="\/blog\/assets\/search\.js"/);
-  const settings = await readFile(path.join(root, '_site', 'settings', 'index.html'), 'utf8');
-  assert.match(settings, /Reader settings/);
-  assert.match(settings, /option value="en"/);
-  assert.match(settings, /option value="fr"/);
-  assert.match(settings, /page URL always controls the content/);
+  /*
+   * There is no settings page. The two reader settings live in the header's own dialog, and a
+   * page carrying a second copy of them was a second thing to keep correct.
+   */
+  const home = await readFile(path.join(root, '_site', 'index.html'), 'utf8');
+  assert.match(home, /id="gala-settings-dialog"/);
+  // Shipped, and linked, so no reader's browser asks for /favicon.ico and gets a 404.
+  assert.match(home, /rel="icon"[^>]*assets\/favicon\.svg/);
+  assert.ok(await bytes(path.join(root, '_site', 'assets', 'favicon.svg')) > 0);
+  assert.match(home, /option value="en"/);
+  assert.match(home, /option value="fr"/);
+  assert.doesNotMatch(home, /Open settings page/);
   for (const relative of [
     'index.html',
     path.join('en', 'validated', 'index.html'),
-    path.join('search', 'index.html'),
-    path.join('settings', 'index.html')
+    path.join('search', 'index.html')
   ]) {
     assert.ok(
       await bytes(path.join(root, '_site', relative)) <= PERFORMANCE_BUDGETS.ordinaryHtmlBytes,

@@ -235,13 +235,29 @@ blockquote {
   color: var(--gala-color-muted);
 }
 
+/*
+ * Stays with the reader. It used to scroll away, so on a long post the only way back to the site
+ * — or to sign in — was to scroll to the top. The negative inline margin lets the bar's background
+ * reach the edge of the viewport while its contents stay on the page's own measure.
+ */
 .gala-site-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--gala-space-md);
   max-inline-size: var(--gala-content-width);
   margin-inline: auto;
-  margin-block-end: 1.5rem;
+  margin-block-end: var(--gala-space-xl);
+  padding-block: var(--gala-space-xs);
+  background: color-mix(in srgb, var(--gala-color-background) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-block-end: 1px solid var(--gala-color-hairline);
+}
+@supports not (backdrop-filter: blur(8px)) {
+  .gala-site-header { background: var(--gala-color-background); }
 }
 
 .gala-site-header__actions { display: flex; gap: 0.5rem; }
@@ -279,8 +295,16 @@ blockquote {
   box-shadow: var(--gala-shadow-high);
 }
 .gala-dialog::backdrop { background: rgb(0 0 0 / 65%); }
-.gala-dialog__close { float: inline-end; }
-.gala-account-dialog iframe { inline-size: 100%; min-block-size: 22rem; border: 0; }
+/* Sized to what it holds. 22rem was a box for a name and one button, and it showed. */
+.gala-account-dialog { inline-size: min(26rem, calc(100% - 2rem)); }
+.gala-account-dialog iframe {
+  display: block;
+  inline-size: 100%;
+  min-block-size: 7rem;
+  border: 0;
+}
+/* The close control belongs on the same line as the title, not floated above it. */
+.gala-dialog__close { float: inline-end; margin-inline-start: var(--gala-space-md); }
 
 main,
 .gala-page-footer {
@@ -372,12 +396,7 @@ button:focus-visible {
 .gala-search-results h2 { margin-block-start: 0; }
 .gala-toc { padding: 1rem; background: var(--gala-color-surface); }
 .gala-share__fallback { inline-size: min(100%, 36rem); }
-.gala-engagement { min-block-size: var(--gala-widget-min-block-size); }
-.gala-engagement dl { display: flex; flex-wrap: wrap; gap: 1rem 2rem; }
-.gala-engagement dl > div { display: grid; gap: 0.25rem; }
-.gala-engagement dd { margin: 0; font-size: 1.25rem; font-weight: 700; }
 .gala-engagement__placeholder { display: grid; min-block-size: var(--gala-widget-min-block-size); align-content: center; margin: 0; }
-.gala-engagement-profile { margin-block: 1.5rem; padding: 1rem; background: var(--gala-color-surface); border-radius: var(--gala-radius-control); }
 .gala-engagement-profile > * { margin-block: 0 0.5rem; }
 .gala-comments { display: grid; gap: 1rem; padding-inline-start: 1.5rem; }
 .gala-comments li { padding: 1rem; background: var(--gala-color-surface); border-radius: var(--gala-radius-control); }
@@ -387,8 +406,6 @@ button:focus-visible {
    reassures rather than sells. Hidden for anyone who opened the account dialog deliberately. */
 .gala-account-dialog__invite { margin-block: 0 1rem; max-inline-size: 34rem; }
 .gala-account-dialog__invite[hidden] { display: none; }
-.gala-reaction-actions,
-.gala-comment-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .gala-engagement-actions form,
 [data-comment-editor] { display: grid; gap: 0.5rem; max-inline-size: 42rem; }
 .gala-engagement-actions label { display: grid; gap: 0.5rem; }
@@ -522,3 +539,50 @@ button:focus-visible {
   font-size: var(--gala-text-sm);
 }
 .gala-comments__more { margin-block-start: var(--gala-space-md); }
+
+/* ---------------------------------------------------------------- where the article ends
+   The writing and the conversation about it are different things, and the page has to say so.
+   A footnote used to run straight into the author card with nothing between them. */
+.gala-engagement {
+  /* Space is reserved before the counts arrive, so the page does not jump under the reader. */
+  min-block-size: var(--gala-widget-min-block-size);
+  max-inline-size: var(--gala-content-width);
+  margin-block-start: var(--gala-space-xl);
+  padding-block-start: var(--gala-space-lg);
+  border-block-start: 1px solid var(--gala-color-border);
+}
+.gala-engagement-profile {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gala-space-sm);
+  padding: 0;
+  background: none;
+}
+.gala-engagement-profile h2 { font-size: var(--gala-text-lg); margin: 0; }
+.gala-engagement-profile p { margin: 0; color: var(--gala-color-muted); font-size: var(--gala-text-sm); }
+
+/* Counts read as data, not as three stacked paragraphs. */
+.gala-engagement dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gala-space-lg);
+  margin-block: var(--gala-space-md);
+}
+.gala-engagement dl > div { display: flex; flex-direction: column-reverse; gap: 0.1rem; }
+.gala-engagement dt {
+  font-size: var(--gala-text-xs);
+  letter-spacing: var(--gala-tracking-wide);
+  text-transform: uppercase;
+  color: var(--gala-color-muted);
+}
+.gala-engagement dd {
+  margin: 0;
+  font-size: var(--gala-text-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.gala-reaction-actions { display: flex; flex-wrap: wrap; gap: var(--gala-space-2xs); }
+.gala-comment-actions { display: flex; flex-wrap: wrap; gap: var(--gala-space-2xs); }
+.gala-engagement-actions { display: grid; gap: var(--gala-space-sm); justify-items: start; }
+.gala-engagement-actions > [data-follow-article] { inline-size: auto; }
+.gala-share { margin-block-start: var(--gala-space-lg); }

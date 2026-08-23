@@ -32,6 +32,7 @@ const expectedRuntimeFiles = [
   'src/assets/interactions.js',
   'src/assets/engagement-comments.js',
   'src/assets/engagement-transport.js',
+  'src/assets/favicon.svg',
   'src/assets/embed-codepen.svg',
   'src/assets/embed-gist.svg',
   'src/assets/embed-x.svg',
@@ -53,7 +54,6 @@ const expectedRuntimeFiles = [
   'src/redirects.11ty.js',
   'src/search-index.11ty.js',
   'src/search.njk',
-  'src/settings.njk',
   'src/sitemap.11ty.js',
   'static/robots.txt'
 ].sort();
@@ -89,4 +89,39 @@ test('doctor never owns mutable author or platform data', async () => {
   ]) {
     assert.equal(manifest.files[mutable], undefined, mutable);
   }
+});
+
+/*
+ * What the runtime needs in order to build at all.
+ *
+ * A publication carries its own budgets in its own `site.config.yml`, and the self-updater cannot
+ * silently rewrite the writer's file — so an update that ships more bytes than the site allows
+ * fails its next build with "Managed JavaScript performance budget exceeded". That is exactly what
+ * happened when the reader runtime landed. Declaring the minimum here lets the updater raise the
+ * ceiling alongside the files, and asserting it against the real bytes stops the two drifting.
+ */
+test('the declared budget minimums cover what the theme actually ships', async () => {
+  const manifest = JSON.parse(await readFile(new URL('../.gala/managed-files.json', import.meta.url), 'utf8'));
+  const required = manifest.requiredBudgets;
+  assert.ok(required, 'the manifest must declare the budgets its files need');
+
+  const root = new URL('../src/assets/', import.meta.url);
+  const total = async (extension) => {
+    const { readdir, stat } = await import('node:fs/promises');
+    const walk = async (dir) => {
+      const entries = await readdir(dir, { withFileTypes: true });
+      const sizes = await Promise.all(entries.map(async (entry) => {
+        const child = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, dir);
+        if (entry.isDirectory()) return walk(child);
+        return entry.name.endsWith(extension) ? (await stat(child)).size : 0;
+      }));
+      return sizes.reduce((sum, size) => sum + size, 0);
+    };
+    return walk(root);
+  };
+
+  assert.ok(await total('.js') <= required.managedJavaScriptBytes,
+    'the theme ships more JavaScript than it declares a publication must allow');
+  assert.ok(await total('.css') <= required.managedCssBytes,
+    'the theme ships more CSS than it declares a publication must allow');
 });

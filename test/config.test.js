@@ -47,7 +47,10 @@ test('hosting provider is fixed to GitHub Pages in v1', () => {
 
 test('scaffolds author-owned uncompressed performance budgets', () => {
   assert.deepEqual(config.performance.budgets, {
-    managedJavaScriptBytes: 32768,
+    // Raised from 32768 when the conversation became an island: a publication now carries a small
+    // Preact runtime of its own rather than fetching one, because a Gala site has to keep working
+    // when Gala does not.
+    managedJavaScriptBytes: 65536,
     managedCssBytes: 16384,
     ordinaryHtmlBytes: 32768
   });

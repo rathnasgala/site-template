@@ -11,7 +11,7 @@ const execute = promisify(execFile);
 const templateRoot = fileURLToPath(new URL('..', import.meta.url));
 const eleventy = path.join(templateRoot, 'node_modules', '@11ty', 'eleventy', 'cmd.cjs');
 const PERFORMANCE_BUDGETS = {
-  managedJavaScriptBytes: 32_768,
+  managedJavaScriptBytes: 65_536,
   managedCssBytes: 16_384,
   ordinaryHtmlBytes: 32_768
 };
@@ -277,8 +277,13 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
       `${relative} exceeds the ordinary HTML performance budget`
     );
   }
+  // The vendored reader runtime counts too: it is shipped with the site and downloaded by every
+  // reader, so leaving `vendor/` out would let the budget pass while the page got heavier.
   const managedJavaScriptBytes = await Promise.all([
-    'interactions.js', 'preferences.js', 'search.js', 'theme-mode.js'
+    'interactions.js', 'preferences.js', 'search.js', 'theme-mode.js',
+    'engagement-comments.js', 'engagement-transport.js',
+    'vendor/preact.js', 'vendor/hooks.js', 'vendor/signals.js',
+    'vendor/signals-core.js', 'vendor/htm.js'
   ].map((asset) => bytes(path.join(root, '_site', 'assets', asset))));
   assert.ok(
     managedJavaScriptBytes.reduce((total, size) => total + size, 0)

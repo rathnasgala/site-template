@@ -33,13 +33,12 @@
       ] %}<button type="button" data-reaction="{{ reaction.value }}" aria-pressed="false">{{ reaction.label }}</button>{% endfor %}
     </div>
     <button type="button" data-follow-article aria-pressed="false">Follow article</button>
-    <form data-comment-create>
-      <label>Comment<textarea name="body" maxlength="5000" required></textarea></label>
-      <p data-comment-reply-context hidden></p>
-      <button type="submit">Post comment</button>
-      <button type="button" data-cancel-reply hidden>Cancel reply</button>
-    </form>
   </section>
+  {# The conversation is an island: it owns its own state, because a thread five deep with a page
+     cursor, an open reply form and an edit in progress is state, and hand-written DOM kept losing
+     track of it. Nothing here is needed by a search engine — comments have always arrived from the
+     API after load — so rendering them on the client costs nothing the article cares about. #}
+  <div data-gala-comments></div>
   <output data-engagement-status aria-live="polite"></output>
 </section>
 {% endmacro %}

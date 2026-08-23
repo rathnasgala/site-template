@@ -87,7 +87,9 @@ body {
 }
 .gala-icon-control:hover { background: var(--gala-color-surface); }
 .gala-icon-control:focus-visible { outline: 0.1875rem solid currentcolor; outline-offset: 0.1875rem; }
-.gala-icon-control svg { inline-size: 100%; block-size: 100%; fill: currentcolor; }
+/* Stroked, not filled: the icons are drawn on one 24px grid at a single weight, so they read as
+   a set rather than as six unrelated silhouettes. */
+.gala-icon-control svg { inline-size: 100%; block-size: 100%; fill: none; stroke: currentcolor; }
 
 .gala-dialog {
   inline-size: min(42rem, calc(100% - 2rem));

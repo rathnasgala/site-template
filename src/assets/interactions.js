@@ -70,61 +70,6 @@ document.addEventListener('click', async (event) => {
     return;
   }
 
-  const reply = event.target.closest('[data-reply-comment]');
-  if (reply) {
-    const region = reply.closest('[data-engagement-url]');
-    const form = region?.querySelector('[data-comment-create]');
-    if (!form) return;
-    form.dataset.parentCommentId = reply.dataset.replyComment;
-    const context = form.querySelector('[data-comment-reply-context]');
-    if (context) {
-      context.hidden = false;
-      context.textContent = `Replying to ${reply.dataset.replyAuthor || 'comment'}.`;
-    }
-    const cancel = form.querySelector('[data-cancel-reply]');
-    if (cancel) cancel.hidden = false;
-    form.querySelector('textarea')?.focus();
-    return;
-  }
-
-  const cancelReply = event.target.closest('[data-cancel-reply]');
-  if (cancelReply) {
-    clearReply(cancelReply.closest('[data-comment-create]'));
-    return;
-  }
-
-  const edit = event.target.closest('[data-edit-comment]');
-  if (edit) {
-    showCommentEditor(edit);
-    return;
-  }
-
-  const cancelEdit = event.target.closest('[data-cancel-comment-edit]');
-  if (cancelEdit) {
-    cancelEdit.closest('[data-comment-editor]')?.remove();
-    return;
-  }
-
-  const remove = event.target.closest('[data-delete-comment]');
-  if (remove) {
-    const region = remove.closest('[data-engagement-url]');
-    if (!region) return;
-    await mutateEngagement(region, 'comment.delete', {
-      articleId: region.dataset.articleId,
-      commentId: remove.dataset.deleteComment
-    });
-    return;
-  }
-
-  const moreComments = event.target.closest('[data-comments-cursor]');
-  if (moreComments) {
-    const region = moreComments.closest('[data-engagement-url]');
-    if (!region) return;
-    moreComments.disabled = true;
-    await refreshEngagement(region, moreComments.dataset.commentsCursor, true);
-    return;
-  }
-
   const share = event.target.closest('[data-copy-url]');
   if (share) {
     const value = share.dataset.copyUrl;
@@ -187,57 +132,6 @@ function engagementCounts(data) {
   ];
 }
 
-function commentList(items, currentUser) {
-  const roots = document.createElement('ol');
-  roots.className = 'gala-comments';
-  const nodes = new Map();
-  for (const comment of items) {
-    const item = document.createElement('li');
-    item.dataset.commentId = comment.commentId;
-    const author = comment.author?.displayName ?? '[deleted]';
-    item.append(textElement('strong', author));
-    const body = textElement('p', comment.deleted ? '[deleted]' : comment.body);
-    body.dataset.commentBody = '';
-    item.append(body);
-    if (!comment.deleted && currentUser) {
-      const actions = document.createElement('div');
-      actions.className = 'gala-comment-actions';
-      const reply = textElement('button', 'Reply');
-      reply.type = 'button';
-      reply.dataset.replyComment = comment.commentId;
-      reply.dataset.replyAuthor = author;
-      actions.append(reply);
-      if (comment.author?.userId === currentUser.id) {
-        const edit = textElement('button', 'Edit');
-        edit.type = 'button';
-        edit.dataset.editComment = comment.commentId;
-        const remove = textElement('button', 'Delete');
-        remove.type = 'button';
-        remove.dataset.deleteComment = comment.commentId;
-        actions.append(edit, remove);
-      }
-      item.append(actions);
-    }
-    nodes.set(comment.commentId, item);
-  }
-  for (const comment of items) {
-    const item = nodes.get(comment.commentId);
-    const parent = comment.parentCommentId ? nodes.get(comment.parentCommentId) : null;
-    if (!parent) {
-      roots.append(item);
-      continue;
-    }
-    let replies = parent.querySelector(':scope > ol');
-    if (!replies) {
-      replies = document.createElement('ol');
-      replies.className = 'gala-comment-replies';
-      parent.append(replies);
-    }
-    replies.append(item);
-  }
-  return roots;
-}
-
 function renderEngagement(region, payload, appendComments = false) {
   const data = payload?.data;
   if (!data || typeof data !== 'object') throw new TypeError('Engagement data is invalid');
@@ -267,60 +161,19 @@ function renderEngagement(region, payload, appendComments = false) {
     live.append(summary);
   }
 
-  if (Array.isArray(data.comments?.items) && data.comments.items.length > 0) {
-    live.append(commentList(data.comments.items, sessionUser));
-  }
-  live.querySelector('[data-comments-cursor]')?.remove();
-  if (data.comments?.nextCursor) {
-    const more = textElement('button', 'Load more comments');
-    more.type = 'button';
-    more.dataset.commentsCursor = data.comments.nextCursor;
-    live.append(more);
-  }
   region.querySelector('[data-engagement-snapshot]')?.remove();
   region.querySelector('.gala-engagement__placeholder')?.remove();
 }
 
-function clearReply(form) {
-  if (!form) return;
-  delete form.dataset.parentCommentId;
-  const context = form.querySelector('[data-comment-reply-context]');
-  if (context) {
-    context.hidden = true;
-    context.textContent = '';
-  }
-  const cancel = form.querySelector('[data-cancel-reply]');
-  if (cancel) cancel.hidden = true;
-}
-
-function showCommentEditor(control) {
-  const item = control.closest('[data-comment-id]');
-  if (!item || item.querySelector('[data-comment-editor]')) return;
-  const form = document.createElement('form');
-  form.dataset.commentEditor = control.dataset.editComment;
-  const textarea = document.createElement('textarea');
-  textarea.name = 'body';
-  textarea.maxLength = 5000;
-  textarea.required = true;
-  textarea.value = item.querySelector('[data-comment-body]')?.textContent ?? '';
-  const save = textElement('button', 'Save');
-  save.type = 'submit';
-  const cancel = textElement('button', 'Cancel');
-  cancel.type = 'button';
-  cancel.dataset.cancelCommentEdit = '';
-  form.append(textarea, save, cancel);
-  item.append(form);
-  textarea.focus();
-}
-
-async function refreshEngagement(region, commentsCursor = '', appendComments = false) {
+async function refreshEngagement(region, commentsCursor = '', appendComments = false, fresh = false) {
   const status = region.querySelector('[data-engagement-status]');
   try {
     const requestUrl = new URL(region.dataset.engagementUrl);
     if (commentsCursor) requestUrl.searchParams.set('commentsCursor', commentsCursor);
     const response = await fetch(requestUrl, {
       headers: { Accept: 'application/json' },
-      credentials: 'omit'
+      credentials: 'omit',
+      cache: fresh ? 'no-store' : 'default'
     });
     if (!response.ok) throw new Error(`Engagement returned HTTP ${response.status}`);
     const payload = await response.json();
@@ -358,52 +211,14 @@ function recordView(region) {
   }).catch(() => {});
 }
 
-// Asked at the moment of intent: the reader reaches for the comment box, and only then are they
-// asked who they are — never as a wall in front of something they have not decided to do.
-document.addEventListener('focusin', (event) => {
+/*
+ * The comments island asks for a sign-in when the reader reaches for something that needs one.
+ * Opening the window and replaying the interrupted intent stays here, because that is a property
+ * of the page, not of any one island.
+ */
+document.addEventListener('gala-request-sign-in', (event) => {
   if (sessionUser || pendingIntent) return;
-  const field = event.target.closest('[data-comment-create] textarea, [data-comment-editor] textarea');
-  if (!field) return;
-  const region = field.closest('[data-engagement-url]');
-  const form = field.closest('[data-comment-create], [data-comment-editor]');
-  if (!region || !form) return;
-  requestSession({ kind: 'comment', region,
-    selector: `${form.matches('[data-comment-create]') ? '[data-comment-create]' : '[data-comment-editor]'} textarea`,
-    field });
-});
-
-document.addEventListener('submit', async (event) => {
-  const create = event.target.closest('[data-comment-create]');
-  const editor = event.target.closest('[data-comment-editor]');
-  if (!create && !editor) return;
-  event.preventDefault();
-  const form = create ?? editor;
-  const region = form.closest('[data-engagement-url]');
-  const body = form.elements.body?.value;
-  if (!region || typeof body !== 'string' || body.trim() === '') return;
-  if (!sessionUser) {
-    return requestSession({ kind: 'comment', region,
-      selector: `${create ? '[data-comment-create]' : '[data-comment-editor]'} textarea`,
-      field: form.querySelector('textarea') });
-  }
-  if (create) {
-    const saved = await mutateEngagement(region, 'comment.create', {
-      articleId: region.dataset.articleId,
-      parentCommentId: create.dataset.parentCommentId || null,
-      body
-    });
-    if (!saved) return;
-    create.reset();
-    clearReply(create);
-  } else {
-    const saved = await mutateEngagement(region, 'comment.edit', {
-      articleId: region.dataset.articleId,
-      commentId: editor.dataset.commentEditor,
-      body
-    });
-    if (!saved) return;
-    editor.remove();
-  }
+  requestSession({ kind: event.detail?.kind ?? 'comment' });
 });
 
 let sessionUser = null;
@@ -556,7 +371,8 @@ async function mutateEngagement(region, operation, payload) {
     if (status) status.textContent = 'Saving…';
     await sendEngagementWrite(operation, payload);
     if (status) status.textContent = 'Saved.';
-    await refreshEngagement(region);
+    // The reader's own write must be visible to them at once, so this one bypasses the cache.
+    await refreshEngagement(region, '', false, true);
     return true;
   } catch (error) {
     if (status) status.textContent = engagementErrorMessage(error.message);

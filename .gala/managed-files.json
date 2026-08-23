@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "0.0.15",
+    "version": "0.0.16",
     "availableDesignThemes": [
       "editorial"
     ],
@@ -37,7 +37,7 @@
     "src/assets/embed-gist.svg": "fcd9bc2bf29a5c118492b853c0a01390b7539c38ddb985da3c2a6e2f246a39f7",
     "src/assets/embed-x.svg": "0ae74edc6790ec7e933067fe5392bce756e93fa7ad71caacf1c1ca99fa4ec9b6",
     "src/assets/embed-youtube.svg": "10d192f2b14b67664fea88c8cf246321d20190def51d59fad5762e552219b067",
-    "src/assets/interactions.js": "fafa38854663f840fb4eb206d3ca06a836abf36bedb035a4e8ac211805709f09",
+    "src/assets/interactions.js": "caaf22c9e64bc1be8b92d9facbaa52f2c1c9de2685c25fe470557fd7fe2a52e2",
     "src/assets/preferences.js": "789127bee013ed6a1bbf8cefd7b9109291c16220e7a6e09314e3c93c54731d1d",
     "src/assets/search.js": "df425f0239277792ad39f2138bc89cb66cc4ecda5ed59042d46abc2f05372088",
     "src/assets/theme-mode.js": "3797c84dbaa090b5b21427a31928b5dd97f13d04d99833f5e1e74c6b50e01dcc",

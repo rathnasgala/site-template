@@ -476,6 +476,23 @@ window.addEventListener('focus', () => {
   if (sessionUser && pendingIntent) resumeIntent();
 });
 
+/*
+ * The sign-in window reports success to this page rather than to the account frame.
+ *
+ * It cannot reach the frame directly: a frame embedded in a publication has its storage — and its
+ * BroadcastChannel — partitioned away from a window running at the top level on the API's origin,
+ * so the session it wrote is invisible there. The signal carries no token; it only says a sign-in
+ * happened, and this asks the frame to look again. Without it the frame never learns the reader
+ * signed in, and every click asks them to sign in once more.
+ */
+window.addEventListener('message', (event) => {
+  const frame = document.querySelector('[data-gala-session-frame]');
+  if (!frame || event.data?.type !== 'gala-session-established') return;
+  const apiOrigin = new URL(frame.src).origin;
+  if (event.origin !== apiOrigin) return;
+  frame.contentWindow?.postMessage({ type: 'gala-session-recheck' }, apiOrigin);
+});
+
 document.querySelectorAll('[data-engagement-url]').forEach((region) => {
   refreshEngagement(region);
   recordView(region);

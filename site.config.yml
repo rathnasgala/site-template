@@ -4,7 +4,7 @@ schemaVersion: 1
 framework:
   themePackage:
     name: "@rathnasgala/theme"
-    version: 0.0.20
+    version: 2.0.1
 site:
   id: unavailable
   ownerId: unavailable
@@ -21,14 +21,6 @@ hosting:
   canonicalPolicy: self
 design:
   theme: editorial
-  layout: article-first
-  palette: default
-  typography: system
-  spacing: comfortable
-  radius: soft
-  density: comfortable
-  motion: subtle
-  componentStyle: quiet
   colorMode: system
 sharing:
   targets: []

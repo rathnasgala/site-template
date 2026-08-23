@@ -1,264 +1,145 @@
-/**
- * The conversation under an article.
- *
- * Built as an island rather than by hand-writing DOM, because the state here is real: a thread
- * five deep, a page of roots with more behind a cursor, a reply form belonging to one comment, an
- * edit in progress, and a reader who may sign in halfway through. The imperative version rebuilt
- * the whole region from a fresh fetch after every write, which is how a posted comment could take
- * a browser cache's word for it and not appear at all — and a comment that is not rendered has no
- * Reply button, so the thread died with it.
- *
- * The article itself is never touched. Eleventy renders the post and everything search engines
- * read; this mounts only into the comments container, which was always filled from the API and so
- * has nothing to lose by being rendered here.
- */
-import { h, render } from './vendor/preact.js';
-import { useCallback, useEffect, useMemo, useState } from './vendor/hooks.js';
-import htm from './vendor/htm.js';
-// Importing the signals integration is what lets a component re-render when it reads `.value`.
-import './vendor/signals.js';
-import {
-  engagementErrorMessage, requestSignIn, sendEngagementWrite, sessionUser,
-} from './engagement-transport.js';
+import { engagementErrorMessage, requestSignIn, sendEngagementWrite, sessionUser } from './engagement-transport.js';
 
-const html = htm.bind(h);
-
-/** The server's own limit. A reply deeper than this is refused, so it is not offered. */
 const MAXIMUM_DEPTH = 5;
-
-const isoTime = (value) => {
-  const at = Date.parse(value);
-  return Number.isFinite(at) ? new Date(at).toLocaleDateString() : '';
+const element = (name, className, text) => {
+  const node = document.createElement(name);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
 };
 
-/** Roots in order, each followed by its own descendants, from one flat API page. */
-function toThreads(items) {
-  const byParent = new Map();
+function threads(items) {
+  const children = new Map();
   for (const item of items) {
-    const key = item.parentCommentId ?? '';
-    if (!byParent.has(key)) byParent.set(key, []);
-    byParent.get(key).push(item);
+    const parent = item.parentCommentId ?? '';
+    if (!children.has(parent)) children.set(parent, []);
+    children.get(parent).push(item);
   }
-  const build = (parentId, depth) => (byParent.get(parentId) ?? []).map((comment) => ({
-    ...comment,
-    depth,
-    replies: build(comment.commentId, depth + 1),
+  const build = (parent, depth) => (children.get(parent) ?? []).map((item) => ({
+    ...item, depth, replies: build(item.commentId, depth + 1),
   }));
   return build('', 0);
 }
 
-function Comment({ comment, reader, onReply, onEdit, onDelete, busy }) {
-  const [replying, setReplying] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState('');
-  const mine = !comment.deleted && reader && comment.author?.userId === reader.id;
-  const canReply = !comment.deleted && comment.depth < MAXIMUM_DEPTH;
+function commentsController(root, endpoint) {
+  const state = { items: [], cursor: null, total: 0, busy: false, status: '', loading: true };
+  const articleId = /\/v1\/articles\/([^/]+)\/engagement/.exec(endpoint)?.[1] ?? '';
 
-  const submitReply = async (event) => {
-    event.preventDefault();
-    if (!draft.trim()) return;
-    const posted = await onReply(comment.commentId, draft.trim());
-    if (posted) { setDraft(''); setReplying(false); }
-  };
-
-  const submitEdit = async (event) => {
-    event.preventDefault();
-    if (!draft.trim()) return;
-    const saved = await onEdit(comment.commentId, draft.trim());
-    if (saved) setEditing(false);
-  };
-
-  return html`
-    <li class="gala-comment" data-comment-id=${comment.commentId} data-depth=${comment.depth}>
-      <p class="gala-comment__meta">
-        <strong>${comment.author?.displayName ?? '[deleted]'}</strong>
-        ${comment.createdAt && html`<time datetime=${comment.createdAt}>${isoTime(comment.createdAt)}</time>`}
-        ${comment.editedAt && html`<span class="gala-comment__edited">edited</span>`}
-        ${comment.pending && html`<span class="gala-comment__pending">sending…</span>`}
-      </p>
-
-      ${editing
-        ? html`<form class="gala-comment__form" onSubmit=${submitEdit}>
-            <label class="gala-visually-hidden" for=${`edit-${comment.commentId}`}>Edit your comment</label>
-            <textarea id=${`edit-${comment.commentId}`} rows="3" value=${draft}
-              onInput=${(e) => setDraft(e.target.value)}></textarea>
-            <div class="gala-comment__controls">
-              <button type="submit" disabled=${busy}>Save</button>
-              <button type="button" onClick=${() => setEditing(false)}>Cancel</button>
-            </div>
-          </form>`
-        : html`<p class="gala-comment__body">${comment.deleted ? '[deleted]' : comment.body}</p>`}
-
-      ${!comment.deleted && html`
-        <div class="gala-comment-actions">
-          ${canReply && html`<button type="button" data-reply-comment=${comment.commentId}
-            onClick=${() => { setReplying((open) => !open); setDraft(''); }}>Reply</button>`}
-          ${mine && html`<button type="button" data-edit-comment=${comment.commentId}
-            onClick=${() => { setEditing(true); setDraft(comment.body ?? ''); }}>Edit</button>`}
-          ${mine && html`<button type="button" data-delete-comment=${comment.commentId}
-            onClick=${() => onDelete(comment.commentId)} disabled=${busy}>Delete</button>`}
-        </div>`}
-
-      ${replying && html`
-        <form class="gala-comment__form" onSubmit=${submitReply}>
-          <label class="gala-visually-hidden" for=${`reply-${comment.commentId}`}>
-            Reply to ${comment.author?.displayName ?? 'this comment'}
-          </label>
-          <textarea id=${`reply-${comment.commentId}`} rows="3" value=${draft} autofocus
-            placeholder="Write a reply" onInput=${(e) => setDraft(e.target.value)}></textarea>
-          <div class="gala-comment__controls">
-            <button type="submit" disabled=${busy || !draft.trim()}>Post reply</button>
-            <button type="button" onClick=${() => setReplying(false)}>Cancel</button>
-          </div>
-        </form>`}
-
-      ${comment.replies.length > 0 && html`
-        <ol class="gala-comment-replies">
-          ${comment.replies.map((reply) => html`
-            <${Comment} key=${reply.commentId} comment=${reply} reader=${reader} busy=${busy}
-              onReply=${onReply} onEdit=${onEdit} onDelete=${onDelete} />`)}
-        </ol>`}
-    </li>`;
-}
-
-function Comments({ endpoint }) {
-  // Reading `.value` during render subscribes this component to the signal, so a sign-in
-  // anywhere on the page re-renders the conversation without anything having to tell it.
-  const reader = sessionUser.value;
-  const [items, setItems] = useState([]);
-  const [cursor, setCursor] = useState(null);
-  const [total, setTotal] = useState(0);
-  const [status, setStatus] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [draft, setDraft] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  /* `fresh` skips the browser cache. The endpoint is `max-age=60, public`, which is right for a
-     cold visit and wrong straight after a write: the browser would answer from its own cache with
-     the state from before the reader wrote anything. */
-  const load = useCallback(async (nextCursor = '', { append = false, fresh = false } = {}) => {
+  async function load(nextCursor = '', { append = false, fresh = false } = {}) {
     const url = new URL(endpoint);
     if (nextCursor) url.searchParams.set('commentsCursor', nextCursor);
     const response = await fetch(url, {
-      headers: { Accept: 'application/json' },
-      credentials: 'omit',
-      cache: fresh ? 'no-store' : 'default',
+      headers: { Accept: 'application/json' }, credentials: 'omit', cache: fresh ? 'no-store' : 'default',
     });
     if (!response.ok) throw new Error(`Comments returned HTTP ${response.status}`);
-    const payload = await response.json();
-    const page = payload?.data?.comments;
-    if (!page) throw new TypeError('Comment page is invalid');
-    setItems((current) => (append ? [...current, ...page.items] : page.items));
-    setCursor(page.nextCursor ?? null);
-    if (Number.isSafeInteger(page.totalCount)) setTotal(page.totalCount);
-    return page;
-  }, [endpoint]);
+    const page = (await response.json())?.data?.comments;
+    if (!page || !Array.isArray(page.items)) throw new TypeError('Comment page is invalid');
+    state.items = append ? [...state.items, ...page.items] : page.items;
+    state.cursor = page.nextCursor ?? null;
+    if (Number.isSafeInteger(page.totalCount)) state.total = page.totalCount;
+  }
 
-  useEffect(() => {
-    let live = true;
-    load().catch(() => { if (live) setStatus('Comments are temporarily unavailable.'); })
-      .finally(() => { if (live) setLoading(false); });
-    return () => { live = false; };
-  }, [load]);
-
-  // Signing in changes what the reader may do, not what the article says, so only re-read when
-  // the reader actually changes.
-  useEffect(() => {
-    if (!reader) return undefined;
-    load('', { fresh: true }).catch(() => {});
-    return undefined;
-  }, [reader?.id]);
-
-  const write = useCallback(async (operation, payload, optimistic) => {
-    if (!reader) { requestSignIn({ kind: 'comment' }); return false; }
-    setBusy(true);
-    setStatus('');
-    if (optimistic) setItems((current) => [optimistic, ...current]);
+  async function write(operation, payload) {
+    if (!sessionUser.value) { requestSignIn({ kind: 'comment' }); return false; }
+    state.busy = true; state.status = ''; render();
     try {
       await sendEngagementWrite(operation, payload);
-      /* Re-read past the cache so what is on screen is what the server actually holds — the
-         optimistic row above is a promise to the reader, not a source of truth. */
       await load('', { fresh: true });
       return true;
     } catch (error) {
-      if (optimistic) {
-        setItems((current) => current.filter((item) => item.commentId !== optimistic.commentId));
-      }
-      setStatus(engagementErrorMessage(error.message));
+      state.status = engagementErrorMessage(error.message);
       return false;
-    } finally {
-      setBusy(false);
-    }
-  }, [reader?.id, load]);
+    } finally { state.busy = false; render(); }
+  }
 
-  const articleId = useMemo(() => {
-    const match = /\/v1\/articles\/([^/]+)\/engagement/.exec(endpoint);
-    return match ? match[1] : '';
-  }, [endpoint]);
-
-  const post = async (event) => {
-    event.preventDefault();
-    const body = draft.trim();
-    if (!body) return;
-    const posted = await write('comment.create', { articleId, body }, {
-      commentId: `pending-${crypto.randomUUID()}`,
-      parentCommentId: null,
-      body,
-      depth: 0,
-      createdAt: new Date().toISOString(),
-      author: { userId: reader?.id, displayName: reader?.displayName },
-      pending: true,
+  function form(label, initial, submit) {
+    const formNode = element('form', 'gala-comment__form');
+    const field = element('textarea');
+    field.rows = 3; field.value = initial; field.placeholder = label; field.setAttribute('aria-label', label);
+    const send = element('button', '', 'Post'); send.type = 'submit'; send.disabled = state.busy;
+    formNode.append(field, send);
+    formNode.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const body = field.value.trim();
+      if (body && await submit(body)) field.value = '';
     });
-    if (posted) setDraft('');
-  };
+    return formNode;
+  }
 
-  const reply = (parentCommentId, body) =>
-    write('comment.create', { articleId, parentCommentId, body });
-  const edit = (commentId, body) => write('comment.edit', { articleId, commentId, body });
-  const remove = (commentId) => write('comment.delete', { articleId, commentId });
+  function commentNode(comment) {
+    const item = element('li', 'gala-comment');
+    item.dataset.commentId = comment.commentId; item.dataset.depth = comment.depth;
+    const meta = element('p', 'gala-comment__meta');
+    meta.append(element('strong', '', comment.author?.displayName ?? '[deleted]'));
+    if (comment.createdAt) {
+      const time = element('time', '', new Date(comment.createdAt).toLocaleDateString());
+      time.dateTime = comment.createdAt; meta.append(time);
+    }
+    item.append(meta, element('p', 'gala-comment__body', comment.deleted ? '[deleted]' : comment.body));
+    if (!comment.deleted) {
+      const actions = element('div', 'gala-comment-actions');
+      if (comment.depth < MAXIMUM_DEPTH) {
+        const reply = element('button', '', 'Reply'); reply.type = 'button'; reply.dataset.replyComment = comment.commentId;
+        reply.addEventListener('click', () => {
+          const existing = item.querySelector(':scope > .gala-comment__form');
+          if (existing) { existing.remove(); return; }
+          actions.after(form(`Reply to ${comment.author?.displayName ?? 'this comment'}`, '',
+            (body) => write('comment.create', { articleId, parentCommentId: comment.commentId, body })));
+        }); actions.append(reply);
+      }
+      const mine = sessionUser.value && comment.author?.userId === sessionUser.value.id;
+      if (mine) {
+        const edit = element('button', '', 'Edit'); edit.type = 'button'; edit.dataset.editComment = comment.commentId;
+        edit.addEventListener('click', () => actions.after(form('Edit your comment', comment.body ?? '',
+          (body) => write('comment.edit', { articleId, commentId: comment.commentId, body }))));
+        const remove = element('button', '', 'Delete'); remove.type = 'button'; remove.dataset.deleteComment = comment.commentId;
+        remove.addEventListener('click', () => write('comment.delete', { articleId, commentId: comment.commentId }));
+        actions.append(edit, remove);
+      } else {
+        const report = element('button', '', 'Report'); report.type = 'button'; report.dataset.reportComment = comment.commentId;
+        report.addEventListener('click', () => write('comment.report', { articleId, commentId: comment.commentId, reason: 'OTHER' }));
+        actions.append(report);
+      }
+      item.append(actions);
+    }
+    if (comment.replies.length) {
+      const replies = element('ol', 'gala-comment-replies');
+      replies.append(...comment.replies.map(commentNode)); item.append(replies);
+    }
+    return item;
+  }
 
-  const threads = useMemo(() => toThreads(items), [items]);
+  function render() {
+    const section = element('section', 'gala-comments-island'); section.setAttribute('aria-label', 'Comments');
+    section.append(element('h2', 'gala-comments__heading', state.total === 1 ? '1 comment' : `${state.total} comments`));
+    if (sessionUser.value) section.append(form('Add a comment', '', (body) => write('comment.create', { articleId, body })));
+    else {
+      const prompt = element('p', 'gala-comments__prompt');
+      const signIn = element('button', '', 'Sign in to join the conversation'); signIn.type = 'button';
+      signIn.addEventListener('click', () => requestSignIn({ kind: 'comment' })); prompt.append(signIn); section.append(prompt);
+    }
+    if (state.status) { const status = element('p', 'gala-comments__status', state.status); status.role = 'status'; section.append(status); }
+    if (state.loading) section.append(element('p', 'gala-comments__status', 'Loading comments…'));
+    else if (!state.items.length) section.append(element('p', 'gala-comments__empty', 'No comments yet.'));
+    else { const list = element('ol', 'gala-comments'); list.append(...threads(state.items).map(commentNode)); section.append(list); }
+    if (state.cursor) {
+      const more = element('button', 'gala-comments__more', 'Show more comments'); more.type = 'button'; more.disabled = state.busy;
+      more.addEventListener('click', async () => {
+        state.busy = true; render();
+        try { await load(state.cursor, { append: true }); } catch { state.status = 'Could not load more comments.'; }
+        state.busy = false; render();
+      }); section.append(more);
+    }
+    root.replaceChildren(section);
+  }
 
-  return html`
-    <section class="gala-comments-island" aria-label="Comments">
-      <h2 class="gala-comments__heading">${total === 1 ? '1 comment' : `${total} comments`}</h2>
-
-      ${reader
-        ? html`<form class="gala-comment__form" onSubmit=${post}>
-            <label class="gala-visually-hidden" for="gala-new-comment">Add a comment</label>
-            <textarea id="gala-new-comment" rows="3" value=${draft} placeholder="Add a comment"
-              onInput=${(e) => setDraft(e.target.value)}></textarea>
-            <button type="submit" disabled=${busy || !draft.trim()}>Post comment</button>
-          </form>`
-        : html`<p class="gala-comments__prompt">
-            <button type="button" onClick=${() => requestSignIn({ kind: 'comment' })}>
-              Sign in to join the conversation
-            </button>
-          </p>`}
-
-      ${status && html`<p class="gala-comments__status" role="status">${status}</p>`}
-
-      ${loading
-        ? html`<p class="gala-comments__status" role="status">Loading comments…</p>`
-        : threads.length === 0
-          ? html`<p class="gala-comments__empty">No comments yet.</p>`
-          : html`<ol class="gala-comments">
-              ${threads.map((comment) => html`
-                <${Comment} key=${comment.commentId} comment=${comment} reader=${reader}
-                  busy=${busy} onReply=${reply} onEdit=${edit} onDelete=${remove} />`)}
-            </ol>`}
-
-      ${cursor && html`
-        <button type="button" class="gala-comments__more" disabled=${busy}
-          onClick=${() => { setBusy(true); load(cursor, { append: true })
-            .catch(() => setStatus('Could not load more comments.'))
-            .finally(() => setBusy(false)); }}>
-          Show more comments
-        </button>`}
-    </section>`;
+  window.addEventListener('gala-session-change', render);
+  render();
+  load().catch(() => { state.status = 'Comments are temporarily unavailable.'; })
+    .finally(() => { state.loading = false; render(); });
 }
 
-for (const mount of document.querySelectorAll('[data-gala-comments]')) {
-  const endpoint = mount.closest('[data-engagement-url]')?.dataset.engagementUrl;
-  if (endpoint) render(html`<${Comments} endpoint=${endpoint} />`, mount);
-}
+document.querySelectorAll('[data-gala-comments]').forEach((root) => {
+  const endpoint = root.closest('[data-engagement-url]')?.dataset.engagementUrl;
+  if (endpoint) commentsController(root, endpoint);
+});

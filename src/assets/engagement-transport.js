@@ -9,9 +9,7 @@
  * `sessionUser` is a signal rather than a variable because more than one island depends on it and
  * they must not each keep their own copy going stale in its own way.
  */
-import { signal } from './vendor/signals.js';
-
-export const sessionUser = signal(null);
+export const sessionUser = { value: null };
 
 const sessionFrame = document.querySelector('[data-gala-session-frame]');
 const frameOrigin = sessionFrame ? new URL(sessionFrame.src).origin : null;
@@ -39,7 +37,14 @@ export function sendEngagementWrite(operation, payload) {
   }
   const requestId = crypto.randomUUID();
   return new Promise((resolve, reject) => {
-    pending.set(requestId, { resolve, reject });
+    const timeout = setTimeout(() => {
+      pending.delete(requestId);
+      reject(new Error('REQUEST_TIMEOUT'));
+    }, 10_000);
+    pending.set(requestId, {
+      resolve: (value) => { clearTimeout(timeout); resolve(value); },
+      reject: (error) => { clearTimeout(timeout); reject(error); }
+    });
     sessionFrame.contentWindow.postMessage(
       { type: 'gala-engagement-write', requestId, operation, payload }, frameOrigin);
   });
@@ -69,5 +74,6 @@ if (sessionFrame) {
     if (event.data?.type !== 'gala-session') return;
     const user = event.data.user;
     sessionUser.value = user && typeof user.id === 'string' ? user : null;
+    window.dispatchEvent(new CustomEvent('gala-session-change'));
   });
 }

@@ -260,7 +260,8 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   const search = await readFile(path.join(root, '_site', 'search', 'index.html'), 'utf8');
   assert.match(search, /data-gala-search/);
   assert.match(search, /data-index-url="\/blog\/search-index\.json"/);
-  assert.match(search, /src="\/blog\/assets\/search\.js"/);
+  assert.match(search, /src="\/blog\/assets\/reader\.js"/);
+  assert.doesNotMatch(search, /assets\/(?:search|interactions|preferences|theme-mode|engagement-comments|engagement-transport)\.js/);
   /*
    * There is no settings page. The two reader settings live in the header's own dialog, and a
    * page carrying a second copy of them was a second thing to keep correct.
@@ -283,13 +284,9 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
       `${relative} exceeds the ordinary HTML performance budget`
     );
   }
-  // The vendored reader runtime counts too: it is shipped with the site and downloaded by every
-  // reader, so leaving `vendor/` out would let the budget pass while the page got heavier.
+  // Readers receive one dependency-free browser bundle.
   const managedJavaScriptBytes = await Promise.all([
-    'interactions.js', 'preferences.js', 'search.js', 'theme-mode.js',
-    'engagement-comments.js', 'engagement-transport.js',
-    'vendor/preact.js', 'vendor/hooks.js', 'vendor/signals.js',
-    'vendor/signals-core.js', 'vendor/htm.js'
+    'reader.js'
   ].map((asset) => bytes(path.join(root, '_site', 'assets', asset))));
   assert.ok(
     managedJavaScriptBytes.reduce((total, size) => total + size, 0)

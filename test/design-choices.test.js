@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-const css = await readFile(new URL('../src/assets/theme.css', import.meta.url), 'utf8');
+const css = await readFile(new URL('../src/styles/theme.css', import.meta.url), 'utf8');
 const layout = await readFile(new URL('../src/_includes/layouts/base.njk', import.meta.url), 'utf8');
 const config = await readFile(new URL('../lib/site-config.js', import.meta.url), 'utf8');
 

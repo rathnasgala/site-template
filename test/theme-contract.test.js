@@ -3,14 +3,16 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const base = new URL('../src/_includes/layouts/base.njk', import.meta.url);
-const css = new URL('../src/assets/theme.css', import.meta.url);
+const css = new URL('../src/styles/theme.css', import.meta.url);
 
 test('resolves stored color mode in the head before stylesheets', async () => {
   const source = await readFile(base, 'utf8');
-  const resolver = source.indexOf("localStorage.getItem('gala-color-mode')");
+  const config = await readFile(new URL('../eleventy.config.js', import.meta.url), 'utf8');
+  const resolver = source.indexOf('{{ themeBootstrap | safe }}');
   const stylesheet = source.indexOf('rel="stylesheet"');
   assert.ok(resolver > 0);
   assert.ok(resolver < stylesheet);
+  assert.match(config, /localStorage\.getItem\('gala-color-mode'\)/);
 });
 
 test('supports system mode without JavaScript and explicit light/dark modes', async () => {

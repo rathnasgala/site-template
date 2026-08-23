@@ -4,6 +4,9 @@ import { loadSiteConfiguration } from './lib/site-config.js';
 import { enforcePerformanceBudgets } from './lib/performance-budget.js';
 import { lstat, realpath } from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
+
+const themeBootstrap = "(function(){try{var m=localStorage.getItem('gala-color-mode');if(m==='light'||m==='dark'||m==='system')document.documentElement.dataset.mode=m}catch(e){}})();";
 
 async function verifiedMediaSource(postSource, mediaSource) {
   const metadata = await lstat(mediaSource);
@@ -25,9 +28,20 @@ export default async function (eleventyConfig) {
   const [manifest, site] = await Promise.all([readBuildManifest(), loadSiteConfiguration()]);
   const attributionTier = process.env.GALA_ATTRIBUTION_TIER === 'PAID' ? 'PAID' : 'FREE';
   eleventyConfig.addGlobalData('attributionTier', attributionTier);
+  eleventyConfig.addGlobalData('themeBootstrap', themeBootstrap);
+  eleventyConfig.addFilter('sha256Csp', (value) =>
+    createHash('sha256').update(String(value)).digest('base64'));
   eleventyConfig.setLibrary('md', markdownLibrary);
   eleventyConfig.addPassthroughCopy({ static: '/' });
-  eleventyConfig.addPassthroughCopy({ 'src/assets': 'assets' });
+  eleventyConfig.addPassthroughCopy({
+    'src/assets/theme.css': 'assets/theme.css',
+    'src/assets/reader.js': 'assets/reader.js',
+    'src/assets/favicon.svg': 'assets/favicon.svg',
+    'src/assets/embed-codepen.svg': 'assets/embed-codepen.svg',
+    'src/assets/embed-gist.svg': 'assets/embed-gist.svg',
+    'src/assets/embed-x.svg': 'assets/embed-x.svg',
+    'src/assets/embed-youtube.svg': 'assets/embed-youtube.svg'
+  });
   eleventyConfig.addPassthroughCopy('custom.css');
   for (const post of manifest.posts) {
     for (const copy of post.media ?? []) {

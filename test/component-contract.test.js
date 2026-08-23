@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const components = new URL('../src/_includes/components/ui.njk', import.meta.url);
-const css = new URL('../src/assets/theme.css', import.meta.url);
+const css = new URL('../src/styles/theme.css', import.meta.url);
 const layout = new URL('../src/_includes/layouts/base.njk', import.meta.url);
 const interactions = new URL('../src/assets/interactions.js', import.meta.url);
 
@@ -61,7 +61,7 @@ test('contact form delegates authenticated writes without collecting identity fi
 test('layout and palette configuration select real managed-theme variants', async () => {
   const markup = await readFile(layout, 'utf8');
   const styles = await readFile(css, 'utf8');
-  assert.match(markup, /data-layout="{{ site\.design\.layout }}"/);
+  assert.match(markup, /data-layout="{{ site\.design\.layout \| default\('article-first'\) }}"/);
   // Defaulted, so a publication written before a key existed still renders a real look rather
   // than an empty attribute no rule answers to.
   assert.match(markup, /data-palette="{{ site\.design\.palette \| default\('default'\) }}"/);
@@ -101,14 +101,19 @@ test('embed facades reserve final dimensions and activate only from an explicit 
   assert.match(pages, /console\.warn\(`\$\{post\.source}: warning: \$\{warning}`\)/);
 });
 
-test('share control uses links and a selectable readonly fallback', async () => {
+test('the single action rail exposes only the supported share controls and a fallback', async () => {
   const source = await readFile(components, 'utf8');
   assert.match(source, /data-copy-url/);
   assert.match(source, /readonly aria-label="Canonical URL"/);
   assert.match(source, /rel="noopener noreferrer"/);
+  assert.match(source, /data-native-share/);
+  assert.match(source, /x\.com\/intent\/post/);
+  assert.match(source, /wa\.me/);
+  assert.doesNotMatch(source, /facebook|instagram|linkedin/i);
   assert.doesNotMatch(source, /<script|<iframe/);
   const postLayout = await readFile(new URL('../src/_includes/layouts/post.njk', import.meta.url), 'utf8');
-  assert.match(postLayout, /shareControl\(post\.canonicalUrl, shareTargets\)/);
+  assert.match(postLayout, /engagementSummary\(post\.id, post\.canonicalUrl,/);
+  assert.doesNotMatch(postLayout, /shareControl/);
 });
 
 /*
@@ -122,7 +127,7 @@ test('every page declares an icon, so no reader gets a 404 for one', async () =>
 });
 
 test('the header stays with the reader on a long post', async () => {
-  const css = await readFile(new URL('../src/assets/theme.css', import.meta.url), 'utf8');
+  const css = await readFile(new URL('../src/styles/theme.css', import.meta.url), 'utf8');
   const header = css.match(/\.gala-site-header \{[^}]+\}/)?.[0] ?? '';
   assert.match(header, /position: sticky/);
   assert.match(header, /inset-block-start: 0/);
@@ -131,7 +136,7 @@ test('the header stays with the reader on a long post', async () => {
 });
 
 test('the article visibly ends before the conversation begins', async () => {
-  const css = await readFile(new URL('../src/assets/theme.css', import.meta.url), 'utf8');
+  const css = await readFile(new URL('../src/styles/theme.css', import.meta.url), 'utf8');
   const engagement = css.match(/\.gala-engagement \{[^}]+\}/)?.[0] ?? '';
   assert.match(engagement, /border-block-start/);
   assert.match(engagement, /margin-block-start/);

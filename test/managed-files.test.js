@@ -19,7 +19,10 @@ const expectedRuntimeFiles = [
   'lib/share-targets.js',
   'package-lock.json',
   'package.json',
+  'scripts/build-reader.js',
+  'scripts/lint.js',
   'src/404.njk',
+  'src/accent.11ty.js',
   'src/cname.11ty.js',
   'src/_data/buildManifest.js',
   'src/_data/engagementSnapshot.js',
@@ -29,6 +32,8 @@ const expectedRuntimeFiles = [
   'src/_includes/components/ui.njk',
   'src/_includes/layouts/base.njk',
   'src/_includes/layouts/post.njk',
+  'src/client/reader.js',
+  'src/assets/reader.js',
   'src/assets/interactions.js',
   'src/assets/engagement-comments.js',
   'src/assets/engagement-transport.js',
@@ -40,12 +45,8 @@ const expectedRuntimeFiles = [
   'src/assets/preferences.js',
   'src/assets/search.js',
   'src/assets/theme-mode.js',
-  'src/assets/vendor/htm.js',
-  'src/assets/vendor/hooks.js',
-  'src/assets/vendor/preact.js',
-  'src/assets/vendor/signals-core.js',
-  'src/assets/vendor/signals.js',
   'src/assets/theme.css',
+  'src/styles/theme.css',
   'src/contact.njk',
   'src/index.njk',
   'src/feed.11ty.js',
@@ -65,7 +66,7 @@ test('managed manifest covers exactly immutable framework runtime files', async 
   assert.equal(manifest.schemaVersion, 1);
   assert.equal(manifest.themePackage.name, '@rathnasgala/theme');
   assert.match(manifest.themePackage.version, /^\d+\.\d+\.\d+$/);
-  assert.deepEqual(manifest.themePackage.availableDesignThemes, ['editorial']);
+  assert.deepEqual(manifest.themePackage.availableDesignThemes, ['editorial', 'modern', 'technical']);
   assert.deepEqual(manifest.themePackage.securityAdvisories, []);
   assert.deepEqual(Object.keys(manifest.files).sort(), expectedRuntimeFiles);
 

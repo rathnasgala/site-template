@@ -13,33 +13,42 @@
 {% macro tableOfContents(items) %}<nav class="gala-toc" aria-label="Table of contents"><ol>{% for item in items %}<li><a href="#{{ item.id }}">{{ item.text }}</a></li>{% endfor %}</ol></nav>{% endmacro %}
 {% macro shareControl(canonicalUrl, targets=[]) %}<section class="gala-share" aria-label="Share this article"><button type="button" data-copy-url="{{ canonicalUrl | escape }}" aria-label="Copy canonical URL">Copy link</button><output class="gala-share__status" aria-live="polite"></output><input class="gala-share__fallback" value="{{ canonicalUrl | escape }}" readonly aria-label="Canonical URL">{% if targets.length %}<ul>{% for target in targets %}<li><a href="{{ target.url | escape }}" rel="noopener noreferrer" aria-label="Share on {{ target.label | escape }}">{{ target.label }}</a></li>{% endfor %}</ul>{% endif %}</section>{% endmacro %}
 {% macro languageSwitcher(links, currentLanguage) %}{% if links.length > 2 %}<label>Preferred language <select data-language-preference data-navigate-on-selection>{% for link in links %}{% if link.hreflang != "x-default" %}<option value="{{ link.hreflang | escape }}" data-url="{{ link.href | escape }}"{% if link.hreflang == currentLanguage %} selected{% endif %}>{{ link.hreflang }}</option>{% endif %}{% endfor %}</select></label>{% endif %}{% endmacro %}
-{% macro engagementSummary(articleId, engagement, apiBaseUrl) %}
-<section class="gala-engagement" aria-label="Engagement" data-article-id="{{ articleId | escape }}" data-engagement-url="{{ apiBaseUrl | escape }}/v1/articles/{{ articleId | escape }}/engagement">
+{% macro engagementSummary(articleId, canonicalUrl, engagement, apiBaseUrl) %}
+<section id="conversation" class="gala-engagement" aria-label="Article conversation" data-article-id="{{ articleId | escape }}" data-engagement-url="{{ apiBaseUrl | escape }}/v1/articles/{{ articleId | escape }}/engagement">
+  <aside class="gala-action-rail" aria-label="Reader actions">
+    <div class="gala-reaction-actions" role="group" aria-label="React to this article">
+      {% for reaction in [
+        { value: 'like', label: 'Like', icon: '♥' },
+        { value: 'insightful', label: 'Insightful', icon: '✦' },
+        { value: 'celebrate', label: 'Celebrate', icon: '★' },
+        { value: 'funny', label: 'Funny', icon: '☺' },
+        { value: 'mind-blown', label: 'Mind blown', icon: '◉' },
+        { value: 'thank-you', label: 'Thank you', icon: '✓' }
+      ] %}<button type="button" data-reaction="{{ reaction.value }}" aria-label="{{ reaction.label }}" title="{{ reaction.label }}" aria-pressed="false"><span aria-hidden="true">{{ reaction.icon }}</span></button>{% endfor %}
+    </div>
+    <button type="button" data-follow-article aria-label="Follow article" title="Follow article" aria-pressed="false"><span aria-hidden="true">＋</span><span class="gala-visually-hidden" data-follow-label>Follow article</span></button>
+    <div class="gala-share" aria-label="Share this article">
+      <button type="button" data-copy-url="{{ canonicalUrl | escape }}" aria-label="Copy link" title="Copy link">Copy</button>
+      <button type="button" data-native-share="{{ canonicalUrl | escape }}" aria-label="Share" title="Share">Share</button>
+      <a href="https://x.com/intent/post?url={{ canonicalUrl | urlencode }}" rel="noopener noreferrer" aria-label="Share on X" title="Share on X">X</a>
+      <a href="https://wa.me/?text={{ canonicalUrl | urlencode }}" rel="noopener noreferrer" aria-label="Share on WhatsApp" title="Share on WhatsApp">WA</a>
+      <output class="gala-share__status gala-visually-hidden" aria-live="polite"></output>
+      <input class="gala-share__fallback" value="{{ canonicalUrl | escape }}" readonly aria-label="Canonical URL">
+    </div>
+  </aside>
+  <div class="gala-conversation">
+  <header class="gala-conversation__header"><p class="gala-eyebrow">Discussion</p><h2>Continue the conversation</h2></header>
   {% if engagement.available %}<dl data-engagement-snapshot><div><dt>Reactions</dt><dd>{{ engagement.reactions }}</dd></div><div><dt>Comments</dt><dd>{{ engagement.comments }}</dd></div><div><dt>Views</dt><dd>{{ engagement.views }}</dd></div></dl>{% else %}<p class="gala-engagement__placeholder" role="status">Loading engagement data.</p>{% endif %}
   <div data-engagement-live></div>
   {# Readers see what they can do before they are asked who they are. Signing in is requested
      at the moment of intent, and the intent is replayed once they are back. #}
-  <section class="gala-engagement-actions" aria-label="Reader actions" data-engagement-actions>
-    <div class="gala-reaction-actions" role="group" aria-label="React to this article">
-      {# The six the platform actually stores (io.gala.api.engagement.ReactionType). Offering
-         any other name renders a button that can only ever fail on the way to the API. #}
-      {% for reaction in [
-        { value: 'like', label: 'Like' },
-        { value: 'insightful', label: 'Insightful' },
-        { value: 'celebrate', label: 'Celebrate' },
-        { value: 'funny', label: 'Funny' },
-        { value: 'mind-blown', label: 'Mind blown' },
-        { value: 'thank-you', label: 'Thank you' }
-      ] %}<button type="button" data-reaction="{{ reaction.value }}" aria-pressed="false">{{ reaction.label }}</button>{% endfor %}
-    </div>
-    <button type="button" data-follow-article aria-pressed="false">Follow article</button>
-  </section>
   {# The conversation is an island: it owns its own state, because a thread five deep with a page
      cursor, an open reply form and an edit in progress is state, and hand-written DOM kept losing
      track of it. Nothing here is needed by a search engine — comments have always arrived from the
      API after load — so rendering them on the client costs nothing the article cares about. #}
   <div data-gala-comments></div>
   <output data-engagement-status aria-live="polite"></output>
+  </div>
 </section>
 {% endmacro %}
 {% macro pageFooter(siteName, links=[]) %}<footer class="gala-page-footer"><p>&copy; {{ siteName }}</p>{% if links.length %}<nav aria-label="Footer"><ul>{% for link in links %}<li><a href="{{ link.url }}">{{ link.label }}</a></li>{% endfor %}</ul></nav>{% endif %}</footer>{% endmacro %}

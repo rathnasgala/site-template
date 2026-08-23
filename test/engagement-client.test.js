@@ -5,7 +5,7 @@ import test from 'node:test';
 
 const behavior = await readFile(new URL('../src/assets/interactions.js', import.meta.url), 'utf8');
 const components = await readFile(new URL('../src/_includes/components/ui.njk', import.meta.url), 'utf8');
-// The conversation moved out of the imperative file and into an island of its own.
+// The conversation is dependency-free DOM code in an island of its own.
 const island = await readFile(new URL('../src/assets/engagement-comments.js', import.meta.url), 'utf8');
 const transport = await readFile(new URL('../src/assets/engagement-transport.js', import.meta.url), 'utf8');
 
@@ -22,7 +22,7 @@ test('published article islands request the neutral public bundle without creden
 test('comment cursors append nested thread pages without navigating', () => {
   assert.match(island, /searchParams\.set\('commentsCursor', nextCursor\)/);
   assert.match(island, /Show more comments/);
-  assert.match(island, /append \? \[\.\.\.current, \.\.\.page\.items\]/);
+  assert.match(island, /append \? \[\.\.\.state\.items, \.\.\.page\.items\]/);
   assert.match(island, /item\.parentCommentId/);
   assert.match(island, /gala-comment-replies/);
   // The server refuses a reply below its own limit, so one is never offered.
@@ -34,8 +34,7 @@ test('untrusted API fields are never written as markup', () => {
   assert.match(behavior, /textContent = text/);
   assert.match(behavior, /data\.profile\.displayName/);
   assert.doesNotMatch(behavior, /innerHTML|insertAdjacentHTML|document\.write/);
-  // The island interpolates author names and bodies as children, which Preact escapes. What it
-  // must never do is hand the API's text to the DOM as markup.
+  // The island assigns author names and bodies through textContent only.
   assert.match(island, /comment\.author\?\.displayName/);
   assert.doesNotMatch(island, /innerHTML|insertAdjacentHTML|document\.write|dangerouslySetInnerHTML/);
 });
@@ -96,7 +95,7 @@ test('authenticated writes use only the typed platform-frame protocol', () => {
 
 test('reader controls are accessible and include all low-risk write classes', () => {
   assert.match(components, /data-gala-comments/);
-  assert.match(components, /data-follow-article aria-pressed="false"/);
+  assert.match(components, /data-follow-article[^>]+aria-pressed="false"/);
   // Exactly the six the platform stores (io.gala.api.engagement.ReactionType). The template
   // used to offer love/curious/support, which the API has never accepted: three of the six
   // buttons returned INVALID_ENGAGEMENT_WRITE on every click.
@@ -107,12 +106,13 @@ test('reader controls are accessible and include all low-risk write classes', ()
     assert.doesNotMatch(components, new RegExp(`value: '${unsupported}'`));
   }
   assert.match(components, /data-reaction="{{ reaction.value }}"/);
-  assert.match(island, /data-reply-comment/);
-  assert.match(island, /data-edit-comment/);
-  assert.match(island, /data-delete-comment/);
+  assert.match(island, /dataset\.replyComment/);
+  assert.match(island, /dataset\.editComment/);
+  assert.match(island, /dataset\.deleteComment/);
+  assert.match(island, /dataset\.reportComment/);
   // Every control the island renders is a real button with a label, and every field has one.
-  assert.match(island, /class="gala-visually-hidden" for=/);
-  assert.match(island, /type="button"/);
+  assert.match(island, /setAttribute\('aria-label', label\)/);
+  assert.match(island, /\.type = 'button'/);
 });
 
 /*
@@ -130,6 +130,6 @@ test('ordinary loads and cursor pages still use the cache', () => {
   // `fresh` is the fourth argument. The cursor page passes `true` as the third — that is
   // `appendComments` — so the two are distinguished by shape, not by counting `true`s.
   // Paging appends and stays cacheable; only a write asks for `fresh`.
-  assert.match(island, /load\(cursor, \{ append: true \}\)/);
-  assert.doesNotMatch(island, /load\(cursor, \{ append: true, fresh: true \}\)/);
+  assert.match(island, /load\(state\.cursor, \{ append: true \}\)/);
+  assert.doesNotMatch(island, /load\(state\.cursor, \{ append: true, fresh: true \}\)/);
 });

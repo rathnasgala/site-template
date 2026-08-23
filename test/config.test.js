@@ -24,8 +24,7 @@ test('shipped example post claims no article identity', async () => {
 
 test('design contract exposes every scaffold-level design dimension', () => {
   assert.deepEqual(Object.keys(config.design).sort(), [
-    'colorMode', 'componentStyle', 'density', 'layout', 'motion',
-    'palette', 'radius', 'spacing', 'theme', 'typography'
+    'colorMode', 'theme'
   ]);
 });
 
@@ -47,11 +46,9 @@ test('hosting provider is fixed to GitHub Pages in v1', () => {
 
 test('scaffolds author-owned uncompressed performance budgets', () => {
   assert.deepEqual(config.performance.budgets, {
-    // Raised from 32768 when the conversation became an island: a publication now carries a small
-    // Preact runtime of its own rather than fetching one, because a Gala site has to keep working
-    // when Gala does not.
+    // The single dependency-free reader bundle has ample room without letting regressions hide.
     managedJavaScriptBytes: 65536,
-    // Raised with the type scale, the palettes and the six new design knobs.
+    // Source CSS stays readable; the browser receives the minified artifact.
     managedCssBytes: 32768,
     ordinaryHtmlBytes: 32768
   });
@@ -86,9 +83,9 @@ performance:
     layout: 'portfolio', palette: 'ocean'
   });
   await writeDesign('magazine', 'ocean');
-  await assert.rejects(() => loadSiteConfiguration({ root }), /Unsupported design\.layout/);
+  await assert.rejects(() => loadSiteConfiguration({ root }), /Unsupported legacy design\.layout/);
   await writeDesign('article-first', 'sunset');
-  await assert.rejects(() => loadSiteConfiguration({ root }), /Unsupported design\.palette/);
+  await assert.rejects(() => loadSiteConfiguration({ root }), /Unsupported legacy design\.palette/);
 });
 
 test('loads an action-selected checkout-relative config and rejects traversal', async () => {

@@ -1,0 +1,811 @@
+/*
+ * A publication should read like a well-set page, not like a product.
+ *
+ * The chrome is quiet, the type carries the hierarchy, and depth comes from surface and space
+ * rather than from an outline around everything. Every value here is a token so that the ten
+ * `design:` choices in site.config.yml can move the whole page by moving a handful of variables,
+ * instead of each component inventing its own spacing and its own grey.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Neutrals carry a slight warmth. A pure grey reads as unconsidered; these were picked. */
+  --gala-color-background: light-dark(#fdfcfb, #131211);
+  --gala-color-surface: light-dark(#f6f4f1, #1c1a18);
+  --gala-color-raised: light-dark(#fffffe, #24211f);
+  --gala-color-text: light-dark(#1a1817, #f2efec);
+  --gala-color-muted: light-dark(#6b645e, #a8a099);
+  --gala-color-border: light-dark(#968e86, #6b645e);
+  --gala-color-hairline: light-dark(#e8e3dd, #2a2724);
+  --gala-color-border-strong: light-dark(#c9c2ba, #46413d);
+  --gala-color-accent: light-dark(
+    var(--gala-accent-light, #8a4b2a),
+    var(--gala-accent-dark, #e8a87c));
+
+  /* Type. One scale, used everywhere, fluid between a phone and a desk. */
+  --gala-font-body: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --gala-font-display: var(--gala-font-body);
+  --gala-font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+  --gala-text-xs: 0.78rem;
+  --gala-text-sm: 0.875rem;
+  --gala-text-base: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --gala-text-lg: clamp(1.15rem, 1.09rem + 0.3vw, 1.3rem);
+  --gala-text-xl: clamp(1.4rem, 1.28rem + 0.6vw, 1.75rem);
+  --gala-text-2xl: clamp(1.75rem, 1.5rem + 1.2vw, 2.4rem);
+  --gala-text-3xl: clamp(2.2rem, 1.7rem + 2.4vw, 3.4rem);
+  --gala-leading-tight: 1.15;
+  --gala-leading-body: 1.65;
+  --gala-tracking-tight: -0.018em;
+  --gala-tracking-wide: 0.08em;
+  --gala-weight-display: 640;
+
+  /* Space, radius, depth, motion. */
+  --gala-step: 1rem;
+  --gala-space-2xs: calc(var(--gala-step) * 0.25);
+  --gala-space-xs: calc(var(--gala-step) * 0.5);
+  --gala-space-sm: calc(var(--gala-step) * 0.75);
+  --gala-space-md: var(--gala-step);
+  --gala-space-lg: calc(var(--gala-step) * 1.75);
+  --gala-space-xl: calc(var(--gala-step) * 3);
+  --gala-space-page: clamp(1.25rem, 5vw, 4.5rem);
+  --gala-radius-control: 0.625rem;
+  --gala-radius-surface: 1rem;
+  --gala-shadow-high:
+    0 1px 2px light-dark(rgb(26 24 23 / 5%), rgb(0 0 0 / 35%)),
+    0 12px 28px -12px light-dark(rgb(26 24 23 / 18%), rgb(0 0 0 / 60%));
+  --gala-motion-fast: 120ms;
+  --gala-motion-base: 220ms;
+  --gala-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  --gala-content-width: 72rem;
+  --gala-measure: 68ch;
+  --gala-widget-min-block-size: 8rem;
+}
+
+/* An explicit choice must beat the operating system in both directions, so every colour is
+   restated rather than left to `light-dark()`. */
+:root[data-mode='light'] {
+  color-scheme: light;
+  --gala-color-background: #fdfcfb;
+  --gala-color-surface: #f6f4f1;
+  --gala-color-raised: #fffffe;
+  --gala-color-text: #1a1817;
+  --gala-color-muted: #6b645e;
+  --gala-color-border: #968e86;
+  --gala-color-hairline: #e8e3dd;
+  --gala-color-border-strong: #c9c2ba;
+  --gala-color-accent: var(--gala-accent-light, #8a4b2a);
+}
+:root[data-mode='dark'] {
+  color-scheme: dark;
+  --gala-color-background: #131211;
+  --gala-color-surface: #1c1a18;
+  --gala-color-raised: #24211f;
+  --gala-color-text: #f2efec;
+  --gala-color-muted: #a8a099;
+  --gala-color-border: #6b645e;
+  --gala-color-hairline: #2a2724;
+  --gala-color-border-strong: #46413d;
+  --gala-color-accent: var(--gala-accent-dark, #e8a87c);
+}
+
+/* ---------------------------------------------------------------- palettes */
+:root[data-palette='ocean'] {
+  --gala-color-background: light-dark(#f8fbfd, #0b1a24);
+  --gala-color-surface: light-dark(#eef4f9, #12252f);
+  --gala-color-raised: light-dark(#ffffff, #172d39);
+  --gala-color-text: light-dark(#12242f, #eaf3f8);
+  --gala-color-muted: light-dark(#5a6f7d, #98aebb);
+  --gala-color-border: light-dark(#7d8d99, #5f7d8c);
+  --gala-color-hairline: light-dark(#dde7ee, #1d3644);
+  --gala-color-border-strong: light-dark(#bdccd7, #33505f);
+  --gala-color-accent: light-dark(#0f5f7a, #7fd0e8);
+}
+:root[data-palette='ocean'][data-mode='light'] {
+  color-scheme: light;
+  --gala-color-background: #f8fbfd;
+  --gala-color-surface: #eef4f9;
+  --gala-color-raised: #ffffff;
+  --gala-color-text: #12242f;
+  --gala-color-muted: #5a6f7d;
+  --gala-color-border: #7d8d99;
+  --gala-color-hairline: #dde7ee;
+  --gala-color-border-strong: #bdccd7;
+  --gala-color-accent: var(--gala-accent-light, #0f5f7a);
+}
+:root[data-palette='ocean'][data-mode='dark'] {
+  color-scheme: dark;
+  --gala-color-background: #0b1a24;
+  --gala-color-surface: #12252f;
+  --gala-color-raised: #172d39;
+  --gala-color-text: #eaf3f8;
+  --gala-color-muted: #98aebb;
+  --gala-color-border: #5f7d8c;
+  --gala-color-hairline: #1d3644;
+  --gala-color-border-strong: #33505f;
+  --gala-color-accent: var(--gala-accent-dark, #7fd0e8);
+}
+
+
+/* Two more, because colour is the choice a writer actually wants to make — and the one that is
+   safe to offer, since a palette only swaps values every rule already reads and each is checked
+   for contrast in both modes. */
+:root[data-palette='forest'] {
+  --gala-color-background: light-dark(#fbfcfa, #101410);
+  --gala-color-surface: light-dark(#f0f4ee, #182018);
+  --gala-color-raised: light-dark(#ffffff, #1f271f);
+  --gala-color-text: light-dark(#18201a, #eef3ec);
+  --gala-color-muted: light-dark(#5b665d, #9aa89b);
+  --gala-color-border: light-dark(#849084, #5e685f);
+  --gala-color-hairline: light-dark(#e2e9df, #232b23);
+  --gala-color-border-strong: light-dark(#5b665d, #7d897e);
+  --gala-color-accent: light-dark(#2f6b3f, #8fd3a1);
+}
+:root[data-palette='forest'][data-mode='light'] {
+  color-scheme: light;
+  --gala-color-background: #fbfcfa;
+  --gala-color-surface: #f0f4ee;
+  --gala-color-raised: #ffffff;
+  --gala-color-text: #18201a;
+  --gala-color-muted: #5b665d;
+  --gala-color-border: #849084;
+  --gala-color-hairline: #e2e9df;
+  --gala-color-border-strong: #5b665d;
+  --gala-color-accent: var(--gala-accent-light, #2f6b3f);
+}
+:root[data-palette='forest'][data-mode='dark'] {
+  color-scheme: dark;
+  --gala-color-background: #101410;
+  --gala-color-surface: #182018;
+  --gala-color-raised: #1f271f;
+  --gala-color-text: #eef3ec;
+  --gala-color-muted: #9aa89b;
+  --gala-color-border: #5e685f;
+  --gala-color-hairline: #232b23;
+  --gala-color-border-strong: #7d897e;
+  --gala-color-accent: var(--gala-accent-dark, #8fd3a1);
+}
+:root[data-palette='plum'] {
+  --gala-color-background: light-dark(#fdfbfd, #141016);
+  --gala-color-surface: light-dark(#f5eff5, #1d1720);
+  --gala-color-raised: light-dark(#ffffff, #241d28);
+  --gala-color-text: light-dark(#1f1820, #f2ecf3);
+  --gala-color-muted: light-dark(#665c69, #a99dac);
+  --gala-color-border: light-dark(#948a95, #6b606d);
+  --gala-color-hairline: light-dark(#ebe2ec, #281f2b);
+  --gala-color-border-strong: light-dark(#665c69, #8b7f8d);
+  --gala-color-accent: light-dark(#7a3d76, #dda6d8);
+}
+:root[data-palette='plum'][data-mode='light'] {
+  color-scheme: light;
+  --gala-color-background: #fdfbfd;
+  --gala-color-surface: #f5eff5;
+  --gala-color-raised: #ffffff;
+  --gala-color-text: #1f1820;
+  --gala-color-muted: #665c69;
+  --gala-color-border: #948a95;
+  --gala-color-hairline: #ebe2ec;
+  --gala-color-border-strong: #665c69;
+  --gala-color-accent: var(--gala-accent-light, #7a3d76);
+}
+:root[data-palette='plum'][data-mode='dark'] {
+  color-scheme: dark;
+  --gala-color-background: #141016;
+  --gala-color-surface: #1d1720;
+  --gala-color-raised: #241d28;
+  --gala-color-text: #f2ecf3;
+  --gala-color-muted: #a99dac;
+  --gala-color-border: #6b606d;
+  --gala-color-hairline: #281f2b;
+  --gala-color-border-strong: #8b7f8d;
+  --gala-color-accent: var(--gala-accent-dark, #dda6d8);
+}
+
+/* ---------------------------------------------------------------- the looks
+ *
+ * Three, each designed whole.
+ *
+ * This replaced nine independent knobs — typeface, spacing, density, radius, motion, surfaces,
+ * palette — which a writer set one at a time, blind, and only saw combined after a deploy. Nine
+ * knobs is several hundred looks, and nobody had seen most of them: `mono` + `round` + `spacious`
+ * + `raised` produced monospace headings inside page-wide pills, and it was reachable in four
+ * clicks. A look is a set of decisions that agree with each other, so it is chosen as a set.
+ */
+
+/* Calm, serif, generous. For essays and long reading. */
+:root[data-theme='editorial'] {
+  --gala-font-body: ui-serif, "Iowan Old Style", Charter, "Source Serif 4", Georgia, serif;
+  --gala-font-display: var(--gala-font-body);
+  --gala-weight-display: 600;
+  --gala-step: 1.1rem;
+  --gala-leading-body: 1.7;
+  --gala-radius-control: 0.5rem;
+  --gala-radius-surface: 0.75rem;
+  --gala-measure: 66ch;
+  --gala-surface-border: var(--gala-color-hairline);
+  --gala-surface-shadow: none;
+}
+
+/* Crisp, sans, a little tighter. The default, and the safe one. */
+:root[data-theme='modern'] {
+  --gala-font-body: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --gala-font-display: var(--gala-font-body);
+  --gala-weight-display: 640;
+  --gala-step: 1rem;
+  --gala-leading-body: 1.65;
+  --gala-radius-control: 0.625rem;
+  --gala-radius-surface: 1rem;
+  --gala-measure: 70ch;
+  --gala-surface-border: transparent;
+  --gala-surface-shadow: var(--gala-shadow-high);
+}
+
+/* For writing about code: mono for the furniture, never for the prose or the headings. */
+:root[data-theme='technical'] {
+  --gala-font-body: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --gala-font-display: var(--gala-font-body);
+  --gala-weight-display: 660;
+  --gala-tracking-tight: -0.022em;
+  --gala-step: 0.9rem;
+  --gala-leading-body: 1.6;
+  --gala-radius-control: 0.375rem;
+  --gala-radius-surface: 0.5rem;
+  --gala-measure: 74ch;
+  --gala-surface-border: var(--gala-color-border-strong);
+  --gala-surface-shadow: none;
+}
+/* Mono is an accent here — labels, counts, metadata — not a face to set a page in. */
+:root[data-theme='technical'] .gala-eyebrow,
+:root[data-theme='technical'] .gala-engagement dt,
+:root[data-theme='technical'] .gala-comment__meta time {
+  font-family: var(--gala-font-mono);
+}
+
+/* Motion is not a choice a writer has to make; it is a property of a considered page. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --gala-motion-fast: 0ms; --gala-motion-base: 0ms; }
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
+
+:root[data-layout='portfolio'] { --gala-content-width: 82rem; }
+
+body {
+  margin: 0;
+  padding: var(--gala-space-page);
+  color: var(--gala-color-text);
+  background: var(--gala-color-background);
+  font-family: var(--gala-font-body);
+  font-size: var(--gala-text-base);
+  line-height: var(--gala-leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.gala-skip-link {
+  position: fixed;
+  inset-block-start: 1rem;
+  inset-inline-start: 1rem;
+  z-index: 100;
+  padding: .75rem 1rem;
+  color: white;
+  background: var(--gala-color-accent);
+  border-radius: 999px;
+  transform: translateY(-200%);
+}
+.gala-skip-link:focus { transform: translateY(0); }
+
+.gala-site-name {
+  color: var(--gala-color-text);
+  font-family: var(--gala-font-display);
+  font-size: var(--gala-text-lg);
+  font-weight: var(--gala-weight-display);
+  letter-spacing: var(--gala-tracking-tight);
+  text-decoration: none;
+}
+.gala-header-link { color: var(--gala-color-text); font-size: var(--gala-text-sm); text-decoration: none; }
+.gala-account-control {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  min-block-size: 2.75rem;
+  padding-inline: .9rem;
+  border-radius: 999px;
+}
+.gala-account-control svg { inline-size: 1rem; block-size: 1rem; }
+
+.gala-article { max-inline-size: 76rem; margin-inline: auto; }
+.gala-article-header { padding-block: clamp(3rem, 9vw, 8rem); }
+.gala-article-header h1 {
+  max-inline-size: 12ch;
+  font-size: clamp(3.25rem, 9vw, 7.5rem);
+  line-height: .92;
+  letter-spacing: -.055em;
+}
+.gala-byline { color: var(--gala-color-muted); font-size: var(--gala-text-sm); }
+.gala-markdown { max-inline-size: 42rem; margin-inline: auto; font-size: clamp(1.1rem, 1rem + .35vw, 1.3rem); }
+.gala-markdown :where(h2) { margin-block-start: clamp(3rem, 7vw, 5rem); font-size: clamp(2.2rem, 5vw, 3.8rem); }
+.gala-markdown :where(img, video) { max-inline-size: 100%; block-size: auto; }
+
+@media (max-width: 47.99rem) {
+  .gala-header-link { display: none; }
+  .gala-site-header__actions { gap: .25rem; }
+}
+
+/* Headings carry the hierarchy, so they get the display face, a tighter measure and tighter
+   tracking — large type set at body tracking is the single clearest sign of an unconsidered page. */
+:where(h1, h2, h3, h4) {
+  font-family: var(--gala-font-display);
+  font-weight: var(--gala-weight-display);
+  line-height: var(--gala-leading-tight);
+  letter-spacing: var(--gala-tracking-tight);
+  text-wrap: balance;
+  margin-block: 0 var(--gala-space-sm);
+}
+:where(h1) { font-size: var(--gala-text-3xl); }
+:where(h2) { font-size: var(--gala-text-2xl); }
+:where(h3) { font-size: var(--gala-text-xl); }
+:where(h4) { font-size: var(--gala-text-lg); }
+:where(p, ul, ol, blockquote) { margin-block: 0 var(--gala-space-md); }
+:where(p) { text-wrap: pretty; }
+
+blockquote {
+  margin-inline: 0;
+  padding-inline-start: var(--gala-space-md);
+  border-inline-start: 2px solid var(--gala-color-accent);
+  color: var(--gala-color-muted);
+}
+
+:where(code, kbd, samp) { font-family: var(--gala-font-mono); font-size: 0.9em; }
+:where(pre) {
+  padding: var(--gala-space-md);
+  overflow-x: auto;
+  background: var(--gala-color-surface);
+  border-radius: var(--gala-radius-control);
+}
+:where(hr) { border: 0; border-block-start: 1px solid var(--gala-color-hairline); margin-block: var(--gala-space-xl); }
+:where(table) { border-collapse: collapse; inline-size: 100%; }
+:where(th, td) { padding: var(--gala-space-xs) var(--gala-space-sm); border-block-end: 1px solid var(--gala-color-hairline); text-align: start; }
+
+/* An uppercase label needs air between the letters or it sets as a solid block. */
+.gala-eyebrow, .gala-comment__meta time, .gala-comment__edited {
+  font-size: var(--gala-text-xs);
+  letter-spacing: var(--gala-tracking-wide);
+  text-transform: uppercase;
+  color: var(--gala-color-muted);
+}
+
+/*
+ * Stays with the reader. It used to scroll away, so on a long post the only way back to the site
+ * — or to sign in — was to scroll to the top. The negative inline margin lets the bar's background
+ * reach the edge of the viewport while its contents stay on the page's own measure.
+ */
+.gala-site-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gala-space-md);
+  max-inline-size: var(--gala-content-width);
+  margin-inline: auto;
+  margin-block-end: var(--gala-space-xl);
+  padding-block: var(--gala-space-xs);
+  background: color-mix(in srgb, var(--gala-color-background) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-block-end: 1px solid var(--gala-color-hairline);
+}
+@supports not (backdrop-filter: blur(8px)) {
+  .gala-site-header { background: var(--gala-color-background); }
+}
+
+.gala-site-header__actions { display: flex; gap: 0.5rem; }
+.gala-icon-control {
+  display: inline-grid;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  box-sizing: border-box;
+  padding: 0.6rem;
+  place-items: center;
+  color: inherit;
+  border: 0.125rem solid transparent;
+  border-radius: 50%;
+}
+.gala-icon-control {
+  transition: background var(--gala-motion-fast) var(--gala-ease),
+              color var(--gala-motion-fast) var(--gala-ease);
+  color: var(--gala-color-muted);
+}
+.gala-icon-control:hover { background: var(--gala-color-surface); color: var(--gala-color-text); }
+.gala-icon-control:focus-visible { outline: 0.1875rem solid currentcolor; outline-offset: 0.1875rem; }
+/* Stroked, not filled: the icons are drawn on one 24px grid at a single weight, so they read as
+   a set rather than as six unrelated silhouettes. */
+.gala-icon-control svg { inline-size: 100%; block-size: 100%; fill: none; stroke: currentcolor; }
+
+.gala-dialog {
+  inline-size: min(42rem, calc(100% - 2rem));
+  max-block-size: calc(100% - 2rem);
+  box-sizing: border-box;
+  padding: 1.5rem;
+  color: var(--gala-color-text);
+  background: var(--gala-color-background);
+  border: 1px solid var(--gala-surface-border);
+  border-radius: var(--gala-radius-surface);
+  box-shadow: var(--gala-shadow-high);
+}
+.gala-dialog::backdrop { background: rgb(0 0 0 / 65%); }
+/* Sized to what it holds. 22rem was a box for a name and one button, and it showed. */
+.gala-account-dialog { inline-size: min(26rem, calc(100% - 2rem)); }
+.gala-account-dialog iframe {
+  display: block;
+  inline-size: 100%;
+  /* Height is set from the frame's own report; this is only what it shows before that arrives. */
+  block-size: 7rem;
+  border: 0;
+  /* The frame owns its layout and reports its size, so it never needs to scroll inside the box. */
+  overflow: hidden;
+}
+/* The close control belongs on the same line as the title, not floated above it. */
+.gala-dialog { display: grid; gap: var(--gala-space-sm); }
+.gala-dialog__close { justify-self: end; margin: 0; }
+.gala-dialog > h2 { margin-block: 0; }
+
+main,
+.gala-page-footer {
+  max-inline-size: var(--gala-content-width);
+  margin-inline: auto;
+}
+
+a { color: var(--gala-color-accent); }
+
+button {
+  min-block-size: 2.75rem;
+  padding-inline: var(--gala-space-md);
+  color: inherit;
+  background: var(--gala-color-surface);
+  border: 1px solid var(--gala-color-border);
+  border-radius: var(--gala-radius-control);
+  font: inherit;
+  font-size: var(--gala-text-sm);
+  cursor: pointer;
+  transition: background var(--gala-motion-fast) var(--gala-ease),
+              border-color var(--gala-motion-fast) var(--gala-ease);
+}
+button:hover { border-color: var(--gala-color-border-strong); background: var(--gala-color-raised); }
+button[disabled] { opacity: 0.55; cursor: not-allowed; }
+
+button:focus-visible {
+  outline: 0.1875rem solid currentcolor;
+  outline-offset: 0.1875rem;
+}
+
+.gala-button,
+.gala-badge,
+.gala-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.75rem;
+  border: 1px solid var(--gala-color-border);
+  border-radius: var(--gala-radius-control);
+  font-size: var(--gala-text-sm);
+}
+
+.gala-badge,
+.gala-tag-chip { padding-inline: 0.75rem; }
+.gala-tag-chip { text-decoration: none; }
+.gala-section-heading { margin-block: 3rem 1rem; }
+.gala-section-heading > :where(h2, p) { margin-block: 0 0.5rem; }
+.gala-hero { display: grid; gap: 1.5rem; align-items: center; }
+.gala-hero__image { inline-size: 100%; block-size: auto; border-radius: var(--gala-radius-control); }
+.gala-page-content { max-inline-size: var(--gala-measure); }
+.gala-page-content :where(img, video) { max-inline-size: 100%; block-size: auto; }
+.gala-author-profile { display: flex; gap: 1rem; padding: 1rem; background: var(--gala-color-surface); border-radius: var(--gala-radius-control); }
+.gala-author-profile img { border-radius: 50%; object-fit: cover; }
+.gala-social-links,
+.gala-page-footer ul,
+.gala-share ul { display: flex; flex-wrap: wrap; gap: 1rem; padding: 0; list-style: none; }
+.gala-card-index { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1rem; padding: 0; list-style: none; }
+[data-layout='portfolio'] .gala-card-index { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1.5rem; }
+[data-layout='portfolio'] .gala-card { padding: clamp(1.25rem, 3vw, 2rem); }
+/* The surfaces are where `componentStyle` becomes visible: quiet sits on the page, outlined draws
+   its edge, raised lifts. One variable decides, so cards and dialogs cannot drift apart. */
+.gala-card {
+  block-size: 100%;
+  box-sizing: border-box;
+  padding: var(--gala-space-lg);
+  background: var(--gala-color-surface);
+  border: 1px solid var(--gala-surface-border);
+  border-radius: var(--gala-radius-surface);
+  box-shadow: var(--gala-surface-shadow);
+}
+/* The one place the page moves of its own accord, and so the one place `motion` is legible:
+   `subtle` is a short settle, `expressive` a longer one, `none` no movement at all. */
+.gala-card { transition: transform var(--gala-motion-base) var(--gala-ease),
+                         box-shadow var(--gala-motion-base) var(--gala-ease); }
+.gala-card-index li:hover .gala-card { transform: translateY(-2px); box-shadow: var(--gala-shadow-high); }
+.gala-stats-graph { min-block-size: var(--gala-widget-min-block-size); margin-inline: 0; }
+.gala-stats-graph svg { inline-size: 100%; block-size: 8rem; }
+.gala-stats-graph polyline { fill: none; stroke: var(--gala-color-accent); stroke-width: 2; }
+.gala-loading { display: grid; min-block-size: var(--gala-widget-min-block-size); place-items: center; }
+.gala-loading__indicator { inline-size: 2rem; block-size: 2rem; border: 0.25rem solid var(--gala-color-border); border-block-start-color: var(--gala-color-accent); border-radius: 50%; animation: gala-spin 0.8s linear infinite; }
+.gala-pagination { display: flex; justify-content: space-between; gap: 1rem; }
+.gala-search { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; }
+.gala-search label { grid-column: 1 / -1; }
+.gala-search input { min-block-size: 2.75rem; font: inherit; }
+.gala-search-results { display: grid; gap: 1rem; padding: 0; list-style: none; }
+.gala-search-results article { padding: 1rem; background: var(--gala-color-surface); border-radius: var(--gala-radius-control); }
+.gala-search-results h2 { margin-block-start: 0; }
+.gala-toc { padding: 1rem; background: var(--gala-color-surface); }
+.gala-share__fallback { inline-size: min(100%, 36rem); }
+.gala-engagement__placeholder { display: grid; min-block-size: var(--gala-widget-min-block-size); align-content: center; margin: 0; }
+.gala-engagement-profile > * { margin-block: 0 0.5rem; }
+.gala-engagement-actions { display: grid; gap: 1rem; margin-block-start: 1.5rem; }
+.gala-engagement-actions[hidden] { display: none; }
+/* Shown only when signing in interrupted something the reader had already decided to do, so it
+   reassures rather than sells. Hidden for anyone who opened the account dialog deliberately. */
+.gala-account-dialog__invite { margin-block: 0 1rem; max-inline-size: 34rem; }
+.gala-account-dialog__invite[hidden] { display: none; }
+.gala-engagement-actions form,
+[data-comment-editor] { display: grid; gap: 0.5rem; max-inline-size: 42rem; }
+.gala-engagement-actions label { display: grid; gap: 0.5rem; }
+.gala-engagement-actions textarea,
+[data-comment-editor] textarea { min-block-size: 7rem; padding: 0.75rem; font: inherit; }
+.gala-page-footer { margin-block-start: 4rem; padding-block-start: 1rem; border-block-start: 0.125rem solid var(--gala-color-border); }
+.gala-error-page { min-block-size: 60vh; display: grid; align-content: center; justify-items: start; }
+.gala-code-block { position: relative; }
+.gala-code-block > button { position: absolute; inset-block-start: 0.5rem; inset-inline-end: 0.5rem; background: var(--gala-color-background); }
+.gala-code-block pre { overflow: auto; padding: 3.5rem 1rem 1rem; background: var(--gala-color-surface); border-radius: var(--gala-radius-control); }
+.gala-embed {
+  display: grid;
+  place-items: center;
+  gap: 0.75rem;
+  box-sizing: border-box;
+  inline-size: 100%;
+  margin-inline: 0;
+  padding: 1rem;
+  overflow: hidden;
+  background: var(--gala-color-surface);
+  border: 0.125rem solid var(--gala-color-border);
+  border-radius: var(--gala-radius-control);
+}
+.gala-embed--youtube { aspect-ratio: 16 / 9; }
+.gala-embed--codepen { min-block-size: 25rem; }
+.gala-embed--gist,
+.gala-embed--x { min-block-size: 8rem; }
+.gala-embed iframe { inline-size: 100%; block-size: 100%; border: 0; }
+.gala-embed__icon {
+  inline-size: 2rem;
+  block-size: 2rem;
+  background: center / contain no-repeat;
+}
+.gala-embed--youtube .gala-embed__icon { background-image: url('../assets/embed-youtube.svg'); }
+.gala-embed--codepen .gala-embed__icon { background-image: url('../assets/embed-codepen.svg'); }
+.gala-embed--gist .gala-embed__icon { background-image: url('../assets/embed-gist.svg'); }
+.gala-embed--x .gala-embed__icon { background-image: url('../assets/embed-x.svg'); }
+.shiki,
+.shiki span { color: var(--shiki-light); background-color: var(--shiki-light-bg); }
+:root[data-mode='dark'] .shiki,
+:root[data-mode='dark'] .shiki span { color: var(--shiki-dark); background-color: var(--shiki-dark-bg); }
+@media (prefers-color-scheme: dark) {
+  :root[data-mode='system'] .shiki,
+  :root[data-mode='system'] .shiki span { color: var(--shiki-dark); background-color: var(--shiki-dark-bg); }
+}
+.gala-visually-hidden { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.gala-contact form { display: grid; gap: 1rem; max-inline-size: 42rem; }
+.gala-contact label { display: grid; gap: .35rem; }
+.gala-contact input,
+.gala-contact textarea { font: inherit; padding: .65rem; }
+.gala-contact textarea { min-block-size: 12rem; resize: vertical; }
+
+@keyframes gala-spin { to { transform: rotate(1turn); } }
+
+@media (min-width: 48rem) {
+  .gala-hero { grid-template-columns: minmax(0, 1fr) minmax(18rem, 1fr); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+
+/* ---------------------------------------------------------------- the conversation
+   A thread is a hierarchy, and the indent is the only thing that says so. It is drawn with a
+   rule rather than padding alone, so five levels deep still reads as five levels and not as an
+   accident of margin. */
+.gala-comments-island { margin-block-start: var(--gala-space-xl); }
+.gala-comments__heading {
+  font-size: var(--gala-text-lg);
+  margin-block-end: var(--gala-space-md);
+}
+.gala-comments, .gala-comment-replies { list-style: none; margin: 0; padding: 0; }
+.gala-comment-replies {
+  margin-block-start: var(--gala-space-sm);
+  margin-inline-start: var(--gala-space-xs);
+  padding-inline-start: var(--gala-space-md);
+  border-inline-start: 1px solid var(--gala-color-hairline);
+}
+.gala-comment { padding-block: var(--gala-space-sm); }
+.gala-comment + .gala-comment { border-block-start: 1px solid var(--gala-color-hairline); }
+.gala-comment-replies .gala-comment + .gala-comment { border-block-start: 0; }
+.gala-comment__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gala-space-xs);
+  margin-block-end: var(--gala-space-2xs);
+  font-size: var(--gala-text-sm);
+}
+.gala-comment__meta strong { font-weight: 600; }
+.gala-comment__pending { font-size: var(--gala-text-xs); color: var(--gala-color-muted); }
+.gala-comment__body { margin-block: 0; overflow-wrap: anywhere; }
+
+/* The controls stay out of the way until the comment is worth acting on. */
+.gala-comment-actions {
+  display: flex;
+  gap: var(--gala-space-2xs);
+  margin-block-start: var(--gala-space-2xs);
+  opacity: 0.72;
+  transition: opacity var(--gala-motion-fast) var(--gala-ease);
+}
+.gala-comment:hover > .gala-comment-actions,
+.gala-comment:focus-within > .gala-comment-actions { opacity: 1; }
+.gala-comment-actions button {
+  min-block-size: 2rem;
+  padding-inline: var(--gala-space-xs);
+  font-size: var(--gala-text-xs);
+  background: transparent;
+  border-color: transparent;
+  color: var(--gala-color-muted);
+}
+.gala-comment-actions button:hover { color: var(--gala-color-text); background: var(--gala-color-surface); }
+
+.gala-comment__form { display: grid; gap: var(--gala-space-xs); margin-block: var(--gala-space-sm); }
+.gala-comment__form textarea {
+  inline-size: 100%;
+  box-sizing: border-box;
+  padding: var(--gala-space-sm);
+  color: inherit;
+  background: var(--gala-color-raised);
+  border: 1px solid var(--gala-color-border);
+  border-radius: var(--gala-radius-control);
+  font: inherit;
+  font-size: var(--gala-text-sm);
+  line-height: var(--gala-leading-body);
+  resize: vertical;
+}
+.gala-comment__form textarea:focus-visible { outline: 2px solid var(--gala-color-accent); outline-offset: 1px; }
+.gala-comment__controls { display: flex; gap: var(--gala-space-xs); }
+.gala-comments__status, .gala-comments__empty, .gala-comments__prompt {
+  color: var(--gala-color-muted);
+  font-size: var(--gala-text-sm);
+}
+.gala-comments__more { margin-block-start: var(--gala-space-md); }
+
+/* ---------------------------------------------------------------- where the article ends
+   The writing and the conversation about it are different things, and the page has to say so.
+   A footnote used to run straight into the author card with nothing between them. */
+.gala-engagement {
+  /* Space is reserved before the counts arrive, so the page does not jump under the reader. */
+  min-block-size: var(--gala-widget-min-block-size);
+  max-inline-size: var(--gala-content-width);
+  margin-block-start: var(--gala-space-xl);
+  padding-block-start: var(--gala-space-lg);
+  border-block-start: 1px solid var(--gala-color-border);
+}
+.gala-engagement-profile {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gala-space-sm);
+  padding: 0;
+  background: none;
+}
+.gala-engagement-profile h2 { font-size: var(--gala-text-lg); margin: 0; }
+.gala-engagement-profile p { margin: 0; color: var(--gala-color-muted); font-size: var(--gala-text-sm); }
+
+/* Counts read as data, not as three stacked paragraphs. */
+.gala-engagement dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gala-space-lg);
+  margin-block: var(--gala-space-md);
+}
+.gala-engagement dl > div { display: flex; flex-direction: column-reverse; gap: 0.1rem; }
+.gala-engagement dt {
+  font-size: var(--gala-text-xs);
+  letter-spacing: var(--gala-tracking-wide);
+  text-transform: uppercase;
+  color: var(--gala-color-muted);
+}
+.gala-engagement dd {
+  margin: 0;
+  font-size: var(--gala-text-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.gala-reaction-actions { display: flex; flex-wrap: wrap; gap: var(--gala-space-2xs); }
+.gala-engagement-actions { display: grid; gap: var(--gala-space-sm); justify-items: start; }
+.gala-engagement-actions > [data-follow-article] { inline-size: auto; }
+.gala-share { margin-block-start: var(--gala-space-lg); }
+
+/* v2 keeps every reader action in one stable DOM region. The rail is pure CSS: no scroll
+   observer toggles competing copies, so reaching the conversation cannot cause flicker. */
+.gala-engagement { position: relative; margin-block-start: clamp(4rem, 9vw, 8rem); }
+.gala-conversation {
+  max-width: var(--gala-measure);
+  margin-inline: auto;
+  padding-block: clamp(3rem, 7vw, 6rem);
+}
+.gala-conversation__header { margin-block-end: var(--gala-space-xl); }
+.gala-conversation__header h2 {
+  margin: 0;
+  font: var(--gala-weight-display) var(--gala-text-2xl)/var(--gala-leading-tight) var(--gala-font-display);
+  letter-spacing: var(--gala-tracking-tight);
+}
+.gala-action-rail {
+  position: sticky;
+  z-index: 4;
+  inset-block-start: 6rem;
+  float: left;
+  width: 3.25rem;
+  margin-inline-start: max(-5rem, calc((var(--gala-measure) - 100%) / 2 - 4rem));
+  display: grid;
+  gap: .5rem;
+  padding: .5rem;
+  border: 1px solid var(--gala-color-hairline);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--gala-color-background) 88%, transparent);
+  box-shadow: var(--gala-shadow-high);
+  backdrop-filter: blur(16px);
+}
+.gala-action-rail button,
+.gala-action-rail a {
+  inline-size: 2.25rem;
+  min-block-size: 2.25rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--gala-color-muted);
+  background: transparent;
+  font: 600 var(--gala-text-xs)/1 var(--gala-font-body);
+  text-decoration: none;
+  cursor: pointer;
+}
+.gala-action-rail button:hover,
+.gala-action-rail a:hover,
+.gala-action-rail button[aria-pressed='true'] {
+  color: var(--gala-color-background);
+  background: var(--gala-color-accent);
+}
+.gala-action-rail .gala-reaction-actions,
+.gala-action-rail .gala-share { display: contents; }
+.gala-action-rail .gala-share__fallback {
+  position: fixed;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.gala-action-rail .gala-share__fallback--visible {
+  z-index: 10;
+  inset: auto 1rem 1rem;
+  inline-size: min(32rem, calc(100vw - 2rem));
+  block-size: auto;
+  padding: .75rem;
+  overflow: visible;
+  clip-path: none;
+}
+
+@media (max-width: 54rem) {
+  .gala-action-rail {
+    inset-block-start: auto;
+    inset-block-end: 1rem;
+    float: none;
+    box-sizing: border-box;
+    width: calc(100% - 2rem);
+    max-width: calc(100% - 2rem);
+    margin: 0 auto;
+    grid-auto-flow: column;
+    overflow-x: auto;
+  }
+  .gala-conversation { padding-block-start: var(--gala-space-xl); }
+}

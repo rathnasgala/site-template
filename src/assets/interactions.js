@@ -1,6 +1,7 @@
 function selectableFallback(control) {
   const region = control.closest('.gala-share');
   const fallback = region?.querySelector('.gala-share__fallback');
+  fallback?.classList.add('gala-share__fallback--visible');
   fallback?.focus();
   fallback?.select();
   const status = region?.querySelector('.gala-share__status');
@@ -83,6 +84,20 @@ document.addEventListener('click', async (event) => {
       if (status) status.textContent = 'Link copied.';
     } catch {
       selectableFallback(share);
+    }
+    return;
+  }
+
+  const nativeShare = event.target.closest('[data-native-share]');
+  if (nativeShare) {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: document.title, url: nativeShare.dataset.nativeShare });
+      } catch (error) {
+        if (error.name !== 'AbortError') selectableFallback(nativeShare);
+      }
+    } else {
+      selectableFallback(nativeShare);
     }
     return;
   }
@@ -225,6 +240,7 @@ let sessionUser = null;
 // The reader the current engagement render was built for: null until the frame reports, and
 // null again for a signed-out reader, so an anonymous load never re-requests.
 let renderedSessionUser = null;
+let readerStateRequestId = null;
 const pendingEngagementWrites = new Map();
 
 /**
@@ -331,7 +347,14 @@ function sendEngagementWrite(operation, payload) {
   if (!sessionFrame || !sessionUser) return Promise.reject(new Error('AUTHENTICATION_REQUIRED'));
   const requestId = crypto.randomUUID();
   return new Promise((resolve, reject) => {
-    pendingEngagementWrites.set(requestId, { resolve, reject });
+    const timeout = setTimeout(() => {
+      pendingEngagementWrites.delete(requestId);
+      reject(new Error('REQUEST_TIMEOUT'));
+    }, 10_000);
+    pendingEngagementWrites.set(requestId, {
+      resolve: (value) => { clearTimeout(timeout); resolve(value); },
+      reject: (error) => { clearTimeout(timeout); reject(error); }
+    });
     sessionFrame.contentWindow.postMessage({
       type: 'gala-engagement-write', requestId, operation, payload
     }, new URL(sessionFrame.src).origin);
@@ -392,6 +415,21 @@ if (sessionFrame) {
       else pending.reject(new Error(event.data.error?.code || 'ENGAGEMENT_WRITE_FAILED'));
       return;
     }
+    if (event.data?.type === 'gala-reader-state-result') {
+      if (event.data.requestId !== readerStateRequestId || event.data.ok !== true) return;
+      readerStateRequestId = null;
+      const active = new Set(Array.isArray(event.data.state?.reactions) ? event.data.state.reactions : []);
+      document.querySelectorAll('[data-reaction]').forEach((control) => {
+        control.setAttribute('aria-pressed', String(active.has(control.dataset.reaction)));
+      });
+      document.querySelectorAll('[data-follow-article]').forEach((control) => {
+        const following = event.data.state?.following === true;
+        control.setAttribute('aria-pressed', String(following));
+        control.setAttribute('aria-label', following ? 'Unfollow article' : 'Follow article');
+        control.title = following ? 'Unfollow article' : 'Follow article';
+      });
+      return;
+    }
     /* The frame is cross-origin, so its content height is not readable from here — it reports
        its own, and the box is sized to it. Without this the account panel scrolled inside a fixed
        box, clipping the first line of its own text. */
@@ -410,12 +448,24 @@ if (sessionFrame) {
       control.setAttribute('aria-label', displayName
         ? `Account: ${displayName}` : 'Sign in or view account');
       control.title = displayName ? `Account: ${displayName}` : 'Account';
+      const label = control.querySelector('[data-user-label]');
+      if (label) label.textContent = displayName || 'Sign in';
     }
     // The session frame reports on every page load, signed in or not. Re-reading engagement
     // then duplicated the request made on load and returned an identical payload for anyone
     // who was not signed in. Only a change of reader can change what the API answers.
     const changed = renderedSessionUser !== (sessionUser?.id ?? null);
     renderedSessionUser = sessionUser?.id ?? null;
+    if (sessionUser) {
+      const region = document.querySelector('[data-article-id]');
+      if (region) {
+        readerStateRequestId = crypto.randomUUID();
+        sessionFrame.contentWindow.postMessage({
+          type: 'gala-reader-state-request', requestId: readerStateRequestId,
+          articleId: region.dataset.articleId
+        }, sessionOrigin);
+      }
+    }
     document.querySelectorAll('[data-engagement-url]').forEach((region) => {
       if (changed) refreshEngagement(region);
     });

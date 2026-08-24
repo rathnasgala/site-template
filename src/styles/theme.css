@@ -867,6 +867,9 @@ button:focus-visible {
   gap: .4rem;
   padding-inline: .25rem;
 }
+.gala-action-stats > div + div {
+  border-inline-start: 1px solid var(--gala-color-hairline);
+}
 .gala-action-stats dt {
   display: grid;
   place-items: center;
@@ -966,6 +969,10 @@ button:focus-visible {
   }
   .gala-action-rail .gala-action-stats { gap: var(--gala-space-2xs); }
   .gala-action-rail:not(.gala-action-rail--integrated) .gala-action-stats { grid-template-columns: 1fr; }
+  .gala-action-rail:not(.gala-action-rail--integrated) .gala-action-stats > div + div {
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--gala-color-hairline);
+  }
   .gala-action-rail .gala-action-stats > div {
     min-block-size: 2.5rem;
     display: grid;

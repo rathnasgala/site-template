@@ -206,5 +206,7 @@ test('the docked action rail respects the intrinsic width of every control group
   assert.match(css, /\.gala-action-rail--integrated \.gala-action-stats\s*\{[^}]*grid-area:\s*stats/s);
   assert.match(css, /\.gala-action-rail--integrated \.gala-utility-actions\s*\{[^}]*repeat\(4, 2\.5rem\)/s);
   assert.match(css, /\.gala-action-rail--integrated \.gala-action-stats > div\s*\{[^}]*flex-direction:\s*row/s);
+  assert.match(css, /\.gala-action-stats > div \+ div\s*\{[^}]*border-inline-start:\s*1px solid var\(--gala-color-hairline\)/s);
+  assert.match(css, /\.gala-action-rail:not\(\.gala-action-rail--integrated\) \.gala-action-stats > div \+ div\s*\{[^}]*border-block-start:\s*1px solid var\(--gala-color-hairline\)/s);
   assert.doesNotMatch(css, /\.gala-engagement dl > div/);
 });

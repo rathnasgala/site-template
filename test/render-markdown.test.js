@@ -88,12 +88,11 @@ test('retains the documented safe HTML and URL boundary', () => {
   assert.match(rendered, /href="\.\.\/relative\/"/);
 });
 
-test('highlights known fenced languages at build time with exact light and dark themes', () => {
+test('highlights known fenced languages without CSP-blocked inline styles', () => {
   const rendered = renderMarkdown('```javascript\nconst answer = 42;\n```');
 
   assert.match(rendered, /class="shiki shiki-themes github-light github-dark"/);
-  assert.match(rendered, /--shiki-light:/);
-  assert.match(rendered, /--shiki-dark:/);
+  assert.doesNotMatch(rendered, /\sstyle=/);
   assert.match(rendered, />const</);
   assert.match(rendered, /> answer</);
   assert.doesNotMatch(rendered, /gala-highlight-placeholder/);

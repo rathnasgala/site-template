@@ -29,7 +29,7 @@
     <link rel="icon" href="{{ '/assets/favicon.svg' | url }}" type="image/svg+xml">
     <script src="{{ '/assets/reader.js' | url }}" defer></script>
   </head>
-  <body>
+  <body{% if post %} class="gala-page--article"{% endif %}>
     <a class="gala-skip-link" href="#main-content">Skip to content</a>
     <header class="gala-site-header">
       <a class="gala-site-name" href="{{ '/' | url }}" aria-label="Home">{{ site.site.name }}</a>
@@ -56,7 +56,17 @@
     </header>
     <main id="main-content">{{ content | safe }}</main>
     <footer class="gala-page-footer">
-      <p>&copy; {{ site.site.name }}</p>
+      <section class="gala-page-footer__identity" aria-label="Publication author">
+        {% if site.site.authorProfile.avatarUrl %}<img src="{{ site.site.authorProfile.avatarUrl | escape }}" alt="" width="40" height="40">{% endif %}
+        <div class="gala-page-footer__details">
+          <p class="gala-page-footer__line">
+            {% if site.site.authorProfile.profileUrl %}<a class="gala-page-footer__author" href="{{ site.site.authorProfile.profileUrl | escape }}" rel="author">{{ site.site.authorProfile.displayName }}</a>{% else %}<strong class="gala-page-footer__author">{{ site.site.authorProfile.displayName }}</strong>{% endif %}
+            {% if site.site.publisher.name %}<span>Published by {% if site.site.publisher.url %}<a href="{{ site.site.publisher.url | escape }}" rel="publisher">{{ site.site.publisher.name }}</a>{% else %}{{ site.site.publisher.name }}{% endif %}</span>{% endif %}
+            <span>&copy; {{ site.site.name }}</span>
+          </p>
+          {% if site.site.authorProfile.bio %}<p class="gala-page-footer__bio">{{ site.site.authorProfile.bio }}</p>{% endif %}
+        </div>
+      </section>
       {# Which repository sent the traffic, which footer the click came from, which language it
          was read in, and which author owns it. Sites registered before these managed values
          existed fall back rather than emitting the literal placeholder. #}
@@ -64,21 +74,20 @@
       {% set galaLinkLanguage = post.language or site.site.defaultLanguage %}
       {% set galaLinkSource = site.site.repository if site.site.repository and site.site.repository != 'unavailable' else 'gala-site' %}
       {% set galaLinkOwner = site.site.ownerId if site.site.ownerId and site.site.ownerId != 'unavailable' else site.site.id %}
-      {% if attributionTier != 'PAID' %}<p><a href="https://gala67.com/?utm_source={{ galaLinkSource | urlencode }}&amp;utm_medium=referral&amp;utm_campaign=built-with-gala&amp;utm_content={{ galaLinkPlacement | urlencode }}&amp;utm_term={{ galaLinkLanguage | urlencode }}&amp;utm_id={{ galaLinkOwner | urlencode }}" rel="external">Built with Gala</a></p>{% endif %}
+      <nav aria-label="Publication footer"><ul>
+        {% if attributionTier != 'PAID' %}<li><a href="https://gala67.com/?utm_source={{ galaLinkSource | urlencode }}&amp;utm_medium=referral&amp;utm_campaign=powered-by-gala&amp;utm_content={{ galaLinkPlacement | urlencode }}&amp;utm_term={{ galaLinkLanguage | urlencode }}&amp;utm_id={{ galaLinkOwner | urlencode }}" rel="external">Powered by Gala</a></li>{% endif %}
+        <li><a href="https://app.gala67.com/s/terms" rel="external">Terms</a></li>
+        <li><a href="https://app.gala67.com/s/privacy" rel="external">Privacy</a></li>
+      </ul></nav>
     </footer>
     <dialog id="gala-settings-dialog" class="gala-dialog" aria-labelledby="gala-settings-title">
-      <form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close settings">Close</button></form>
-      <h2 id="gala-settings-title">Reader settings</h2>
-      <section aria-labelledby="gala-dialog-language-setting">
-        <h3 id="gala-dialog-language-setting">Language preference</h3>
-        <label>Preferred language
-          <select data-language-preference>{% for language in languages %}<option value="{{ language | escape }}">{{ language }}</option>{% endfor %}</select>
-        </label>
-      </section>
+      <header class="gala-dialog__header"><h2 id="gala-settings-title">Reader settings</h2><form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close settings">Close</button></form></header>
+      <label>Preferred language
+        <select data-language-preference>{% for language in languages %}<option value="{{ language | escape }}">{{ language }}</option>{% endfor %}</select>
+      </label>
     </dialog>
     <dialog id="gala-search-dialog" class="gala-dialog" aria-labelledby="gala-search-title">
-      <form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close search">Close</button></form>
-      <h2 id="gala-search-title">Search</h2>
+      <header class="gala-dialog__header"><h2 id="gala-search-title">Search</h2><form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close search">Close</button></form></header>
       <section data-gala-search data-index-url="{{ '/search-index.json' | url }}">
         <form class="gala-search" action="{{ '/search/' | url }}" role="search">
           <label for="gala-dialog-search-query">Search published posts</label>
@@ -88,13 +97,12 @@
         <p data-search-status role="status" aria-live="polite">Enter a search term.</p>
         <ol class="gala-search-results" data-search-results></ol>
       </section>
-      <p><a href="{{ '/search/' | url }}">Open search page</a></p>
     </dialog>
     {% if site.site.id and site.site.id != "unavailable" %}
     <dialog id="gala-account-dialog" class="gala-dialog gala-account-dialog" aria-labelledby="gala-account-title">
       <form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close account">Close</button></form>
       <h2 id="gala-account-title" class="gala-visually-hidden">Gala account</h2>
-      <iframe data-gala-session-frame title="Gala account and sign in" allow="identity-credentials-get" src="{{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}/v1/widget/session?siteId={{ site.site.id | escape }}"></iframe>
+      <iframe data-gala-session-frame title="Gala account and sign in" loading="lazy" allow="identity-credentials-get" src="{{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}/v1/widget/session?siteId={{ site.site.id | escape }}"></iframe>
     </dialog>
     {% endif %}
   </body>

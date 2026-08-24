@@ -30,5 +30,8 @@ test('loads the author-owned override after managed theme styles', async () => {
 test('free sites retain visible Gala attribution while paid sites suppress only that link', async () => {
   const source = await readFile(base, 'utf8');
   assert.match(source, /&copy; \{\{ site\.site\.name \}\}/);
-  assert.match(source, /\{% if attributionTier != 'PAID' %\}.*Built with Gala.*\{% endif %\}/);
+  assert.match(
+    source,
+    /\{% if attributionTier != 'PAID' %\}<li>.*Powered by Gala.*<\/li>\{% endif %\}\s*<li>.*Terms<\/a><\/li>\s*<li>.*Privacy<\/a><\/li>/
+  );
 });

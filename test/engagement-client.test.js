@@ -5,13 +5,14 @@ import test from 'node:test';
 
 const behavior = await readFile(new URL('../src/assets/interactions.js', import.meta.url), 'utf8');
 const components = await readFile(new URL('../src/_includes/components/ui.njk', import.meta.url), 'utf8');
+const postLayout = await readFile(new URL('../src/_includes/layouts/post.njk', import.meta.url), 'utf8');
 // The conversation is dependency-free DOM code in an island of its own.
 const island = await readFile(new URL('../src/assets/engagement-comments.js', import.meta.url), 'utf8');
 const transport = await readFile(new URL('../src/assets/engagement-transport.js', import.meta.url), 'utf8');
 
 test('published article islands request the neutral public bundle without credentials', () => {
-  assert.match(components, /data-engagement-url=/);
-  assert.match(components, /\/v1\/articles\/.*\/engagement/);
+  assert.match(postLayout, /data-engagement-url=/);
+  assert.match(postLayout, /\/v1\/articles\/.*\/engagement/);
   assert.match(behavior, /querySelectorAll\('\[data-engagement-url\]'\)/);
   assert.match(behavior, /new URL\(region\.dataset\.engagementUrl\)/);
   assert.match(behavior, /fetch\(requestUrl/);
@@ -31,12 +32,23 @@ test('comment cursors append nested thread pages without navigating', () => {
 });
 
 test('untrusted API fields are never written as markup', () => {
-  assert.match(behavior, /textContent = text/);
-  assert.match(behavior, /data\.profile\.displayName/);
+  assert.match(behavior, /count\.textContent = publicCount\(value\)/);
   assert.doesNotMatch(behavior, /innerHTML|insertAdjacentHTML|document\.write/);
   // The island assigns author names and bodies through textContent only.
   assert.match(island, /comment\.author\?\.displayName/);
   assert.doesNotMatch(island, /innerHTML|insertAdjacentHTML|document\.write|dangerouslySetInnerHTML/);
+});
+
+test('the comments island is the single owner of conversation loading and failure states', () => {
+  assert.match(components, />Conversation<\/h2>/);
+  assert.equal((components.match(/data-engagement-status/g) ?? []).length, 1);
+  assert.doesNotMatch(components, /Discussion|Continue the conversation|Loading engagement data|data-engagement-live/);
+  assert.match(island, /phase: 'loading'/);
+  assert.match(island, /phase === 'unavailable' \? 'Comments are temporarily unavailable\.'/);
+  assert.match(island, /state\.phase !== 'ready'/);
+  assert.match(island, /More comments couldn’t be loaded\. Try again\./);
+  assert.doesNotMatch(island, /Could not load more comments\.|gala-comments__status/);
+  assert.doesNotMatch(behavior, /Live engagement data is temporarily unavailable\./);
 });
 
 test('published articles send one best-effort privacy-reduced view beacon', () => {

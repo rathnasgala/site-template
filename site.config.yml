@@ -4,13 +4,23 @@ schemaVersion: 1
 framework:
   themePackage:
     name: "@rathnasgala/theme"
-    version: 2.0.1
+    version: 2.0.2
 site:
   id: unavailable
   ownerId: unavailable
   repository: unavailable
-  name: New Gala Site
-  author: New Gala Site
+  # Set the publication title and public author profile here. Until then the repository owner is shown.
+  name: unavailable
+  author: unavailable
+  authorProfile:
+    displayName: unavailable
+    bio: unavailable
+    avatarUrl: unavailable
+    profileUrl: unavailable
+  publisher:
+    name: unavailable
+    url: unavailable
+    logoUrl: unavailable
   defaultLanguage: en
   timezone: UTC
 hosting:

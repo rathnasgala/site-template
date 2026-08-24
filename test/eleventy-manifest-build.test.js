@@ -181,6 +181,8 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
 
   const published = await readFile(path.join(root, '_site', 'en', 'validated', 'index.html'), 'utf8');
   assert.match(published, /<strong>body<\/strong>/);
+  assert.match(published, /1 min read/);
+  assert.ok(await bytes(path.join(root, '_site', 'favicon.ico')) > 0);
   assert.match(published, /href="\/blog\/assets\/theme\.css"/);
   assert.doesNotMatch(published, /wrong-environment-prefix/);
   assert.match(
@@ -215,17 +217,16 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
     /rel="alternate" hreflang="x-default" href="https:\/\/example.com\/blog\/en\/validated\/"/
   );
   assert.match(published, /data-language-preference/);
-  assert.match(published, /data-engagement-snapshot/);
-  assert.match(published, /<dt>Reactions<\/dt><dd>2<\/dd>/);
-  assert.match(published, /<dt>Comments<\/dt><dd>3<\/dd>/);
-  assert.match(published, /<dt>Views<\/dt><dd>5<\/dd>/);
+  assert.doesNotMatch(published, /data-engagement-snapshot|data-engagement-live/);
+  assert.match(published, /title="2 reactions"/);
+  assert.match(published, /title="3 comments"/);
+  assert.match(published, /title="5 views"/);
   const withoutSnapshot = await readFile(
     path.join(root, '_site', 'de', 'without-snapshot', 'index.html'),
     'utf8'
   );
-  assert.match(withoutSnapshot, /class="gala-engagement__placeholder" role="status"/);
-  assert.match(withoutSnapshot, /Loading engagement data/);
-  assert.match(withoutSnapshot, /data-engagement-live/);
+  assert.doesNotMatch(withoutSnapshot, /gala-engagement__placeholder|data-engagement-live/);
+  assert.match(withoutSnapshot, /data-engagement-status[^>]*>Loading comments…<\/output>/);
   assert.doesNotMatch(withoutSnapshot, /<dd>0<\/dd>/);
   assert.match(
     withoutSnapshot,

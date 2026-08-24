@@ -7,6 +7,7 @@ const expectedRuntimeFiles = [
   '.gala/publish.yml.template',
   '.gitignore',
   'eleventy.config.js',
+  'lib/accent.js',
   'lib/build-manifest.js',
   'lib/site-config.js',
   'lib/performance-budget.js',
@@ -56,6 +57,7 @@ const expectedRuntimeFiles = [
   'src/search-index.11ty.js',
   'src/search.njk',
   'src/sitemap.11ty.js',
+  'static/favicon.ico',
   'static/robots.txt'
 ].sort();
 

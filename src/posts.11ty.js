@@ -31,6 +31,7 @@ export default class ValidatedPostPages {
         postTableOfContents: ({ post }) => post?.publicationState === 'published'
           ? renderedDocument(post).tableOfContents
           : [],
+        readingMinutes: ({ post }) => readingMinutes(post?.body),
         seo: ({ post, site }) => post?.publicationState === 'published'
           ? postSeo({ post, site, renderedHtml: renderedDocument(post).html })
           : null
@@ -44,6 +45,11 @@ export default class ValidatedPostPages {
     }
     return renderedDocument(post).html;
   }
+}
+
+function readingMinutes(markdown) {
+  const words = String(markdown ?? '').trim().match(/[\p{L}\p{N}]+(?:['’_-][\p{L}\p{N}]+)*/gu)?.length ?? 0;
+  return Math.max(1, Math.ceil(words / 225));
 }
 
 const renderedDocuments = new WeakMap();

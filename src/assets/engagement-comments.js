@@ -22,8 +22,9 @@ function threads(items) {
 }
 
 function commentsController(root, endpoint) {
-  const state = { items: [], cursor: null, total: 0, busy: false, status: '', loading: true };
+  const state = { items: [], cursor: null, total: 0, busy: false, status: '', phase: 'loading' };
   const articleId = /\/v1\/articles\/([^/]+)\/engagement/.exec(endpoint)?.[1] ?? '';
+  const statusNode = root.closest('.gala-conversation')?.querySelector('[data-engagement-status]');
 
   async function load(nextCursor = '', { append = false, fresh = false } = {}) {
     const url = new URL(endpoint);
@@ -110,23 +111,31 @@ function commentsController(root, endpoint) {
   }
 
   function render() {
+    if (statusNode) {
+      statusNode.textContent = state.phase === 'loading'
+        ? 'Loading comments…'
+        : state.phase === 'unavailable' ? 'Comments are temporarily unavailable.' : state.status;
+    }
+    if (state.phase !== 'ready') {
+      root.replaceChildren();
+      return;
+    }
     const section = element('section', 'gala-comments-island'); section.setAttribute('aria-label', 'Comments');
-    section.append(element('h2', 'gala-comments__heading', state.total === 1 ? '1 comment' : `${state.total} comments`));
+    section.append(element('p', 'gala-comments__heading', state.total === 1 ? '1 comment' : `${state.total} comments`));
     if (sessionUser.value) section.append(form('Add a comment', '', (body) => write('comment.create', { articleId, body })));
     else {
       const prompt = element('p', 'gala-comments__prompt');
       const signIn = element('button', '', 'Sign in to join the conversation'); signIn.type = 'button';
       signIn.addEventListener('click', () => requestSignIn({ kind: 'comment' })); prompt.append(signIn); section.append(prompt);
     }
-    if (state.status) { const status = element('p', 'gala-comments__status', state.status); status.role = 'status'; section.append(status); }
-    if (state.loading) section.append(element('p', 'gala-comments__status', 'Loading comments…'));
-    else if (!state.items.length) section.append(element('p', 'gala-comments__empty', 'No comments yet.'));
+    if (!state.items.length) section.append(element('p', 'gala-comments__empty', 'No comments yet.'));
     else { const list = element('ol', 'gala-comments'); list.append(...threads(state.items).map(commentNode)); section.append(list); }
     if (state.cursor) {
       const more = element('button', 'gala-comments__more', 'Show more comments'); more.type = 'button'; more.disabled = state.busy;
       more.addEventListener('click', async () => {
-        state.busy = true; render();
-        try { await load(state.cursor, { append: true }); } catch { state.status = 'Could not load more comments.'; }
+        state.busy = true; state.status = 'Loading more comments…'; render();
+        try { await load(state.cursor, { append: true }); state.status = ''; }
+        catch { state.status = 'More comments couldn’t be loaded. Try again.'; }
         state.busy = false; render();
       }); section.append(more);
     }
@@ -135,8 +144,9 @@ function commentsController(root, endpoint) {
 
   window.addEventListener('gala-session-change', render);
   render();
-  load().catch(() => { state.status = 'Comments are temporarily unavailable.'; })
-    .finally(() => { state.loading = false; render(); });
+  load().then(() => { state.phase = 'ready'; })
+    .catch(() => { state.phase = 'unavailable'; })
+    .finally(render);
 }
 
 document.querySelectorAll('[data-gala-comments]').forEach((root) => {

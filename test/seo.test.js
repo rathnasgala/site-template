@@ -169,7 +169,19 @@ test('orders feeds by declared publication date then descending ULID without cat
 
 test('builds complete SEO metadata with approved fallbacks and absolute post-local media', () => {
   const site = {
-    site: { name: 'Example Site', author: 'Default Author' },
+    site: {
+      name: 'Example Site',
+      author: 'Default Author',
+      authorProfile: {
+        displayName: 'Default Author', bio: 'A careful writer.',
+        avatarUrl: 'https://images.example.com/author.jpg',
+        profileUrl: 'https://example.com/authors/default'
+      },
+      publisher: {
+        name: 'Example Press', url: 'https://press.example.com',
+        logoUrl: 'https://press.example.com/logo.svg'
+      }
+    },
     hosting: { canonicalBaseUrl: 'https://example.com', pathPrefix: '/blog' }
   };
   const seo = postSeo({
@@ -201,6 +213,10 @@ test('builds complete SEO metadata with approved fallbacks and absolute post-loc
     'https://example.com/blog/en/post/'
   ]);
   assert.equal(seo.blogPosting.author.name, 'Default Author');
+  assert.equal(seo.blogPosting.author.url, 'https://example.com/authors/default');
+  assert.equal(seo.blogPosting.author.image, 'https://images.example.com/author.jpg');
+  assert.equal(seo.blogPosting.publisher.name, 'Example Press');
+  assert.equal(seo.blogPosting.publisher.logo.url, 'https://press.example.com/logo.svg');
   assert.equal(seo.blogPosting.image, seo.imageUrl);
   assert.doesNotMatch(seo.structuredDataJson, /<\/script/i);
 });

@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { parse } from 'yaml';
-import { loadSiteConfiguration } from '../lib/site-config.js';
+import { loadSiteConfiguration, validateProfile } from '../lib/site-config.js';
 
 const config = parse(await readFile(new URL('../site.config.yml', import.meta.url), 'utf8'));
 const managed = JSON.parse(await readFile(new URL('../.gala/managed-files.json', import.meta.url), 'utf8'));
@@ -64,6 +64,26 @@ test('scaffolds author-owned contact settings disabled by default', () => {
     websiteEnabled: false,
     phoneEnabled: false
   });
+});
+
+test('normalizes the structured public profile and keeps legacy author fallback', () => {
+  assert.deepEqual(validateProfile({ author: 'Legacy Writer' }), {
+    author: { displayName: 'Legacy Writer', bio: '', avatarUrl: '', profileUrl: '' },
+    publisher: { name: '', url: '', logoUrl: '' }
+  });
+  assert.deepEqual(validateProfile(config.site), {
+    author: { displayName: '', bio: '', avatarUrl: '', profileUrl: '' },
+    publisher: { name: '', url: '', logoUrl: '' }
+  });
+});
+
+test('rejects unsafe profile URLs and unnamed publisher links', () => {
+  assert.throws(() => validateProfile({
+    authorProfile: { avatarUrl: 'javascript:alert(1)' }
+  }), /HTTPS URL/);
+  assert.throws(() => validateProfile({
+    publisher: { url: 'https://publisher.example.com' }
+  }), /publisher\.name/);
 });
 
 test('accepts only the implemented layout and palette identities', async () => {

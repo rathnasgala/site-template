@@ -8,7 +8,99 @@ function selectableFallback(control) {
   if (status) status.textContent = 'Select and copy the URL shown.';
 }
 
+const readingProgress = document.querySelector('[data-reading-progress]');
+const readingContent = document.querySelector('.gala-markdown');
+if (readingProgress && readingContent) {
+  let progressFrame = null;
+  const updateReadingProgress = () => {
+    progressFrame = null;
+    const start = readingContent.offsetTop;
+    const distance = Math.max(1, readingContent.offsetHeight - window.innerHeight);
+    const progress = Math.min(1, Math.max(0, (window.scrollY - start) / distance));
+    readingProgress.value = progress;
+  };
+  const scheduleReadingProgress = () => {
+    if (progressFrame == null) progressFrame = requestAnimationFrame(updateReadingProgress);
+  };
+  addEventListener('scroll', scheduleReadingProgress, { passive: true });
+  addEventListener('resize', scheduleReadingProgress, { passive: true });
+  scheduleReadingProgress();
+}
+
+const articleToc = document.querySelector('.gala-toc');
+if (articleToc?.tagName === 'DETAILS') {
+  const tocNavigation = articleToc.querySelector('nav');
+  const tocLinks = [...articleToc.querySelectorAll('a[href^="#"]')];
+  const headings = tocLinks.map((link) => document.getElementById(link.hash.slice(1))).filter(Boolean);
+  let tocFrame = null;
+  const synchronizeToc = () => {
+    tocFrame = null;
+    articleToc.classList.toggle('gala-toc--floating', articleToc.getBoundingClientRect().top <= 96);
+    if (!headings.length) return;
+    const readingLine = window.innerHeight * 0.42;
+    let active = headings[0];
+    for (const heading of headings) {
+      if (heading.getBoundingClientRect().top <= readingLine) active = heading;
+      else break;
+    }
+    const activeLink = tocLinks.find((link) => link.hash === `#${active.id}`);
+    for (const link of tocLinks) {
+      if (link === activeLink) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    }
+    if (tocNavigation && tocLinks.length) {
+      const firstRect = tocLinks[0].getBoundingClientRect();
+      const lastRect = tocLinks[tocLinks.length - 1].getBoundingClientRect();
+      articleToc.classList.toggle('gala-toc--overflowing',
+        lastRect.bottom - firstRect.top > tocNavigation.clientHeight);
+    }
+    if (activeLink && tocNavigation && tocNavigation.scrollHeight > tocNavigation.clientHeight) {
+      const navigationRect = tocNavigation.getBoundingClientRect();
+      const activeRect = activeLink.getBoundingClientRect();
+      const target = tocNavigation.scrollTop + activeRect.top - navigationRect.top
+        - (tocNavigation.clientHeight - activeRect.height) / 2;
+      tocNavigation.scrollTo({ top: Math.max(0, target), behavior: 'auto' });
+    }
+  };
+  const scheduleToc = () => {
+    if (tocFrame == null) tocFrame = requestAnimationFrame(synchronizeToc);
+  };
+  addEventListener('scroll', scheduleToc, { passive: true });
+  addEventListener('resize', scheduleToc, { passive: true });
+  scheduleToc();
+}
+
+const actionRail = document.querySelector('.gala-action-rail');
+const actionDock = document.querySelector('[data-action-dock]');
+if (actionRail && actionDock) {
+  const synchronizeActionRail = (entries) => {
+    actionRail.classList.toggle('gala-action-rail--integrated', entries[0].isIntersecting);
+  };
+  new IntersectionObserver(synchronizeActionRail, {
+    rootMargin: '0px 0px 18% 0px', threshold: 0
+  }).observe(actionDock);
+}
+
+function presentFollowState(control, following) {
+  const label = following ? 'Unfollow article' : 'Follow article';
+  control.setAttribute('aria-pressed', String(following));
+  control.setAttribute('aria-label', label);
+  control.title = label;
+  const visibleLabel = control.querySelector('[data-follow-label]');
+  if (visibleLabel) visibleLabel.textContent = label;
+}
+
 document.addEventListener('click', async (event) => {
+  if (event.target instanceof HTMLDialogElement && event.target.open) {
+    const bounds = event.target.getBoundingClientRect();
+    const outside = event.clientX < bounds.left || event.clientX > bounds.right
+      || event.clientY < bounds.top || event.clientY > bounds.bottom;
+    if (outside) {
+      event.target.close();
+      return;
+    }
+  }
+
   const embed = event.target.closest('[data-gala-embed-load]');
   if (embed) {
     const container = embed.closest('[data-gala-embed]');
@@ -66,8 +158,7 @@ document.addEventListener('click', async (event) => {
       targetType: 'articles', targetId: region.dataset.articleId
     });
     if (!saved) return;
-    follow.setAttribute('aria-pressed', String(active));
-    follow.textContent = active ? 'Unfollow article' : 'Follow article';
+    presentFollowState(follow, active);
     return;
   }
 
@@ -130,13 +221,6 @@ codeBlocks.forEach((pre) => {
   wrapper.prepend(control);
 });
 
-function textElement(name, text, className) {
-  const element = document.createElement(name);
-  element.textContent = text;
-  if (className) element.className = className;
-  return element;
-}
-
 function engagementCounts(data) {
   const reactionTotal = Object.values(data.reactions ?? {})
     .reduce((total, count) => total + (Number.isSafeInteger(count) ? count : 0), 0);
@@ -147,33 +231,22 @@ function engagementCounts(data) {
   ];
 }
 
-function renderEngagement(region, payload, appendComments = false) {
+function publicCount(value) {
+  if (value < 1000) return '<1K';
+  return new Intl.NumberFormat('en', {
+    notation: 'compact', maximumFractionDigits: 1
+  }).format(value);
+}
+
+function renderEngagement(region, payload) {
   const data = payload?.data;
   if (!data || typeof data !== 'object') throw new TypeError('Engagement data is invalid');
-  const live = region.querySelector('[data-engagement-live]');
-  if (!live) return;
-  if (!appendComments) live.replaceChildren();
-
-  if (!appendComments && data.profile) {
-    const profile = document.createElement('section');
-    profile.className = 'gala-engagement-profile';
-    profile.setAttribute('aria-label', 'Author profile');
-    profile.append(textElement('h2', data.profile.displayName));
-    if (data.profile.username) profile.append(textElement('p', `@${data.profile.username}`));
-    if (Number.isSafeInteger(data.profile.followerCount)) {
-      profile.append(textElement('p', `${data.profile.followerCount} followers`));
-    }
-    live.append(profile);
-  }
-
-  if (!appendComments) {
-    const summary = document.createElement('dl');
-    for (const [label, value] of engagementCounts(data)) {
-      const item = document.createElement('div');
-      item.append(textElement('dt', label), textElement('dd', String(value)));
-      summary.append(item);
-    }
-    live.append(summary);
+  for (const [label, value] of engagementCounts(data)) {
+    region.querySelectorAll(`[data-engagement-stat="${label.toLowerCase()}"]`)
+      .forEach((count) => {
+        count.textContent = publicCount(value);
+        count.closest('div')?.setAttribute('title', `${value} ${label.toLowerCase()}`);
+      });
   }
 
   region.querySelector('[data-engagement-snapshot]')?.remove();
@@ -182,6 +255,7 @@ function renderEngagement(region, payload, appendComments = false) {
 
 async function refreshEngagement(region, commentsCursor = '', appendComments = false, fresh = false) {
   const status = region.querySelector('[data-engagement-status]');
+  const commentsOwnStatus = Boolean(region.querySelector('[data-gala-comments]'));
   try {
     const requestUrl = new URL(region.dataset.engagementUrl);
     if (commentsCursor) requestUrl.searchParams.set('commentsCursor', commentsCursor);
@@ -192,11 +266,11 @@ async function refreshEngagement(region, commentsCursor = '', appendComments = f
     });
     if (!response.ok) throw new Error(`Engagement returned HTTP ${response.status}`);
     const payload = await response.json();
-    renderEngagement(region, payload, appendComments);
-    if (status) status.textContent = payload.errors?.length
+    renderEngagement(region, payload);
+    if (status && !commentsOwnStatus) status.textContent = payload.errors?.length
       ? 'Some engagement data is temporarily unavailable.' : '';
   } catch {
-    if (status) status.textContent = 'Live engagement data is temporarily unavailable.';
+    if (status && !commentsOwnStatus) status.textContent = 'Engagement is temporarily unavailable.';
   }
 }
 
@@ -424,9 +498,7 @@ if (sessionFrame) {
       });
       document.querySelectorAll('[data-follow-article]').forEach((control) => {
         const following = event.data.state?.following === true;
-        control.setAttribute('aria-pressed', String(following));
-        control.setAttribute('aria-label', following ? 'Unfollow article' : 'Follow article');
-        control.title = following ? 'Unfollow article' : 'Follow article';
+        presentFollowState(control, following);
       });
       return;
     }
@@ -436,7 +508,7 @@ if (sessionFrame) {
     if (event.data?.type === 'gala-session-height') {
       const height = Number(event.data.height);
       if (Number.isFinite(height) && height > 0 && height < 2000) {
-        sessionFrame.style.height = `${Math.ceil(height)}px`;
+        sessionFrame.height = String(Math.ceil(height));
       }
       return;
     }

@@ -907,7 +907,7 @@ button:focus-visible {
 }
 .gala-action-dock { display: block; min-block-size: 4.25rem; }
 .gala-article-boundary {
-  width: min(100%, 56rem);
+  width: 100%;
   margin: clamp(4rem, 8vw, 7rem) auto var(--gala-space-lg);
   padding-block-start: var(--gala-space-md);
   display: flex;
@@ -949,7 +949,7 @@ button:focus-visible {
     padding-block: max(1rem, calc((100vh - 11.5rem) / 2));
   }
   .gala-reading-layout .gala-markdown { grid-column: 2; grid-row: 1; max-inline-size: 56rem; inline-size: 100%; margin: 0; }
-  .gala-article-boundary { grid-column: 2; grid-row: 2; margin-inline: 0; }
+  .gala-article-boundary { grid-column: 1 / -1; grid-row: 2; margin-inline: 0; }
   .gala-action-dock { grid-column: 2; grid-row: 3; }
   .gala-action-rail {
     grid-column: 3;

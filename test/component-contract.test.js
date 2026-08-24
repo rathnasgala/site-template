@@ -185,8 +185,10 @@ test('the article visibly ends before API-backed interactions and the author foo
   const post = await readFile(new URL('../src/_includes/layouts/post.njk', import.meta.url), 'utf8');
   const base = await readFile(new URL('../src/_includes/layouts/base.njk', import.meta.url), 'utf8');
   assert.match(css, /\.gala-article-boundary[^}]*border-block-start:\s*\.25rem solid/s);
-  assert.match(post, /gala-article-boundary[^<]*<strong>Reader interactions<\/strong>/);
-  assert.doesNotMatch(post, /gala-article-boundary[^<]*<strong>Reader interactions<\/strong><a/s);
+  assert.match(css, /\.gala-article-boundary\s*\{[^}]*width:\s*100%/s);
+  assert.match(css, /@media \(min-width: 75rem\)[\s\S]*\.gala-article-boundary\s*\{[^}]*grid-column:\s*1 \/ -1/s);
+  assert.match(post, /gala-article-boundary[^<]*<strong>Conversation<\/strong>/);
+  assert.doesNotMatch(post, /gala-article-boundary[^<]*<strong>Conversation<\/strong><a/s);
   assert.match(base, /gala-page-footer__identity/);
   assert.match(base, /gala-page-footer__line/);
   assert.match(base, /gala-page-footer__bio/);

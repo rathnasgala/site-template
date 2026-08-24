@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "2.0.2",
+    "version": "2.0.3",
     "availableDesignThemes": [
       "editorial",
       "modern",
@@ -40,7 +40,7 @@
     "src/_data/site.js": "432be73b49c20f088c304a2f7d7cd85906a747e0f3b381a4b395c5c44d68bb57",
     "src/_includes/components/ui.njk": "0634c206c2db0507f77686635e3b406e1d8878011fd7eac64563df8499fe8f60",
     "src/_includes/layouts/base.njk": "28043f394af8e2e3b09b6218ed3de2a506535fd5d59e67225c0fbd4431f967ff",
-    "src/_includes/layouts/post.njk": "579421054d8b547cb974a87114a96bb90cc2792b1436eb90c1f620589b2bfbfa",
+    "src/_includes/layouts/post.njk": "be1069e47be0da7cc32be9db6163c8de6180ab0bdd1d4a2320485bc720017cea",
     "src/404.njk": "be0d44370ac5402156aaf3d32ea581057bc61ec94c1a5f92bb809733af7a8a20",
     "src/accent.11ty.js": "52e7d3eb731c5f4649c14c4745f65da026c25b58cf462d075b8ef363f0e487dc",
     "src/assets/embed-codepen.svg": "e9def697f38c466fb2b6652535c4c814e8cbbbefc6e052a69f335aeb27e8356b",
@@ -55,7 +55,7 @@
     "src/assets/reader.js": "96018c305177c5cbea77b4958ccba7800be82ace513f47fc811bdd41fb8eee63",
     "src/assets/search.js": "df425f0239277792ad39f2138bc89cb66cc4ecda5ed59042d46abc2f05372088",
     "src/assets/theme-mode.js": "944b29db11a577961a60ddcfa52f07ef2411f3f3631bea85bd79be16428c08be",
-    "src/assets/theme.css": "43adf073599bf660534b26c7096c0fe5c25b12589d6dcb760d2d06fe2a477be4",
+    "src/assets/theme.css": "c3bd809a149f4c2dab8429d2a7aafa9e0a3674e26fa0ee19b1f654299f16e43d",
     "src/client/reader.js": "5a61d629517c5315b3cb14dbae6cee226ba828e95132100f2ad36e614c57470a",
     "src/cname.11ty.js": "206fc224df91c569e18312158e7f69803061f2952513f501ada54bd06c4f8006",
     "src/contact.njk": "f4d74d038781e15af0acef571901c91e7753a2e21b6bef617429585698839a34",
@@ -67,7 +67,7 @@
     "src/search-index.11ty.js": "700dc2a2be0ef20de3a828a4612fcf7a082691eade29c6e1d75f09c24b6c6024",
     "src/search.njk": "63f2e8aeebb63c90da2e375eece639ce096cad1eff7f28628cafc46faf7ceee6",
     "src/sitemap.11ty.js": "4f233e94fb4a913ad5659116518432ed264984a7b622eba3558c77b4ec6435dc",
-    "src/styles/theme.css": "14496b8c692ea81427386125dc92822e1f06eadab30844380f77ca710c2ff7ef",
+    "src/styles/theme.css": "24c8f4b7553bd17a2f8ac4762c16a81e18209bcbc6f1870aaca305da8a56b1e5",
     "static/favicon.ico": "ad3cb0b02f0164f3af6280d0bfe712879d55cec0e9a7a567f658aaddca5a55a2",
     "static/robots.txt": "16ceb5ee3e0dc13aa9adf31a3ebbe45a1d965b8c2b9f72eaf84e5911e140ed95"
   }

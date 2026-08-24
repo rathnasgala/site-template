@@ -9,7 +9,7 @@ layout: layouts/base.njk
     <div class="gala-reading-layout">
       {% if postTableOfContents.length %}{{ tableOfContents(postTableOfContents) }}{% else %}<span></span>{% endif %}
       <div class="gala-markdown">{{ content | safe }}</div>
-      {% if post.publicationState == "published" %}<div class="gala-article-boundary"><strong>Reader interactions</strong></div><span class="gala-action-dock" data-action-dock aria-hidden="true"></span>{{ actionRail(post.canonicalUrl, engagement) }}{% endif %}
+      {% if post.publicationState == "published" %}<div class="gala-article-boundary"><strong>Conversation</strong></div><span class="gala-action-dock" data-action-dock aria-hidden="true"></span>{{ actionRail(post.canonicalUrl, engagement) }}{% endif %}
     </div>
     {% if post.publicationState == "published" %}{{ conversation(engagement) }}{% endif %}
   {% if post.publicationState == "published" %}</section>{% endif %}

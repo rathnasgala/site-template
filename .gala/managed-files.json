@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "2.0.5",
+    "version": "2.0.6",
     "availableDesignThemes": [
       "editorial",
       "modern",

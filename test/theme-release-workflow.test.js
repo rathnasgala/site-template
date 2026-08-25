@@ -50,6 +50,7 @@ test('theme release uses trusted publishing from an exact tag-matched staged art
   assert.match(workflow, /environment: npm-theme-release/);
   assert.match(workflow, /npm@11\.19\.0/);
   assert.match(workflow, /node scripts\/stage-theme-package\.js/);
+  assert.match(workflow, /GITHUB_SHA: \$\{\{ github\.sha \}\}/);
   assert.match(workflow, /test "\$actual" = "\$expected"/);
   assert.match(workflow, /npm publish "\$staging" --access public --provenance/);
   assert.doesNotMatch(workflow, /NODE_AUTH_TOKEN|NPM_TOKEN|secrets\./);

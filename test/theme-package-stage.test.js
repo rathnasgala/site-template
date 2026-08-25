@@ -8,7 +8,8 @@ import { stageThemePackage } from '../scripts/stage-theme-package.js';
 
 test('stages a public no-scripts theme artifact with managed site bytes under payload', async () => {
   const output = await mkdtemp(path.join(tmpdir(), 'gala-theme-stage-'));
-  const staged = await stageThemePackage(output);
+  const sourceCommit = 'a'.repeat(40);
+  const staged = await stageThemePackage(output, { sourceCommit });
   const packageJson = JSON.parse(await readFile(path.join(output, 'package.json'), 'utf8'));
   const manifest = JSON.parse(await readFile(path.join(output, 'payload', '.gala', 'managed-files.json'), 'utf8'));
 
@@ -19,6 +20,7 @@ test('stages a public no-scripts theme artifact with managed site bytes under pa
   assert.deepEqual(packageJson.repository, {
     type: 'git', url: 'git+https://github.com/rathnasgala/site-template.git'
   });
+  assert.deepEqual(packageJson.gala, { sourceCommit });
   assert.equal(Object.hasOwn(packageJson, 'scripts'), false);
   assert.deepEqual(packageJson.files, ['payload']);
   assert.equal(manifest.artifactSources['.gitignore'], '.gala/artifact-files/gitignore');
@@ -28,4 +30,10 @@ test('stages a public no-scripts theme artifact with managed site bytes under pa
   assert.equal(payloadPackage.private, true);
   assert.equal(Object.hasOwn(payloadPackage.scripts, 'stage:theme'), false);
   assert.equal(Object.hasOwn(payloadPackage.scripts, 'lint:theme-release'), false);
+});
+
+test('rejects release metadata that cannot identify a Git commit', async () => {
+  const output = await mkdtemp(path.join(tmpdir(), 'gala-theme-stage-invalid-'));
+  await assert.rejects(stageThemePackage(output, { sourceCommit: 'main' }),
+    /Theme source commit must be a full lowercase Git SHA/);
 });

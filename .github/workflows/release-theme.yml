@@ -29,6 +29,8 @@ jobs:
 
       - name: Verify template and stage immutable artifact
         shell: bash
+        env:
+          GITHUB_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           npm ci --ignore-scripts

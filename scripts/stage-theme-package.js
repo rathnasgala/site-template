@@ -7,7 +7,10 @@ import { fileURLToPath } from 'node:url';
 
 const templateRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-export async function stageThemePackage(destination) {
+export async function stageThemePackage(destination, { sourceCommit } = {}) {
+  if (sourceCommit !== undefined && !/^[0-9a-f]{40}$/.test(sourceCommit)) {
+    throw new Error('Theme source commit must be a full lowercase Git SHA');
+  }
   const output = path.resolve(destination);
   try {
     if ((await readdir(output)).length !== 0) throw new Error('Theme package destination must be empty');
@@ -50,6 +53,7 @@ export async function stageThemePackage(destination) {
       type: 'git',
       url: 'git+https://github.com/rathnasgala/site-template.git'
     },
+    gala: sourceCommit === undefined ? undefined : { sourceCommit },
     files: ['payload'],
     publishConfig: { access: 'public', provenance: true },
     engines: { node: '>=20' }
@@ -60,6 +64,6 @@ export async function stageThemePackage(destination) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const destination = process.argv[2];
   if (!destination) throw new Error('usage: stage-theme-package.js <empty-destination>');
-  const staged = await stageThemePackage(destination);
+  const staged = await stageThemePackage(destination, { sourceCommit: process.env.GITHUB_SHA });
   process.stdout.write(`${staged.name}@${staged.version} (${staged.fileCount} managed files)\n`);
 }

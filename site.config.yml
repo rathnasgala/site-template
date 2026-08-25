@@ -4,7 +4,7 @@ schemaVersion: 1
 framework:
   themePackage:
     name: "@rathnasgala/theme"
-    version: 2.0.4
+    version: 2.0.5
 site:
   id: unavailable
   ownerId: unavailable
@@ -35,6 +35,11 @@ design:
 sharing:
   targets: []
   socialProfiles: {}
+# Optional. Leave unavailable to make every page canonical to its own published Gala URL.
+# A configured template must contain both placeholders, for example:
+# "https://original.example/{language}/{slug}/"
+seo:
+  canonicalUrlTemplate: unavailable
 # Author-owned. Public access exposes only aggregate view counts; unique-visitor
 # estimates and audience dimensions always remain owner-only.
 statistics:

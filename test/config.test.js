@@ -4,7 +4,9 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { parse } from 'yaml';
-import { loadSiteConfiguration, validateProfile } from '../lib/site-config.js';
+import {
+  loadSiteConfiguration, validateCanonicalUrlTemplate, validateProfile
+} from '../lib/site-config.js';
 
 const config = parse(await readFile(new URL('../site.config.yml', import.meta.url), 'utf8'));
 const managed = JSON.parse(await readFile(new URL('../.gala/managed-files.json', import.meta.url), 'utf8'));
@@ -42,6 +44,20 @@ test('hosting provider is fixed to GitHub Pages in v1', () => {
   assert.equal(config.hosting.provider, 'github-pages');
   assert.equal(config.hosting.canonicalPolicy, 'self');
   assert.equal(config.canonicalPolicy, undefined);
+});
+
+test('canonical URL templates preserve a distinct page and language identity', () => {
+  assert.equal(validateCanonicalUrlTemplate(config.seo.canonicalUrlTemplate), '');
+  assert.equal(
+    validateCanonicalUrlTemplate('https://original.example/{language}/{slug}/'),
+    'https://original.example/{language}/{slug}/'
+  );
+  for (const invalid of [
+    'http://example.com/{language}/{slug}/',
+    'https://example.com/{slug}/',
+    'https://example.com/{language}/{slug}/{other}/',
+    'https://example.com/{language}/{slug}/#fragment'
+  ]) assert.throws(() => validateCanonicalUrlTemplate(invalid), /canonicalUrlTemplate/);
 });
 
 test('scaffolds author-owned uncompressed performance budgets', () => {

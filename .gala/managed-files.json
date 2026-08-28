@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "2.0.8",
+    "version": "2.0.9",
     "availableDesignThemes": [
       "editorial",
       "modern",
@@ -53,10 +53,10 @@
     "src/assets/engagement-comments.js": "eda0fee471c7e42ee01a25b8aa14ed6ae9690d52b3fbb34027d97534ab62998b",
     "src/assets/engagement-transport.js": "d4108cded823f859e7a8d6e36716162422ceaf5e4b94a57ed9bd7941d5096216",
     "src/assets/favicon.svg": "8615e3d96fe37ae9ed14afb1886e7c0e690eef5b10be66ca91cccfd085a74bb6",
-    "src/assets/interactions.js": "d7ac42be1c3453fb5a7bc1b7de52bca2bc7322e60ef235ce4953f5382a3550c5",
+    "src/assets/interactions.js": "db4d4d88d7fb415868d71ad62eaefd12a2333a3bec2fff5652b22ee0904a7318",
     "src/assets/preferences.js": "789127bee013ed6a1bbf8cefd7b9109291c16220e7a6e09314e3c93c54731d1d",
     "src/assets/prism-session.js": "1fab23725b843006c3f589af7669ef3ad6ad01f3264a3b00564e64b56738d2cd",
-    "src/assets/reader.js": "b0b8d8244774a7e55f15053da02161a1a884f0827ccba748f7d424d4a7830a3b",
+    "src/assets/reader.js": "0be5a7f7bae2c274f65e34421d74d7abcc228112fbbf49ec52e69980dad86ecd",
     "src/assets/search.js": "df425f0239277792ad39f2138bc89cb66cc4ecda5ed59042d46abc2f05372088",
     "src/assets/theme-mode.js": "944b29db11a577961a60ddcfa52f07ef2411f3f3631bea85bd79be16428c08be",
     "src/assets/theme.css": "c8491d9f4340b32efd841bc6d7cc17a8d5e568032bec53acfcb9f7637288b76f",

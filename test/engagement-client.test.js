@@ -10,6 +10,17 @@ const postLayout = await readFile(new URL('../src/_includes/layouts/post.njk', i
 const island = await readFile(new URL('../src/assets/engagement-comments.js', import.meta.url), 'utf8');
 const transport = await readFile(new URL('../src/assets/engagement-transport.js', import.meta.url), 'utf8');
 
+test('sign-in relays only the opaque one-time transfer code to the account frame', () => {
+  assert.match(behavior, /typeof event\.data\.transferCode !== 'string'/);
+  assert.match(behavior, /type: 'gala-session-transfer', transferCode: event\.data\.transferCode/);
+  assert.doesNotMatch(behavior, /gala-session-recheck/);
+});
+
+test('a blocked or cancelled sign-in never manufactures an authenticated reader', () => {
+  assert.match(behavior, /if \(!window\.open\(signIn,[\s\S]*pendingIntent = null/);
+  assert.doesNotMatch(behavior, /gala-session-established[^\n]*user:/);
+});
+
 test('published article islands request the neutral public bundle without credentials', () => {
   assert.match(postLayout, /data-engagement-url=/);
   assert.match(postLayout, /\/v1\/articles\/.*\/engagement/);

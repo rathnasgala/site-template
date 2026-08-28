@@ -394,8 +394,10 @@ window.addEventListener('message', (event) => {
   const frame = document.querySelector('[data-gala-session-frame]');
   if (!frame || event.data?.type !== 'gala-session-established') return;
   const apiOrigin = new URL(frame.src).origin;
-  if (event.origin !== apiOrigin) return;
-  frame.contentWindow?.postMessage({ type: 'gala-session-recheck' }, apiOrigin);
+  if (event.origin !== apiOrigin || typeof event.data.transferCode !== 'string') return;
+  frame.contentWindow?.postMessage({
+    type: 'gala-session-transfer', transferCode: event.data.transferCode,
+  }, apiOrigin);
 });
 
 document.querySelectorAll('[data-engagement-url]').forEach((region) => {

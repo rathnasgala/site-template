@@ -105,15 +105,30 @@ test('compiled Prism page is semantic, self-identifying, parent-canonical, and e
   assert.doesNotMatch(feed, /\/prism\//);
 });
 
-test('stale configuration compiles only a canonical fallback with no transformed prose', async () => {
-  const root = await build('STALE');
+for (const fixture of [
+  { state: 'STALE', message: /no longer current/ },
+  { state: 'DISABLED', message: /no longer current/ },
+  { state: 'REVOKED', message: /no longer current/ },
+]) {
+  test(`${fixture.state.toLowerCase()} configuration compiles only a canonical fallback with no transformed prose`, async () => {
+    const root = await build(fixture.state);
+    const html = await readFile(
+      path.join(root, '_site', 'en', 'example', 'prism', CONFIGURATION, 'index.html'), 'utf8');
+    assert.match(html, fixture.message);
+    assert.doesNotMatch(html, /Only approved prose/);
+    const restoreLinks = [...html.matchAll(/<a\b[^>]*data-prism-restore[^>]*>/g)];
+    assert.ok(restoreLinks.length >= 2);
+    for (const [anchor] of restoreLinks) assert.doesNotMatch(anchor, /nofollow/);
+  });
+}
+
+test('published edition prose and canonical recovery are present in static HTML without JavaScript', async () => {
+  const root = await build('PUBLISHED');
   const html = await readFile(
     path.join(root, '_site', 'en', 'example', 'prism', CONFIGURATION, 'index.html'), 'utf8');
-  assert.match(html, /no longer current/);
-  assert.doesNotMatch(html, /Only approved prose/);
-  const restoreLinks = [...html.matchAll(/<a\b[^>]*data-prism-restore[^>]*>/g)];
-  assert.ok(restoreLinks.length >= 2);
-  for (const [anchor] of restoreLinks) assert.doesNotMatch(anchor, /nofollow/);
+  assert.match(html, /Only approved prose/);
+  assert.match(html, /href="https:\/\/example.com\/en\/example\/" data-prism-canonical/);
+  assert.doesNotMatch(html, /data-prism-content-pending|Loading edition|fetch\(/);
 });
 
 for (const fixture of [

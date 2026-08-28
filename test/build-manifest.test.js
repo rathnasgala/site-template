@@ -146,3 +146,46 @@ test('validates ephemeral assigned-ID commit bindings', () => {
       /assignedContentIds/);
   }
 });
+
+test('accepts V2 Prism configurations and rejects prose in fallback descriptors', () => {
+  const configuration = {
+    source: 'content/posts/example/prism/01K00000000000000000000001/index.en.md',
+    parentSource: valid.posts[0].source,
+    configurationId: '01K00000000000000000000001',
+    revisionId: '01K00000000000000000000002',
+    approvalId: '01K00000000000000000000003',
+    articleId: valid.posts[0].id,
+    language: 'en',
+    sourceRevisionHash: 'a'.repeat(64),
+    configurationContentHash: 'b'.repeat(64),
+    hashContract: 'GALA_PRISM_HASH_V1',
+    depth: 'BRIEF', intent: 'ORIENTATION', modality: 'TEXT',
+    approvedAt: '2026-08-26T16:00:00.000Z', approvalTokenVersion: 1,
+    approvalToken: 'token', approvalTokenVerifiedWith: 'CURRENT',
+    state: 'PUBLISHED', body: 'Approved body',
+    relativeUrl: '/en/example/prism/01K00000000000000000000001/',
+    pageUrl: 'https://example.com/en/example/prism/01K00000000000000000000001/',
+    canonicalUrl: valid.posts[0].canonicalUrl,
+    configurationLinkPolicy: 'NOFOLLOW'
+  };
+  const v2 = {
+    ...valid,
+    schemaVersion: 2,
+    prism: {
+      schemaVersion: 1,
+      mode: 'MANUAL',
+      configurationLinkPolicy: 'NOFOLLOW',
+      articleModes: {},
+      articleConfigurationLinkPolicies: {}
+    },
+    configurations: [configuration]
+  };
+
+  assert.equal(validateBuildManifest(v2).configurations[0].body, 'Approved body');
+  assert.throws(() => validateBuildManifest({
+    ...v2,
+    configurations: [{ ...configuration, state: 'STALE' }]
+  }), /fallback must not contain prose/);
+  assert.throws(() => validateBuildManifest({ ...valid, configurations: [] }),
+    /V1 cannot contain Prism/);
+});

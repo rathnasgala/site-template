@@ -2,6 +2,7 @@ import { markdownLibrary } from './lib/render-markdown.js';
 import { readBuildManifest } from './lib/build-manifest.js';
 import { loadSiteConfiguration } from './lib/site-config.js';
 import { enforcePerformanceBudgets } from './lib/performance-budget.js';
+import { verifyPrismCompiledOutput } from './lib/prism-compiled-output.js';
 import { lstat, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
@@ -57,6 +58,7 @@ export default async function (eleventyConfig) {
       outputDirectory: path.resolve('_site'),
       budgets: site.performance.budgets
     });
+    await verifyPrismCompiledOutput({ outputDirectory: path.resolve('_site'), manifest });
   });
 
   return {

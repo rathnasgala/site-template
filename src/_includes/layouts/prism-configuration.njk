@@ -1,0 +1,20 @@
+---
+layout: layouts/base.njk
+---
+<article id="article" class="gala-article gala-prism-article" data-prism-configuration-id="{{ prismConfiguration.configurationId }}" data-prism-revision-id="{{ prismConfiguration.revisionId }}" data-prism-approval-id="{{ prismConfiguration.approvalId }}" data-prism-source-hash="{{ prismConfiguration.sourceRevisionHash }}">
+  <header class="gala-article-header">
+    <p class="gala-eyebrow">{{ prismConfiguration.depth }} · {{ prismConfiguration.intent }} · {{ prismConfiguration.modality }}</p>
+    <h1>{{ post.frontmatter.title }}</h1>
+    <p><a href="{{ post.pageUrl }}" data-prism-canonical data-prism-restore>Read the canonical work</a></p>
+  </header>
+  {% if prismConfiguration.state == "PUBLISHED" %}
+    <div class="gala-markdown">{{ content | safe }}</div>
+    {% if prismAlternates.length > 1 %}<nav class="gala-prism-selector" aria-label="Other approved editions">
+      {% for alternate in prismAlternates %}{% if alternate.configurationId != prismConfiguration.configurationId %}
+        <a href="{{ alternate.pageUrl }}" data-prism-select data-prism-article-id="{{ post.id }}" data-prism-language="{{ post.language }}" data-prism-configuration-id="{{ alternate.configurationId }}" data-prism-source-hash="{{ alternate.sourceRevisionHash }}"{% if prismConfiguration.configurationLinkPolicy == "NOFOLLOW" %} rel="nofollow"{% endif %}>{{ alternate.depth }} · {{ alternate.intent }}</a>
+      {% endif %}{% endfor %}
+    </nav>{% endif %}
+  {% else %}
+    <p>This edition is no longer current. <a href="{{ post.pageUrl }}" data-prism-canonical data-prism-restore>Continue with the canonical work</a>.</p>
+  {% endif %}
+</article>

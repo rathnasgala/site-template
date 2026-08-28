@@ -33,3 +33,4 @@ jobs:
       floor-guard-override-commit-sha: ${{ contains(github.event.head_commit.message || '', 'Gala-Floor-Override:') && github.sha || '' }}
     secrets:
       site-secret: ${{ secrets.GALA_SITE_SECRET }}
+      previous-site-secret: ${{ secrets.GALA_PREVIOUS_SITE_SECRET }}

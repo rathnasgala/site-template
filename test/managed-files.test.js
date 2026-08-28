@@ -11,6 +11,8 @@ const expectedRuntimeFiles = [
   'lib/build-manifest.js',
   'lib/site-config.js',
   'lib/performance-budget.js',
+  'lib/prism-compiled-output.js',
+  'lib/prism-session.js',
   'lib/engagement-snapshot.js',
   'lib/provider-fixtures/embeds.v1.json',
   'lib/provider-fixtures/share-intents.v1.json',
@@ -33,6 +35,7 @@ const expectedRuntimeFiles = [
   'src/_includes/components/ui.njk',
   'src/_includes/layouts/base.njk',
   'src/_includes/layouts/post.njk',
+  'src/_includes/layouts/prism-configuration.njk',
   'src/client/reader.js',
   'src/assets/reader.js',
   'src/assets/interactions.js',
@@ -44,6 +47,7 @@ const expectedRuntimeFiles = [
   'src/assets/embed-x.svg',
   'src/assets/embed-youtube.svg',
   'src/assets/preferences.js',
+  'src/assets/prism-session.js',
   'src/assets/search.js',
   'src/assets/theme-mode.js',
   'src/assets/theme.css',
@@ -53,6 +57,7 @@ const expectedRuntimeFiles = [
   'src/feed.11ty.js',
   'src/languages.11ty.js',
   'src/posts.11ty.js',
+  'src/prism-configurations.11ty.js',
   'src/redirects.11ty.js',
   'src/search-index.11ty.js',
   'src/search.njk',
@@ -92,6 +97,15 @@ test('doctor never owns mutable author or platform data', async () => {
   ]) {
     assert.equal(manifest.files[mutable], undefined, mutable);
   }
+});
+
+test('author workflow passes both bounded rotation secret slots to the reusable publisher', async () => {
+  const workflow = await readFile(
+    new URL('../.gala/publish.yml.template', import.meta.url), 'utf8'
+  );
+  assert.match(workflow, /site-secret: \$\{\{ secrets\.GALA_SITE_SECRET \}\}/);
+  assert.match(workflow,
+    /previous-site-secret: \$\{\{ secrets\.GALA_PREVIOUS_SITE_SECRET \}\}/);
 });
 
 /*

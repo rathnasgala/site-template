@@ -3,8 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'sha256-{{ themeBootstrap | sha256Csp }}'{% if seo %} 'sha256-{{ seo.structuredDataJson | sha256Csp }}'{% endif %}; style-src 'self'; img-src 'self' data: https:; connect-src 'self' {{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}; frame-src {{ site.platform.apiBaseUrl or 'https://api.gala67.com' }} https://www.youtube-nocookie.com https://codepen.io; form-action 'self'; upgrade-insecure-requests">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'sha256-{{ themeBootstrap | sha256Csp }}'{% if prismBootstrap %} 'sha256-{{ prismBootstrap | sha256Csp }}'{% endif %}{% if seo %} 'sha256-{{ seo.structuredDataJson | sha256Csp }}'{% endif %}; style-src 'self'; img-src 'self' data: https:; connect-src 'self' {{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}; frame-src {{ site.platform.apiBaseUrl or 'https://api.gala67.com' }} https://www.youtube-nocookie.com https://codepen.io; form-action 'self'; upgrade-insecure-requests">
     <script>{{ themeBootstrap | safe }}</script>
+    {% if prismBootstrap %}<script>{{ prismBootstrap | safe }}</script>{% endif %}
     <title>{{ post.frontmatter.title or title }} · {{ site.site.name }}</title>
     {% if post %}<link rel="canonical" href="{{ post.canonicalUrl }}">{% endif %}
     {% for alternate in hreflangLinks %}<link rel="alternate" hreflang="{{ alternate.hreflang }}" href="{{ alternate.href }}">{% endfor %}

@@ -8,6 +8,7 @@
     "build": "npm run build:reader && eleventy",
     "pretest": "npm run build:reader",
     "test": "node --test",
+    "test:prism-compiled-output": "node --test test/prism-seo-compiled-output.test.js",
     "lint": "node scripts/lint.js",
     "push": "node scripts/push.js"
   },

@@ -50,6 +50,9 @@ test('theme release uses trusted publishing from an exact tag-matched staged art
   assert.match(workflow, /environment: npm-theme-release/);
   assert.match(workflow, /npm@11\.19\.0/);
   assert.match(workflow, /node scripts\/stage-theme-package\.js/);
+  assert.match(workflow, /npm run test:prism-compiled-output/);
+  assert.equal(packageJson.scripts['test:prism-compiled-output'],
+    'node --test test/prism-seo-compiled-output.test.js');
   assert.match(workflow, /GITHUB_SHA: \$\{\{ github\.sha \}\}/);
   assert.match(workflow, /test "\$actual" = "\$expected"/);
   assert.match(workflow, /npm publish "\$staging" --access public --provenance/);

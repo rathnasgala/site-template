@@ -5,6 +5,10 @@ layout: layouts/base.njk
 <article id="article" class="gala-article">
   {% if post.publicationState == "published" %}<progress class="gala-reading-progress" data-reading-progress max="1" value="0" aria-label="Reading progress"></progress><header class="gala-article-header"><p class="gala-eyebrow">Published {{ post.frontmatter.publishAfterDate }} · {{ post.language }} · {{ readingMinutes }} min read</p><h1>{{ post.frontmatter.title }}</h1>{% set byline = post.frontmatter.author or site.site.author %}{% if byline and byline != "unavailable" and byline != "New Gala Site" and byline != site.site.name %}<p class="gala-byline">By {{ byline }}</p>{% endif %}</header>{% endif %}
   {% if post.publicationState == "published" %}{{ languageSwitcher(hreflangLinks, post.language) }}{% endif %}
+  {% if prismConfigurations.length %}<nav class="gala-prism-selector" aria-label="Approved editions">
+    <span aria-current="page">Complete</span>
+    {% for configuration in prismConfigurations %}<a href="{{ configuration.pageUrl }}" data-prism-select data-prism-article-id="{{ post.id }}" data-prism-language="{{ post.language }}" data-prism-configuration-id="{{ configuration.configurationId }}" data-prism-source-hash="{{ configuration.sourceRevisionHash }}"{% if post.prismConfigurationLinkPolicy == "NOFOLLOW" %} rel="nofollow"{% endif %}>{{ configuration.depth }} · {{ configuration.intent }}</a>{% endfor %}
+  </nav>{% endif %}
   {% if post.publicationState == "published" %}<section class="gala-engagement" data-article-id="{{ post.id | escape }}" data-engagement-url="{{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}/v1/articles/{{ post.id | escape }}/engagement">{% endif %}
     <div class="gala-reading-layout">
       {% if postTableOfContents.length %}{{ tableOfContents(postTableOfContents) }}{% else %}<span></span>{% endif %}

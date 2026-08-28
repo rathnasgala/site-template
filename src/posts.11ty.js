@@ -2,6 +2,7 @@ import { renderMarkdownDocument } from '../lib/render-markdown.js';
 import { articleHreflang, postSeo } from '../lib/seo.js';
 import { engagementFor } from '../lib/engagement-snapshot.js';
 import { resolveShareTargets } from '../lib/share-targets.js';
+import { prismSessionBootstrap } from '../lib/prism-session.js';
 
 export default class ValidatedPostPages {
   data() {
@@ -32,6 +33,13 @@ export default class ValidatedPostPages {
           ? renderedDocument(post).tableOfContents
           : [],
         readingMinutes: ({ post }) => readingMinutes(post?.body),
+        prismConfigurations: ({ buildManifest, post }) => (buildManifest.configurations ?? []).filter(
+          (configuration) => configuration.articleId === post.id
+            && configuration.language === post.language && configuration.state === 'PUBLISHED'),
+        prismBootstrap: ({ buildManifest, post }) => prismSessionBootstrap(post,
+          (buildManifest.configurations ?? []).filter((configuration) =>
+            configuration.articleId === post.id && configuration.language === post.language
+              && configuration.state === 'PUBLISHED')),
         seo: ({ post, site }) => post?.publicationState === 'published'
           ? postSeo({ post, site, renderedHtml: renderedDocument(post).html })
           : null

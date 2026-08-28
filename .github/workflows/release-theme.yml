@@ -35,6 +35,7 @@ jobs:
           set -euo pipefail
           npm ci --ignore-scripts
           npm test
+          npm run test:prism-compiled-output
           npm run lint
           node --check scripts/stage-theme-package.js
           node --check test/theme-package-stage.test.js

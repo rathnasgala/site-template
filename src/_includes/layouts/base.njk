@@ -105,7 +105,7 @@
     <dialog id="gala-account-dialog" class="gala-dialog gala-account-dialog" aria-labelledby="gala-account-title">
       <form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close account">Close</button></form>
       <h2 id="gala-account-title" class="gala-visually-hidden">Gala account</h2>
-      <iframe data-gala-session-frame title="Gala account and sign in" loading="lazy" allow="identity-credentials-get" src="{{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}/v1/widget/session?siteId={{ site.site.id | escape }}"></iframe>
+      <iframe data-gala-session-frame title="Gala account and sign in" loading="eager" allow="identity-credentials-get" src="{{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}/v1/widget/session?siteId={{ site.site.id | escape }}"></iframe>
     </dialog>
     {% endif %}
   </body>

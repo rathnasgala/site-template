@@ -49,6 +49,11 @@ test('shared header uses accessible icons and opens search and settings without 
 test('platform account frame delegates only the FedCM identity capability', async () => {
   const source = await readFile(new URL('../src/_includes/layouts/base.njk', import.meta.url), 'utf8');
   assert.match(source, /data-gala-session-frame[^>]+allow="identity-credentials-get"/);
+  // The frame is the only holder of the reader session and the only receiver for the one-time
+  // sign-in transfer. Keeping it lazy inside a closed dialog leaves the normal reaction/comment
+  // sign-in path with no loaded receiver.
+  assert.match(source, /data-gala-session-frame[^>]+loading="eager"/);
+  assert.doesNotMatch(source, /data-gala-session-frame[^>]+loading="lazy"/);
 });
 
 test('contact form delegates authenticated writes without collecting identity fields', async () => {

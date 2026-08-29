@@ -12,7 +12,13 @@ const transport = await readFile(new URL('../src/assets/engagement-transport.js'
 
 test('sign-in relays only the opaque one-time transfer code to the account frame', () => {
   assert.match(behavior, /typeof event\.data\.transferCode !== 'string'/);
-  assert.match(behavior, /type: 'gala-session-transfer', transferCode: event\.data\.transferCode/);
+  assert.match(behavior, /type: 'gala-session-transfer', transferCode: pendingSessionTransferCode/);
+  // A successful popup may return before the cross-origin frame has announced readiness. The
+  // opaque code must wait for that announcement instead of being posted into an unloaded frame.
+  assert.match(behavior, /pendingSessionTransferCode = event\.data\.transferCode/);
+  assert.match(behavior, /if \(pendingSessionTransferCode\) deliverSessionTransfer\(\)/);
+  assert.match(behavior, /sessionFrame\.addEventListener\('load', requestSessionState\)/);
+  assert.match(behavior, /type: 'gala-session-request'/);
   assert.doesNotMatch(behavior, /gala-session-recheck/);
 });
 

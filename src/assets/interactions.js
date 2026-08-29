@@ -323,6 +323,29 @@ const pendingEngagementWrites = new Map();
  * and the comment they were typing keeps its text and its caret.
  */
 let pendingIntent = null;
+const sessionFrame = document.querySelector('[data-gala-session-frame]');
+const sessionOrigin = sessionFrame ? new URL(sessionFrame.src).origin : null;
+let sessionFrameReady = false;
+let pendingSessionTransferCode = null;
+
+function deliverSessionTransfer() {
+  if (!sessionFrameReady || !sessionFrame || !pendingSessionTransferCode) return;
+  sessionFrame.contentWindow?.postMessage({
+    type: 'gala-session-transfer', transferCode: pendingSessionTransferCode,
+  }, sessionOrigin);
+  pendingSessionTransferCode = null;
+}
+
+function requestSessionState() {
+  sessionFrame?.contentWindow?.postMessage({ type: 'gala-session-request' }, sessionOrigin);
+}
+
+if (sessionFrame) {
+  // If the frame already loaded, the immediate request reaches it. If it is still loading, the
+  // load handler repeats the request. This covers both orderings without timing assumptions.
+  sessionFrame.addEventListener('load', requestSessionState);
+  requestSessionState();
+}
 
 function requestSession(intent) {
   const field = intent.field;
@@ -386,26 +409,22 @@ window.addEventListener('focus', () => {
  *
  * It cannot reach the frame directly: a frame embedded in a publication has its storage - and its
  * BroadcastChannel - partitioned away from a window running at the top level on the API's origin,
- * so the session it wrote is invisible there. The signal carries no token; it only says a sign-in
- * happened, and this asks the frame to look again. Without it the frame never learns the reader
- * signed in, and every click asks them to sign in once more.
+ * so the session it wrote is invisible there. The signal carries only an opaque, one-time transfer
+ * code. This page waits for the frame's readiness message before relaying that code; otherwise a
+ * fast popup can return before the frame is listening and every later click asks the reader to sign
+ * in once more.
  */
 window.addEventListener('message', (event) => {
-  const frame = document.querySelector('[data-gala-session-frame]');
-  if (!frame || event.data?.type !== 'gala-session-established') return;
-  const apiOrigin = new URL(frame.src).origin;
-  if (event.origin !== apiOrigin || typeof event.data.transferCode !== 'string') return;
-  frame.contentWindow?.postMessage({
-    type: 'gala-session-transfer', transferCode: event.data.transferCode,
-  }, apiOrigin);
+  if (!sessionFrame || event.data?.type !== 'gala-session-established') return;
+  if (event.origin !== sessionOrigin || typeof event.data.transferCode !== 'string') return;
+  pendingSessionTransferCode = event.data.transferCode;
+  deliverSessionTransfer();
 });
 
 document.querySelectorAll('[data-engagement-url]').forEach((region) => {
   refreshEngagement(region);
   recordView(region);
 });
-
-const sessionFrame = document.querySelector('[data-gala-session-frame]');
 
 function engagementErrorMessage(code) {
   if (code === 'AUTHENTICATION_REQUIRED' || code === 'INVALID_BEARER_TOKEN'
@@ -480,7 +499,6 @@ async function mutateEngagement(region, operation, payload) {
 }
 
 if (sessionFrame) {
-  const sessionOrigin = new URL(sessionFrame.src).origin;
   window.addEventListener('message', (event) => {
     if (event.origin !== sessionOrigin || event.source !== sessionFrame.contentWindow) return;
     if (event.data?.type === 'gala-engagement-result') {
@@ -515,6 +533,8 @@ if (sessionFrame) {
       return;
     }
     if (event.data?.type !== 'gala-session') return;
+    sessionFrameReady = true;
+    if (pendingSessionTransferCode) deliverSessionTransfer();
     sessionUser = event.data.user && typeof event.data.user.id === 'string' ? event.data.user : null;
     const control = document.querySelector('[data-user-control]');
     const displayName = sessionUser?.displayName;

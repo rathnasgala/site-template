@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "2.0.15",
+    "version": "2.0.16",
     "availableDesignThemes": [
       "editorial",
       "modern",
@@ -11,7 +11,7 @@
     "securityAdvisories": []
   },
   "requiredBudgets": {
-    "managedJavaScriptBytes": 67584,
+    "managedJavaScriptBytes": 68608,
     "managedCssBytes": 34816
   },
   "files": {
@@ -41,7 +41,7 @@
     "src/_data/languages.js": "1358748f7fa2f74406d3295a030827d6229a53e94da72cf712e719d7a356aeac",
     "src/_data/site.js": "41e60190d22337321d480a29be9774eaa93a98b848e92b5139129ae97c44fd97",
     "src/_includes/components/ui.njk": "993ddb816a3a74f476040dc403abae3fd02896e99be480fd57177c342c8e8201",
-    "src/_includes/layouts/base.njk": "054460a1293e55a5abc5902899ef2f7a6e256b50aa51375e8d209e2cf2ec2aeb",
+    "src/_includes/layouts/base.njk": "61526fd4f1614d1ca8e52115a6f9402428215e651648dc77d63559471bee763f",
     "src/_includes/layouts/post.njk": "e48e00ca916b740d95e465caae1f1efc0523056ce4bdadd2d2593b80072de530",
     "src/_includes/layouts/prism-configuration.njk": "c984441ac50465eb6ee0e050c68c054e3a0bca98960fb92fb2f5795443301594",
     "src/404.njk": "be0d44370ac5402156aaf3d32ea581057bc61ec94c1a5f92bb809733af7a8a20",
@@ -53,10 +53,10 @@
     "src/assets/engagement-comments.js": "eda0fee471c7e42ee01a25b8aa14ed6ae9690d52b3fbb34027d97534ab62998b",
     "src/assets/engagement-transport.js": "7f69815c4eb4fc0e127a5c09702da4189130d47b73b4598fce4196d7d6f5cbe8",
     "src/assets/favicon.svg": "8615e3d96fe37ae9ed14afb1886e7c0e690eef5b10be66ca91cccfd085a74bb6",
-    "src/assets/interactions.js": "cfc67fb45fbf77dc584e0c2dd3a8de797ba6410cbe225a6e82b7c074bc832c5d",
+    "src/assets/interactions.js": "a346766369071f0351c52de5daeecc52ecffa8c516a37a9c75ca37e2f431c8fc",
     "src/assets/preferences.js": "789127bee013ed6a1bbf8cefd7b9109291c16220e7a6e09314e3c93c54731d1d",
     "src/assets/prism-session.js": "1fab23725b843006c3f589af7669ef3ad6ad01f3264a3b00564e64b56738d2cd",
-    "src/assets/reader.js": "0be5a7f7bae2c274f65e34421d74d7abcc228112fbbf49ec52e69980dad86ecd",
+    "src/assets/reader.js": "66aa4eacbce0d78d5c1f56d21ba6028738292d54eef568b86264007f3ab8c992",
     "src/assets/search.js": "df425f0239277792ad39f2138bc89cb66cc4ecda5ed59042d46abc2f05372088",
     "src/assets/theme-mode.js": "d81af8317b59f6d94dc8154c1dcba9d3e16accb37348bc3fce127712141d6c63",
     "src/assets/theme.css": "7391086efd6f61791c47bbdf3523d7452e17b1cdb1fc91339861fe2f0a2c884b",

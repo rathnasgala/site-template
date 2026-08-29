@@ -13,6 +13,8 @@ const templateRoot = fileURLToPath(new URL('..', import.meta.url));
 const eleventy = path.join(templateRoot, 'node_modules', '@11ty', 'eleventy', 'cmd.cjs');
 const ARTICLE = '01K00000000000000000000000';
 const CONFIGURATION = '01K00000000000000000000001';
+const managed = JSON.parse(await readFile(
+  new URL('../.gala/managed-files.json', import.meta.url), 'utf8'));
 
 async function build(state = 'PUBLISHED', {
   publicationPolicy = 'NOFOLLOW', articlePolicy,
@@ -40,8 +42,8 @@ sharing:
   socialProfiles: {}
 performance:
   budgets:
-    managedJavaScriptBytes: 65536
-    managedCssBytes: 33792
+    managedJavaScriptBytes: ${managed.requiredBudgets.managedJavaScriptBytes}
+    managedCssBytes: ${managed.requiredBudgets.managedCssBytes}
     ordinaryHtmlBytes: 32768
 `);
   await writeFile(path.join(root, 'package.json'), '{"type":"module"}\n');

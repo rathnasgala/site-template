@@ -150,13 +150,15 @@ test('short pages keep the publication footer at the viewport bottom', async () 
   assert.match(body, /flex-direction:\s*column/);
   assert.match(body, /min-block-size:\s*100vh/);
   assert.match(styles, /main\s*\{[^}]*flex:\s*1\s+0\s+auto/s);
+  assert.match(styles, /(?:^|\n)\.gala-page-footer\s*\{[^}]*box-sizing:\s*border-box[^}]*inline-size:\s*100%/s);
 });
 
-test('footer identifies the exact publication build through the platform version page', async () => {
+test('footer identifies the exact publication build through the publication version page', async () => {
   const source = await readFile(layout, 'utf8');
   assert.match(source, /buildIdentity\.versionUrl/);
   assert.match(source, /buildIdentity\.shortCommit/);
   assert.match(source, /aria-label="Publication build/);
+  assert.doesNotMatch(source, /app\.gala67\.com\/s\/version/);
 });
 
 test('closed dialogs occupy no page layout and the responsive article uses one copy of each rail', async () => {

@@ -58,6 +58,7 @@ export async function stageThemePackage(destination, { sourceCommit } = {}) {
     publishConfig: { access: 'public', provenance: true },
     engines: { node: '>=20' }
   }, null, 2)}\n`);
+  await copyFile(path.join(templateRoot, 'theme-package', 'README.md'), path.join(output, 'README.md'));
   return { output, name: identity.name, version: identity.version, fileCount: Object.keys(manifest.files).length };
 }
 

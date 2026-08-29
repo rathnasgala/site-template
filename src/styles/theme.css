@@ -476,6 +476,7 @@ main,
   max-inline-size: var(--gala-content-width);
   margin-inline: auto;
 }
+.gala-page-footer { box-sizing: border-box; inline-size: 100%; }
 main { flex: 1 0 auto; inline-size: 100%; }
 
 a { color: var(--gala-color-accent); }
@@ -527,6 +528,17 @@ button:focus-visible {
 .gala-page-footer ul,
 .gala-share ul { display: flex; flex-wrap: wrap; gap: 1rem; padding: 0; list-style: none; }
 .gala-card-index { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1rem; padding: 0; list-style: none; }
+.gala-version-page { inline-size: min(100%, 74rem); margin-inline: auto; }
+.gala-version-page__header { max-inline-size: 48rem; }
+.gala-version-page__header > p { color: var(--gala-color-muted); }
+.gala-version-page__header .gala-button { margin-block-start: var(--gala-space-md); }
+.gala-version-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: var(--gala-space-md); margin-block-start: var(--gala-space-lg); }
+.gala-version-card { display: grid; align-content: start; gap: var(--gala-space-sm); min-block-size: 10rem; margin-block-start: var(--gala-space-lg); padding: var(--gala-space-lg); border: 1px solid var(--gala-color-border); border-radius: var(--gala-radius-surface); background: var(--gala-color-surface); }
+.gala-version-grid .gala-version-card { margin-block-start: 0; }
+.gala-version-card > * { margin: 0; }
+.gala-version-commit { font-family: var(--gala-font-mono); font-weight: 700; }
+.gala-version-status { color: var(--gala-color-muted); }
+.gala-version-status--error { color: var(--gala-color-accent); }
 [data-layout='portfolio'] .gala-card-index { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1.5rem; }
 [data-layout='portfolio'] .gala-card { padding: clamp(1.25rem, 3vw, 2rem); }
 /* The surfaces are where `componentStyle` becomes visible: quiet sits on the page, outlined draws

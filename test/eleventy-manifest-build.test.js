@@ -11,8 +11,8 @@ const execute = promisify(execFile);
 const templateRoot = fileURLToPath(new URL('..', import.meta.url));
 const eleventy = path.join(templateRoot, 'node_modules', '@11ty', 'eleventy', 'cmd.cjs');
 const PERFORMANCE_BUDGETS = {
-  managedJavaScriptBytes: 65_536,
-  managedCssBytes: 33_792,
+  managedJavaScriptBytes: 67_584,
+  managedCssBytes: 34_816,
   ordinaryHtmlBytes: 32_768
 };
 
@@ -221,8 +221,13 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   assert.match(published, /data-language-preference/);
   assert.match(
     published,
-    /href="https:\/\/app\.gala67\.com\/s\/version\?repository=fixture-owner%2Ffixture-site&amp;commit=a{40}"[^>]*>a{8}<\/a>/
+    /href="\/blog\/s\/version\/"[^>]*>a{8}<\/a>/
   );
+  const versionPage = await readFile(path.join(root, '_site', 's', 'version', 'index.html'), 'utf8');
+  assert.match(versionPage, /data-site-id="01K00000000000000000000010"/);
+  assert.match(versionPage, /data-repository="fixture-owner\/fixture-site"/);
+  assert.match(versionPage, /data-publication-commit="a{40}"/);
+  assert.match(versionPage, /src="\/blog\/assets\/version\.js"/);
   assert.doesNotMatch(published, /data-engagement-snapshot|data-engagement-live/);
   assert.match(published, /title="2 reactions"/);
   assert.match(published, /title="3 comments"/);

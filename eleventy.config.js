@@ -33,13 +33,15 @@ export default async function (eleventyConfig) {
     throw new TypeError('GALA_BUILD_COMMIT must be a lowercase commit SHA');
   }
   const repository = site.site.repository;
+  const publicationPathPrefix = site.hosting.pathPrefix === ''
+    ? ''
+    : site.hosting.pathPrefix.replace(/\/$/, '');
   const buildIdentity = buildCommit != null
     && /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?\/[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/.test(repository ?? '')
     ? Object.freeze({
         commit: buildCommit,
         shortCommit: buildCommit.slice(0, 8),
-        versionUrl: `https://app.gala67.com/s/version?repository=${encodeURIComponent(repository)}`
-          + `&commit=${buildCommit}`
+        versionUrl: `${publicationPathPrefix}/s/version/`
       })
     : null;
   eleventyConfig.addGlobalData('attributionTier', attributionTier);
@@ -52,6 +54,7 @@ export default async function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({
     'src/assets/theme.css': 'assets/theme.css',
     'src/assets/reader.js': 'assets/reader.js',
+    'src/assets/version.js': 'assets/version.js',
     'src/assets/favicon.svg': 'assets/favicon.svg',
     'src/assets/embed-codepen.svg': 'assets/embed-codepen.svg',
     'src/assets/embed-gist.svg': 'assets/embed-gist.svg',

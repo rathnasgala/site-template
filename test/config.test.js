@@ -63,9 +63,9 @@ test('canonical URL templates preserve a distinct page and language identity', (
 test('scaffolds author-owned uncompressed performance budgets', () => {
   assert.deepEqual(config.performance.budgets, {
     // The single dependency-free reader bundle has ample room without letting regressions hide.
-    managedJavaScriptBytes: 65536,
+    managedJavaScriptBytes: managed.requiredBudgets.managedJavaScriptBytes,
     // Source CSS stays readable; the browser receives the minified artifact.
-    managedCssBytes: 33792,
+    managedCssBytes: managed.requiredBudgets.managedCssBytes,
     ordinaryHtmlBytes: 32768
   });
 });

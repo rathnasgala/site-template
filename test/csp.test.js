@@ -16,7 +16,11 @@ test('appearance customization uses a generated stylesheet, not inline style att
   assert.doesNotMatch(layout, /<html[^>]+style=/);
 });
 
-test('the browser receives one managed JavaScript entry point', () => {
+test('the browser receives the shared reader entry point and a version-page-only entry point', () => {
   const executable = [...layout.matchAll(/<script(?:\s+[^>]*)?src="([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(executable, ["{{ '/assets/reader.js' | url }}"]);
+  assert.deepEqual(executable, [
+    "{{ '/assets/reader.js' | url }}",
+    "{{ '/assets/version.js' | url }}"
+  ]);
+  assert.match(layout, /\{% if versionPage %\}<script src="{{ '\/assets\/version\.js' \| url }}"/);
 });

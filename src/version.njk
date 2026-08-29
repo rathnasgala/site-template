@@ -1,0 +1,33 @@
+---
+layout: layouts/base.njk
+title: Versions
+permalink: /s/version/index.html
+versionPage: true
+---
+<section class="gala-version-page" data-version-page
+  data-api-base-url="{{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}"
+  data-site-id="{{ site.site.id | escape }}"
+  data-repository="{{ site.site.repository | escape }}"
+  data-publication-commit="{{ buildIdentity.commit | escape }}">
+  <header class="gala-version-page__header">
+    <p class="gala-eyebrow">Live system</p>
+    <h1>What is running now</h1>
+    <p>Versions are read from the artifacts and package releases currently serving this publication.</p>
+    <button type="button" class="gala-button" data-version-retry>Refresh</button>
+  </header>
+  {% if buildIdentity %}
+  <article class="gala-version-card">
+    <p class="gala-eyebrow">This publication</p>
+    <h2>{{ site.site.name }}</h2>
+    <p><a href="https://github.com/{{ site.site.repository | escape }}">{{ site.site.repository }}</a></p>
+    <p><a href="https://github.com/{{ site.site.repository | escape }}/commit/{{ buildIdentity.commit }}" class="gala-version-commit">{{ buildIdentity.shortCommit }}</a></p>
+  </article>
+  {% endif %}
+  <div class="gala-version-grid" data-version-grid aria-live="polite">
+    {% for module in ['app', 'api', 'cli', 'theme', 'content-validation'] %}
+    <article class="gala-version-card" data-version-module="{{ module }}" aria-busy="true">
+      <p class="gala-version-status">Loading version…</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>

@@ -209,7 +209,7 @@ test('the article visibly ends before API-backed interactions and the author foo
   assert.match(base, /gala-page-footer__identity/);
   assert.match(base, /gala-page-footer__line/);
   assert.match(base, /gala-page-footer__bio/);
-  assert.match(css, /\.gala-page-footer__line\s*\{[^}]*display:\s*grid[^}]*grid-template-columns:\s*repeat\(3, max-content\)/s);
+  assert.match(css, /\.gala-page-footer__line\s*\{[^}]*display:\s*grid[^}]*grid-template-columns:\s*repeat\(4, max-content\)/s);
   assert.match(css, /@media \(max-width: 47\.99rem\)[\s\S]*\.gala-page-footer__line\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/s);
   assert.match(css, /@media \(max-width: 47\.99rem\)[\s\S]*\.gala-page-footer__line > \* \+ \*::before\s*\{[^}]*content:\s*none/s);
   assert.match(css, /\.gala-page-footer__identity p\s*\{[^}]*font-size:\s*var\(--gala-text-sm\)/s);

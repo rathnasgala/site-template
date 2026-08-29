@@ -596,7 +596,7 @@ button:focus-visible {
 .gala-page-footer__identity img { flex: 0 0 auto; border-radius: 50%; object-fit: cover; }
 .gala-page-footer__identity p { margin: 0; color: var(--gala-color-muted); font-size: var(--gala-text-sm); }
 .gala-page-footer__details { display: grid; gap: var(--gala-space-2xs); align-content: center; }
-.gala-page-footer__line { display: grid; grid-template-columns: repeat(3, max-content); align-items: baseline; gap: 0 var(--gala-space-sm); }
+.gala-page-footer__line { display: grid; grid-template-columns: repeat(4, max-content); align-items: baseline; gap: 0 var(--gala-space-sm); }
 .gala-page-footer__line > * + *::before { content: "·"; margin-inline-end: var(--gala-space-sm); color: var(--gala-color-border); }
 .gala-page-footer__bio { line-height: 1.4; }
 .gala-page-footer__author { color: var(--gala-color-text); font-weight: var(--gala-weight-display); }

@@ -64,6 +64,7 @@
             {% if site.site.authorProfile.profileUrl %}<a class="gala-page-footer__author" href="{{ site.site.authorProfile.profileUrl | escape }}" rel="author">{{ site.site.authorProfile.displayName }}</a>{% else %}<strong class="gala-page-footer__author">{{ site.site.authorProfile.displayName }}</strong>{% endif %}
             {% if site.site.publisher.name %}<span>Published by {% if site.site.publisher.url %}<a href="{{ site.site.publisher.url | escape }}" rel="publisher">{{ site.site.publisher.name }}</a>{% else %}{{ site.site.publisher.name }}{% endif %}</span>{% endif %}
             <span>&copy; {{ site.site.name }}</span>
+            {% if buildIdentity %}<span><a href="{{ buildIdentity.versionUrl }}" rel="external" aria-label="Publication build {{ buildIdentity.commit }}">{{ buildIdentity.shortCommit }}</a></span>{% endif %}
           </p>
           {% if site.site.authorProfile.bio %}<p class="gala-page-footer__bio">{{ site.site.authorProfile.bio }}</p>{% endif %}
         </div>

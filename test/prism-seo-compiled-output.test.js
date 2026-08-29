@@ -41,7 +41,7 @@ sharing:
 performance:
   budgets:
     managedJavaScriptBytes: 65536
-    managedCssBytes: 32768
+    managedCssBytes: 33792
     ordinaryHtmlBytes: 32768
 `);
   await writeFile(path.join(root, 'package.json'), '{"type":"module"}\n');

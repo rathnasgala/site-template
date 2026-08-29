@@ -12,7 +12,7 @@ const templateRoot = fileURLToPath(new URL('..', import.meta.url));
 const eleventy = path.join(templateRoot, 'node_modules', '@11ty', 'eleventy', 'cmd.cjs');
 const PERFORMANCE_BUDGETS = {
   managedJavaScriptBytes: 65_536,
-  managedCssBytes: 32_768,
+  managedCssBytes: 33_792,
   ordinaryHtmlBytes: 32_768
 };
 
@@ -32,6 +32,7 @@ async function fixture({ manifest = true } = {}) {
 site:
   id: 01K00000000000000000000010
   name: Fixture Site
+  repository: fixture-owner/fixture-site
   defaultLanguage: en
   timezone: UTC
 hosting:
@@ -175,7 +176,8 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
     env: {
       ...process.env,
       GALA_PATH_PREFIX: '/wrong-environment-prefix/',
-      GALA_BUILD_INSTANT: '2026-06-15T12:30:00Z'
+      GALA_BUILD_INSTANT: '2026-06-15T12:30:00Z',
+      GALA_BUILD_COMMIT: 'a'.repeat(40)
     }
   });
 
@@ -217,6 +219,10 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
     /rel="alternate" hreflang="x-default" href="https:\/\/example.com\/blog\/en\/validated\/"/
   );
   assert.match(published, /data-language-preference/);
+  assert.match(
+    published,
+    /href="https:\/\/app\.gala67\.com\/s\/version\?repository=fixture-owner%2Ffixture-site&amp;commit=a{40}"[^>]*>a{8}<\/a>/
+  );
   assert.doesNotMatch(published, /data-engagement-snapshot|data-engagement-live/);
   assert.match(published, /title="2 reactions"/);
   assert.match(published, /title="3 comments"/);

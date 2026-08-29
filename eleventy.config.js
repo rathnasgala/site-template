@@ -28,7 +28,22 @@ async function verifiedMediaSource(postSource, mediaSource) {
 export default async function (eleventyConfig) {
   const [manifest, site] = await Promise.all([readBuildManifest(), loadSiteConfiguration()]);
   const attributionTier = process.env.GALA_ATTRIBUTION_TIER === 'PAID' ? 'PAID' : 'FREE';
+  const buildCommit = process.env.GALA_BUILD_COMMIT;
+  if (buildCommit != null && !/^[0-9a-f]{40}$/.test(buildCommit)) {
+    throw new TypeError('GALA_BUILD_COMMIT must be a lowercase commit SHA');
+  }
+  const repository = site.site.repository;
+  const buildIdentity = buildCommit != null
+    && /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?\/[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/.test(repository ?? '')
+    ? Object.freeze({
+        commit: buildCommit,
+        shortCommit: buildCommit.slice(0, 8),
+        versionUrl: `https://app.gala67.com/s/version?repository=${encodeURIComponent(repository)}`
+          + `&commit=${buildCommit}`
+      })
+    : null;
   eleventyConfig.addGlobalData('attributionTier', attributionTier);
+  eleventyConfig.addGlobalData('buildIdentity', buildIdentity);
   eleventyConfig.addGlobalData('themeBootstrap', themeBootstrap);
   eleventyConfig.addFilter('sha256Csp', (value) =>
     createHash('sha256').update(String(value)).digest('base64'));

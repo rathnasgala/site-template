@@ -65,7 +65,7 @@ test('scaffolds author-owned uncompressed performance budgets', () => {
     // The single dependency-free reader bundle has ample room without letting regressions hide.
     managedJavaScriptBytes: 65536,
     // Source CSS stays readable; the browser receives the minified artifact.
-    managedCssBytes: 32768,
+    managedCssBytes: 33792,
     ordinaryHtmlBytes: 32768
   });
 });

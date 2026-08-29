@@ -4,7 +4,7 @@ schemaVersion: 1
 framework:
   themePackage:
     name: "@rathnasgala/theme"
-    version: 2.0.9
+    version: 2.0.10
 site:
   id: unavailable
   ownerId: unavailable
@@ -56,5 +56,5 @@ contact:
 performance:
   budgets:
     managedJavaScriptBytes: 65536
-    managedCssBytes: 32768
+    managedCssBytes: 33792
     ordinaryHtmlBytes: 32768

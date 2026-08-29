@@ -142,6 +142,23 @@ test('the header stays with the reader on a long post', async () => {
   assert.match(header, /background:/);
 });
 
+test('short pages keep the publication footer at the viewport bottom', async () => {
+  const styles = await readFile(new URL('../src/styles/theme.css', import.meta.url), 'utf8');
+  const body = styles.match(/body \{[^}]+\}/)?.[0] ?? '';
+  assert.match(body, /box-sizing:\s*border-box/);
+  assert.match(body, /display:\s*flex/);
+  assert.match(body, /flex-direction:\s*column/);
+  assert.match(body, /min-block-size:\s*100vh/);
+  assert.match(styles, /main\s*\{[^}]*flex:\s*1\s+0\s+auto/s);
+});
+
+test('footer identifies the exact publication build through the platform version page', async () => {
+  const source = await readFile(layout, 'utf8');
+  assert.match(source, /buildIdentity\.versionUrl/);
+  assert.match(source, /buildIdentity\.shortCommit/);
+  assert.match(source, /aria-label="Publication build/);
+});
+
 test('closed dialogs occupy no page layout and the responsive article uses one copy of each rail', async () => {
   const styles = await readFile(new URL('../src/styles/theme.css', import.meta.url), 'utf8');
   const componentsSource = await readFile(components, 'utf8');

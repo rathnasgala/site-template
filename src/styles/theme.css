@@ -272,6 +272,11 @@
 html { scroll-behavior: smooth; }
 
 body {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100vh;
+  min-block-size: 100svh;
   margin: 0;
   padding: var(--gala-space-page);
   color: var(--gala-color-text);
@@ -471,6 +476,7 @@ main,
   max-inline-size: var(--gala-content-width);
   margin-inline: auto;
 }
+main { flex: 1 0 auto; inline-size: 100%; }
 
 a { color: var(--gala-color-accent); }
 

@@ -3,7 +3,7 @@
  * Copies the reader-side runtime into `src/assets/vendor`, as files the publication owns.
  *
  * Nothing is fetched at page load: a Gala site is self-contained and outlives Gala, so a CDN
- * `<script src>` on a writer's domain is not an option — it would take their site down with
+ * `<script src>` on a writer's domain is not an option - it would take their site down with
  * somebody else's bad hour, and an auto-updating third-party script can never carry a subresource
  * hash. These copies are committed, listed in `.gala/managed-files.json`, and verified against
  * that manifest before the self-updater will replace them.

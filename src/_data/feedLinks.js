@@ -6,7 +6,7 @@ const site = await loadSiteConfiguration();
 
 export default languages.map((language) => Object.freeze({
   language,
-  title: `${site.site.name} — ${language}`,
+  title: `${site.site.name} - ${language}`,
   href: siteUrl({
     canonicalBaseUrl: site.hosting.canonicalBaseUrl,
     pathPrefix: site.hosting.pathPrefix ?? '/',

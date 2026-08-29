@@ -127,7 +127,7 @@
 }
 
 
-/* Two more, because colour is the choice a writer actually wants to make — and the one that is
+/* Two more, because colour is the choice a writer actually wants to make - and the one that is
    safe to offer, since a palette only swaps values every rule already reads and each is checked
    for contrast in both modes. */
 :root[data-palette='forest'] {
@@ -205,8 +205,8 @@
  *
  * Three, each designed whole.
  *
- * This replaced nine independent knobs — typeface, spacing, density, radius, motion, surfaces,
- * palette — which a writer set one at a time, blind, and only saw combined after a deploy. Nine
+ * This replaced nine independent knobs - typeface, spacing, density, radius, motion, surfaces,
+ * palette - which a writer set one at a time, blind, and only saw combined after a deploy. Nine
  * knobs is several hundred looks, and nobody had seen most of them: `mono` + `round` + `spacious`
  * + `raised` produced monospace headings inside page-wide pills, and it was reachable in four
  * clicks. A look is a set of decisions that agree with each other, so it is chosen as a set.
@@ -254,7 +254,7 @@
   --gala-surface-border: var(--gala-color-border-strong);
   --gala-surface-shadow: none;
 }
-/* Mono is an accent here — labels, counts, metadata — not a face to set a page in. */
+/* Mono is an accent here - labels, counts, metadata - not a face to set a page in. */
 :root[data-theme='technical'] .gala-eyebrow,
 :root[data-theme='technical'] .gala-engagement dt,
 :root[data-theme='technical'] .gala-comment__meta time {
@@ -350,7 +350,7 @@ body {
 }
 
 /* Headings carry the hierarchy, so they get the display face, a tighter measure and tighter
-   tracking — large type set at body tracking is the single clearest sign of an unconsidered page. */
+   tracking - large type set at body tracking is the single clearest sign of an unconsidered page. */
 :where(h1, h2, h3, h4) {
   font-family: var(--gala-font-display);
   font-weight: var(--gala-weight-display);
@@ -394,13 +394,15 @@ blockquote {
 
 /*
  * Stays with the reader. It used to scroll away, so on a long post the only way back to the site
- * — or to sign in — was to scroll to the top. The negative inline margin lets the bar's background
+ * - or to sign in - was to scroll to the top. The negative inline margin lets the bar's background
  * reach the edge of the viewport while its contents stay on the page's own measure.
  */
 .gala-site-header {
   position: sticky;
   inset-block-start: 0;
   z-index: 10;
+  box-sizing: border-box;
+  inline-size: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;

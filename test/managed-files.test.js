@@ -114,7 +114,7 @@ test('author workflow passes both bounded rotation secret slots to the reusable 
  * What the runtime needs in order to build at all.
  *
  * A publication carries its own budgets in its own `site.config.yml`, and the self-updater cannot
- * silently rewrite the writer's file — so an update that ships more bytes than the site allows
+ * silently rewrite the writer's file - so an update that ships more bytes than the site allows
  * fails its next build with "Managed JavaScript performance budget exceeded". That is exactly what
  * happened when the reader runtime landed. Declaring the minimum here lets the updater raise the
  * ceiling alongside the files, and asserting it against the real bytes stops the two drifting.

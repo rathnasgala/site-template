@@ -22,9 +22,10 @@ export default class LanguageIndexes {
   }
 
   render({ buildManifest, language, site }) {
-    const posts = buildManifest.posts.filter(
-      (post) => post.publicationState === 'published' && post.language === language
-    );
+    const posts = buildManifest.posts.filter((post) => (
+      post.publicationState === 'published'
+        || (buildManifest.preview === true && post.publicationState === 'not-emitted')
+    ) && post.language === language);
     const items = posts.map((post) => {
       const href = siteUrl({
         canonicalBaseUrl: site.hosting.canonicalBaseUrl,
@@ -33,6 +34,6 @@ export default class LanguageIndexes {
       });
       return `<li><a href="${html(href)}">${html(post.frontmatter.title)}</a></li>`;
     }).join('');
-    return `<h1>${html(site.site.name)} — ${html(language)}</h1><ol>${items}</ol>`;
+    return `<h1>${html(site.site.name)} - ${html(language)}</h1><ol>${items}</ol>`;
   }
 }

@@ -21,6 +21,10 @@ test('publication owns its version page and binds API access to its site identit
   assert.match(behavior, /\/v1\/version\?siteId=/);
   assert.match(behavior, /registry\.npmjs\.org/);
   assert.match(behavior, /app\.gala67\.com\/version\.json/);
+  assert.doesNotMatch(behavior, /github\.com\/rathnasgala\/(?:app|api)/);
+  for (const repository of ['cli', 'site-template', 'publish']) {
+    assert.match(behavior, new RegExp(`github\\.com/rathnasgala/${repository}`));
+  }
   assert.match(behavior, /Promise\.allSettled/);
   assert.match(behavior, /data-version-retry/);
   assert.match(base, /assets\/version\.js/);
@@ -83,12 +87,24 @@ test('runtime isolates source failures and refresh retries every live source', a
   });
   await new Promise((resolve) => setImmediate(resolve));
   assert.match(cards.get('api').children[1].textContent, /unavailable/);
-  assert.equal(cards.get('app').children[1].textContent, 'aaaaaaaa');
+  assert.equal(cards.get('app').children.length, 2);
+  assert.equal(cards.get('app').children[1].textContent, 'Built 8/28/2026, 5:00:00 PM');
   assert.equal(calls.length, 5);
+
+  for (const [id, repository] of [
+    ['cli', 'https://github.com/rathnasgala/cli'],
+    ['theme', 'https://github.com/rathnasgala/site-template'],
+    ['content-validation', 'https://github.com/rathnasgala/publish'],
+  ]) {
+    const card = cards.get(id);
+    assert.equal(card.children[2].href, repository);
+    assert.equal(card.children[3].href, `${repository}/commit/${'b'.repeat(40)}`);
+  }
 
   failApi = false;
   retry.listeners.get('click')();
   await new Promise((resolve) => setImmediate(resolve));
-  assert.equal(cards.get('api').children[1].textContent, 'aaaaaaaa');
+  assert.equal(cards.get('api').children.length, 2);
+  assert.equal(cards.get('api').children[1].textContent, 'Built 8/28/2026, 5:00:00 PM');
   assert.equal(calls.length, 10);
 });

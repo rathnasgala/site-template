@@ -21,7 +21,7 @@ export default async function siteConfiguration() {
   };
   /*
    * The writer picks one colour; the page needs two, because the same colour cannot be readable on
-   * both a light and a dark ground. Derived here rather than in CSS so the contrast is exact — a
+   * both a light and a dark ground. Derived here rather than in CSS so the contrast is exact - a
    * `color-mix()` approximation can land under 4.5:1 and nobody would know until a reader could
    * not read a link.
    *

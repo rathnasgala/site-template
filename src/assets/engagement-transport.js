@@ -2,7 +2,7 @@
  * The reader's identity, and the only way to write on their behalf.
  *
  * Both belong to the account frame, which is served by the API and runs on its origin. The
- * reader's token lives there and nowhere else — this page never sees it, and never should: the
+ * reader's token lives there and nowhere else - this page never sees it, and never should: the
  * page is the writer's own site, and a reader's credentials are not the writer's to hold. So a
  * write is a request posted into the frame, and the frame answers with a result.
  *

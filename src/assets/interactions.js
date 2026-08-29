@@ -384,8 +384,8 @@ window.addEventListener('focus', () => {
 /*
  * The sign-in window reports success to this page rather than to the account frame.
  *
- * It cannot reach the frame directly: a frame embedded in a publication has its storage — and its
- * BroadcastChannel — partitioned away from a window running at the top level on the API's origin,
+ * It cannot reach the frame directly: a frame embedded in a publication has its storage - and its
+ * BroadcastChannel - partitioned away from a window running at the top level on the API's origin,
  * so the session it wrote is invisible there. The signal carries no token; it only says a sign-in
  * happened, and this asks the frame to look again. Without it the frame never learns the reader
  * signed in, and every click asks them to sign in once more.
@@ -504,7 +504,7 @@ if (sessionFrame) {
       });
       return;
     }
-    /* The frame is cross-origin, so its content height is not readable from here — it reports
+    /* The frame is cross-origin, so its content height is not readable from here - it reports
        its own, and the box is sized to it. Without this the account panel scrolled inside a fixed
        box, clipping the first line of its own text. */
     if (event.data?.type === 'gala-session-height') {

@@ -34,6 +34,20 @@ test('accepts effective emitted posts and no interpretation flags', () => {
   }), /publicationState/);
 });
 
+test('accepts scheduled posts only in an explicitly marked preview manifest', () => {
+  const scheduled = { ...valid.posts[0], publicationState: 'not-emitted' };
+  assert.equal(validateBuildManifest({
+    ...valid,
+    preview: true,
+    posts: [scheduled]
+  }).posts[0].publicationState, 'not-emitted');
+  assert.throws(() => validateBuildManifest({
+    ...valid,
+    preview: false,
+    posts: [scheduled]
+  }), /publicationState/);
+});
+
 test('accepts an intentional published-slug redirect and rejects output collisions', () => {
   const redirect = {
     id: valid.posts[0].id,

@@ -2,11 +2,11 @@
   const page = document.querySelector('[data-version-page]');
   if (!(page instanceof HTMLElement)) return;
   const modules = Object.freeze([
-    { id: 'app', name: 'Gala App', url: 'https://app.gala67.com/version.json', repository: 'https://github.com/rathnasgala/app' },
-    { id: 'api', name: 'Gala API', url: `${page.dataset.apiBaseUrl}/v1/version?siteId=${encodeURIComponent(page.dataset.siteId ?? '')}`, repository: 'https://github.com/rathnasgala/api' },
-    { id: 'cli', name: 'Gala CLI', url: 'https://registry.npmjs.org/%40rathnasgala%2Fcli/latest', repository: 'https://github.com/rathnasgala/cli' },
-    { id: 'theme', name: 'Gala Site Template', url: 'https://registry.npmjs.org/%40rathnasgala%2Ftheme/latest', repository: 'https://github.com/rathnasgala/site-template' },
-    { id: 'content-validation', name: 'Gala Content Validation', url: 'https://registry.npmjs.org/%40rathnasgala%2Fcontent-validation/latest', repository: 'https://github.com/rathnasgala/publish' }
+    { id: 'app', name: 'Gala App', url: 'https://app.gala67.com/version.json' },
+    { id: 'api', name: 'Gala API', url: `${page.dataset.apiBaseUrl}/v1/version?siteId=${encodeURIComponent(page.dataset.siteId ?? '')}` },
+    { id: 'cli', name: 'Gala CLI', url: 'https://registry.npmjs.org/%40rathnasgala%2Fcli/latest', repository: 'https://github.com/rathnasgala/cli', repositoryName: 'rathnasgala/cli' },
+    { id: 'theme', name: 'Gala Site Template', url: 'https://registry.npmjs.org/%40rathnasgala%2Ftheme/latest', repository: 'https://github.com/rathnasgala/site-template', repositoryName: 'rathnasgala/site-template' },
+    { id: 'content-validation', name: 'Gala Content Validation', url: 'https://registry.npmjs.org/%40rathnasgala%2Fcontent-validation/latest', repository: 'https://github.com/rathnasgala/publish', repositoryName: 'rathnasgala/publish' }
   ]);
   const commitPattern = /^[0-9a-f]{40}$/;
   function exactCommit(value) {
@@ -31,23 +31,29 @@
       return;
     }
     const value = result.value;
-    const commit = exactCommit(value);
     if (typeof value.version === 'string') {
       const release = document.createElement('p');
       release.textContent = `Release ${value.version}`;
       card.append(release);
     }
-    if (commit) {
-      const link = document.createElement('a');
-      link.href = `${module.repository}/commit/${commit}`;
-      link.className = 'gala-version-commit';
-      link.textContent = commit.slice(0, 8);
-      card.append(link);
-    } else {
-      const status = document.createElement('p');
-      status.className = 'gala-version-status gala-version-status--error';
-      status.textContent = 'The live source did not report an exact commit.';
-      card.append(status);
+    if (module.repository) {
+      const repository = document.createElement('a');
+      repository.href = module.repository;
+      repository.textContent = module.repositoryName;
+      card.append(repository);
+      const commit = exactCommit(value);
+      if (commit) {
+        const link = document.createElement('a');
+        link.href = `${module.repository}/commit/${commit}`;
+        link.className = 'gala-version-commit';
+        link.textContent = commit.slice(0, 8);
+        card.append(link);
+      } else {
+        const status = document.createElement('p');
+        status.className = 'gala-version-status gala-version-status--error';
+        status.textContent = 'The live source did not report an exact commit.';
+        card.append(status);
+      }
     }
     if (typeof value.builtAt === 'string') {
       const built = document.createElement('time');

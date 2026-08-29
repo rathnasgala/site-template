@@ -169,6 +169,29 @@ performance:
   return root;
 }
 
+async function previewFixture() {
+  const root = await fixture();
+  const manifestPath = path.join(root, '.gala', 'build', 'validated-posts.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  manifest.preview = true;
+  manifest.posts.push({
+    source: 'content/posts/scheduled/index.en.md',
+    id: '01K00000000000000000000003',
+    rawFrontmatter: { title: 'Scheduled post', publishAfterDate: '2026-06-20', language: 'en' },
+    frontmatter: { title: 'Scheduled post', publishAfterDate: '2026-06-20', language: 'en' },
+    contentBody: 'Scheduled **preview** body.',
+    body: 'Scheduled **preview** body.',
+    slug: 'scheduled',
+    language: 'en',
+    relativeUrl: '/en/scheduled/',
+    pageUrl: 'https://example.com/blog/en/scheduled/',
+    canonicalUrl: 'https://example.com/blog/en/scheduled/',
+    publicationState: 'not-emitted'
+  });
+  await writeFile(manifestPath, JSON.stringify(manifest));
+  return root;
+}
+
 test('Eleventy emits only current manifest pages and renders tombstones in place', async () => {
   const root = await fixture();
   await execute(process.execPath, [eleventy], {
@@ -319,7 +342,7 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   assert.match(frenchFeed, /Validé/);
   assert.doesNotMatch(frenchFeed, /Deleted/);
   const englishIndex = await readFile(path.join(root, '_site', 'en', 'index.html'), 'utf8');
-  assert.match(englishIndex, /Fixture Site — en/);
+  assert.match(englishIndex, /Fixture Site - en/);
   assert.match(englishIndex, /href="https:\/\/example\.com\/blog\/en\/validated\/"/);
   assert.equal(
     await readFile(path.join(root, '_site', 'en', 'validated', 'media', 'cover image.png'), 'utf8'),
@@ -343,6 +366,20 @@ test('Eleventy fails hard instead of globbing content when the manifest is missi
     () => execute(process.execPath, [eleventy], { cwd: root }),
     /Validated build manifest is missing/
   );
+});
+
+test('local preview renders a scheduled post with an explicit schedule label', async () => {
+  const root = await previewFixture();
+  await execute(process.execPath, [eleventy], { cwd: root });
+
+  const home = await readFile(path.join(root, '_site', 'index.html'), 'utf8');
+  assert.match(home, />Scheduled post<\/a>/);
+  assert.match(home, /Scheduled for 2026-06-20/);
+  const post = await readFile(path.join(root, '_site', 'en', 'scheduled', 'index.html'), 'utf8');
+  assert.match(post, /<h1>Scheduled post<\/h1>/);
+  assert.match(post, /Scheduled for 2026-06-20/);
+  assert.match(post, /Scheduled <strong>preview<\/strong> body\./);
+  assert.doesNotMatch(post, /data-engagement-url|Article conversation/);
 });
 
 test('Eleventy refuses a validated media path replaced by a symbolic link', async () => {

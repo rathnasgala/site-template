@@ -3,7 +3,7 @@ const STORAGE_KEY = 'gala-color-mode';
 
 /*
  * The reader's own choice always wins. Absent one, the publication's `design.colorMode` decides
- * what they see first — it is already on the element, server-rendered. This used to fall back to
+ * what they see first - it is already on the element, server-rendered. This used to fall back to
  * `system` unconditionally, which meant a writer could set a colour mode and no reader ever saw
  * it: the setting existed everywhere except in the page.
  */

@@ -142,7 +142,7 @@ test('reader controls are accessible and include all low-risk write classes', ()
  * The engagement endpoint is `max-age=60, public`. That is right for view counts and wrong the
  * instant a reader writes something: the refresh after a write re-requested the same URL and the
  * browser answered from its own cache, so the reader's comment did not appear until they reloaded
- * — and since a comment absent from the list carries no Reply button, nobody could reply to it.
+ * - and since a comment absent from the list carries no Reply button, nobody could reply to it.
  */
 test('a write is followed by a refresh that bypasses the browser cache', () => {
   assert.match(island, /cache: fresh \? 'no-store' : 'default'/);
@@ -150,8 +150,8 @@ test('a write is followed by a refresh that bypasses the browser cache', () => {
 });
 
 test('ordinary loads and cursor pages still use the cache', () => {
-  // `fresh` is the fourth argument. The cursor page passes `true` as the third — that is
-  // `appendComments` — so the two are distinguished by shape, not by counting `true`s.
+  // `fresh` is the fourth argument. The cursor page passes `true` as the third - that is
+  // `appendComments` - so the two are distinguished by shape, not by counting `true`s.
   // Paging appends and stays cacheable; only a write asks for `fresh`.
   assert.match(island, /load\(state\.cursor, \{ append: true \}\)/);
   assert.doesNotMatch(island, /load\(state\.cursor, \{ append: true, fresh: true \}\)/);

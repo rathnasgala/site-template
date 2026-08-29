@@ -12,7 +12,7 @@ const PROVIDER_HOST = /\.github\.io$/;
  * The host this repository may claim as its own, or null.
  *
  * A site served under a path is served that way because GitHub gives it the domain held by the
- * owner's main site — https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages
+ * owner's main site - https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages
  * puts a project site at `www.octocat.com/octo-project`. GitHub reads this file from the
  * published branch and treats it as *this* repository's own domain, which overrides that
  * inheritance: the blog would move to the domain root and take the address away from the site

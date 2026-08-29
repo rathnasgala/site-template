@@ -5,4 +5,4 @@ permalink: /index.html
 ---
 {% from "components/ui.njk" import cardIndex %}
 <h1>{{ site.site.name }}</h1>
-{{ cardIndex(buildManifest.posts) }}
+{{ cardIndex(buildManifest.posts, buildManifest.preview) }}

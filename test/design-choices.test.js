@@ -9,15 +9,15 @@ const config = await readFile(new URL('../lib/site-config.js', import.meta.url),
 /**
  * Every choice offered to a writer has to change something.
  *
- * Twice now a value has been offered and implemented nowhere — `colorMode` was written into
+ * Twice now a value has been offered and implemented nowhere - `colorMode` was written into
  * `site.config.yml` while the page hardcoded `data-mode="system"`, and `componentStyle` set two
  * custom properties that no rule read. Both looked complete from every side except the reader's.
  */
 /*
  * Three decisions, not nine.
  *
- * A writer chooses a look, a palette and a colour mode. Everything else — typeface, spacing,
- * radius, surfaces, motion — belongs to the look and is designed with it. Nine independent knobs
+ * A writer chooses a look, a palette and a colour mode. Everything else - typeface, spacing,
+ * radius, surfaces, motion - belongs to the look and is designed with it. Nine independent knobs
  * was several hundred combinations, none of them reviewed: `mono` + `round` + `spacious` +
  * `raised` set a page in monospace inside page-wide pills, and it was four clicks away.
  */

@@ -138,6 +138,8 @@ test('the header stays with the reader on a long post', async () => {
   const header = css.match(/\.gala-site-header \{[^}]+\}/)?.[0] ?? '';
   assert.match(header, /position: sticky/);
   assert.match(header, /inset-block-start: 0/);
+  assert.match(header, /box-sizing:\s*border-box/);
+  assert.match(header, /inline-size:\s*100%/);
   // A transparent sticky bar lets the article scroll through it.
   assert.match(header, /background:/);
 });

@@ -8,7 +8,7 @@ const DARK = parseHex('#131211');
 
 /*
  * A writer picks a colour they like. Most colours a person likes fail contrast against one ground
- * or the other, and they cannot see that until the site is deployed — so the colour is moved along
+ * or the other, and they cannot see that until the site is deployed - so the colour is moved along
  * its own lightness until it is readable, rather than accepted and left unreadable, or refused.
  */
 test('any colour a writer picks is readable in both modes', () => {

@@ -28,7 +28,7 @@ export default class LanguageFeeds {
     });
     return renderAtomFeed({
       id: selfUrl,
-      title: `${site.site.name} — ${language}`,
+      title: `${site.site.name} - ${language}`,
       author: typeof site.site.author === 'string' && site.site.author.trim() !== ''
         ? site.site.author.trim()
         : site.site.name,

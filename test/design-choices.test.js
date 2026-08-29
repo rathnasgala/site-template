@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const css = await readFile(new URL('../src/styles/theme.css', import.meta.url), 'utf8');
+const compiledCss = await readFile(new URL('../src/assets/theme.css', import.meta.url), 'utf8');
 const layout = await readFile(new URL('../src/_includes/layouts/base.njk', import.meta.url), 'utf8');
 const config = await readFile(new URL('../lib/site-config.js', import.meta.url), 'utf8');
 
@@ -72,4 +73,13 @@ test('the allowlist a writer is offered is the one the theme implements', () => 
       assert.ok(config.includes(`'${value}'`), `${key}: ${value} is not in site-config.js`);
     }
   }
+});
+
+test('the header divider spans the same available content width as the footer', () => {
+  const sourceHeader = css.match(/\.gala-site-header\s*\{([^}]*)\}/)?.[1] ?? '';
+  const compiledHeader = compiledCss.match(/\.gala-site-header\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(sourceHeader, /inline-size:\s*100%/);
+  assert.match(sourceHeader, /box-sizing:\s*border-box/);
+  assert.match(compiledHeader, /inline-size:100%/);
+  assert.match(compiledHeader, /box-sizing:border-box/);
 });

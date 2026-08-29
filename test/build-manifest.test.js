@@ -35,7 +35,7 @@ test('accepts effective emitted posts and no interpretation flags', () => {
 });
 
 test('accepts scheduled posts only in an explicitly marked preview manifest', () => {
-  const scheduled = { ...valid.posts[0], publicationState: 'not-emitted' };
+  const scheduled = { ...valid.posts[0], id: null, publicationState: 'not-emitted' };
   assert.equal(validateBuildManifest({
     ...valid,
     preview: true,
@@ -44,8 +44,26 @@ test('accepts scheduled posts only in an explicitly marked preview manifest', ()
   assert.throws(() => validateBuildManifest({
     ...valid,
     preview: false,
-    posts: [scheduled]
+    posts: [{ ...scheduled, id: valid.posts[0].id }]
   }), /publicationState/);
+  assert.throws(() => validateBuildManifest({
+    ...valid,
+    preview: true,
+    posts: [{ ...valid.posts[0], id: null, publicationState: 'published' }]
+  }), /id is invalid/);
+  const second = {
+    ...scheduled,
+    source: 'content/posts/second/index.en.md',
+    slug: 'second',
+    relativeUrl: '/en/second/',
+    pageUrl: 'https://example.com/en/second/',
+    canonicalUrl: 'https://example.com/en/second/'
+  };
+  assert.equal(validateBuildManifest({
+    ...valid,
+    preview: true,
+    posts: [scheduled, second]
+  }).posts.length, 2);
 });
 
 test('accepts an intentional published-slug redirect and rejects output collisions', () => {

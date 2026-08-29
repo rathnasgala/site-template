@@ -176,7 +176,7 @@ async function previewFixture() {
   manifest.preview = true;
   manifest.posts.push({
     source: 'content/posts/scheduled/index.en.md',
-    id: '01K00000000000000000000003',
+    id: null,
     rawFrontmatter: { title: 'Scheduled post', publishAfterDate: '2026-06-20', language: 'en' },
     frontmatter: { title: 'Scheduled post', publishAfterDate: '2026-06-20', language: 'en' },
     contentBody: 'Scheduled **preview** body.',

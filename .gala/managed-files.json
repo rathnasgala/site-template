@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "2.0.13",
+    "version": "2.0.14",
     "availableDesignThemes": [
       "editorial",
       "modern",
@@ -19,7 +19,7 @@
     ".gitignore": "b5fa24e10155097a0d372926fd2e59e6072e7cc2cb6399bbfb4beb8b33ea315b",
     "eleventy.config.js": "7772953f8c55673d9e11fb803c75470f8a61747de9e1cec0d03bbbedb7fae246",
     "lib/accent.js": "24e5d2bcf00e6b3ad86cf8942e56dcb98b0d06ff8e0673ccb7cc85fa732e0837",
-    "lib/build-manifest.js": "f3863c7418b125cdf47eb69c2245b08b5048a7415361120fc555db0043a7efaf",
+    "lib/build-manifest.js": "b6fd412256515603a075d1fcf5f9fb57f197b4fd5f92c9ca28ca5fe2486daf11",
     "lib/engagement-snapshot.js": "298c11b1ab135a3a98a4e31b6320ab60dfd7fda6a9d9053df37d86282a5a6687",
     "lib/performance-budget.js": "70c5d1d697302466e1fa982fd07b19abb299e3fcae0bb05aa8cdebf5d7b69241",
     "lib/prism-compiled-output.js": "0c1f93d025c70dbec10c78f17f59ae10a9a6de773b58adb2f26f42de62f7be2c",

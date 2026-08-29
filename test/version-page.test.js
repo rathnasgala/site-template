@@ -40,6 +40,8 @@ test('version page exposes repository and exact publication commit without an Ap
 });
 
 test('runtime isolates source failures and refresh retries every live source', async () => {
+  const builtAt = '2026-08-29T00:00:00Z';
+  const expectedBuiltAt = `Built ${new Date(builtAt).toLocaleString()}`;
   class Element {
     constructor() {
       this.dataset = {};
@@ -74,7 +76,7 @@ test('runtime isolates source failures and refresh retries every live source', a
       ok: true,
       json: async () => url.includes('registry.npmjs.org')
         ? { version: '1.2.3', gitHead: 'b'.repeat(40) }
-        : { commit: 'a'.repeat(40), builtAt: '2026-08-29T00:00:00Z' }
+        : { commit: 'a'.repeat(40), builtAt }
     };
   };
   const document = {
@@ -88,7 +90,7 @@ test('runtime isolates source failures and refresh retries every live source', a
   await new Promise((resolve) => setImmediate(resolve));
   assert.match(cards.get('api').children[1].textContent, /unavailable/);
   assert.equal(cards.get('app').children.length, 2);
-  assert.equal(cards.get('app').children[1].textContent, 'Built 8/28/2026, 5:00:00 PM');
+  assert.equal(cards.get('app').children[1].textContent, expectedBuiltAt);
   assert.equal(calls.length, 5);
 
   for (const [id, repository] of [
@@ -105,6 +107,6 @@ test('runtime isolates source failures and refresh retries every live source', a
   retry.listeners.get('click')();
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(cards.get('api').children.length, 2);
-  assert.equal(cards.get('api').children[1].textContent, 'Built 8/28/2026, 5:00:00 PM');
+  assert.equal(cards.get('api').children[1].textContent, expectedBuiltAt);
   assert.equal(calls.length, 10);
 });

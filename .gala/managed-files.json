@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "2.0.21",
+    "version": "2.0.22",
     "availableDesignThemes": [
       "editorial",
       "modern",
@@ -11,7 +11,7 @@
     "securityAdvisories": []
   },
   "requiredBudgets": {
-    "managedJavaScriptBytes": 72168,
+    "managedJavaScriptBytes": 72492,
     "managedCssBytes": 34816
   },
   "files": {
@@ -50,16 +50,16 @@
     "src/assets/embed-gist.svg": "fcd9bc2bf29a5c118492b853c0a01390b7539c38ddb985da3c2a6e2f246a39f7",
     "src/assets/embed-x.svg": "0ae74edc6790ec7e933067fe5392bce756e93fa7ad71caacf1c1ca99fa4ec9b6",
     "src/assets/embed-youtube.svg": "10d192f2b14b67664fea88c8cf246321d20190def51d59fad5762e552219b067",
-    "src/assets/engagement-comments.js": "eda0fee471c7e42ee01a25b8aa14ed6ae9690d52b3fbb34027d97534ab62998b",
+    "src/assets/engagement-comments.js": "2cab353abcbc2b4095f948c9d1b0e528bca937afb269944e29be8bffb7115e09",
     "src/assets/engagement-transport.js": "7f69815c4eb4fc0e127a5c09702da4189130d47b73b4598fce4196d7d6f5cbe8",
     "src/assets/favicon.svg": "8615e3d96fe37ae9ed14afb1886e7c0e690eef5b10be66ca91cccfd085a74bb6",
     "src/assets/interactions.js": "2c59352ef14e46feabc0106c4ec9440b6b2e047daa441f72b4d1604d7cc0d1c5",
     "src/assets/preferences.js": "789127bee013ed6a1bbf8cefd7b9109291c16220e7a6e09314e3c93c54731d1d",
     "src/assets/prism-session.js": "1fab23725b843006c3f589af7669ef3ad6ad01f3264a3b00564e64b56738d2cd",
-    "src/assets/reader.js": "a55efa63d8b6fee9afb1eb1fe4166d289aef56673e130f571c1be63598b9d3c3",
+    "src/assets/reader.js": "cc1798e0f7b0070b4115ad0e7158fb7bad59bb0ec0d127c48b2c973e998fa2af",
     "src/assets/search.js": "df425f0239277792ad39f2138bc89cb66cc4ecda5ed59042d46abc2f05372088",
     "src/assets/theme-mode.js": "d81af8317b59f6d94dc8154c1dcba9d3e16accb37348bc3fce127712141d6c63",
-    "src/assets/theme.css": "7391086efd6f61791c47bbdf3523d7452e17b1cdb1fc91339861fe2f0a2c884b",
+    "src/assets/theme.css": "409a5631277aeed7a03b9f7825e154052544b670b472c1821ec751498735115b",
     "src/assets/version.js": "57d1bb2bd949a7bdc00de6293138c1044a57b41f611ca6cc2da5aa168e5f0543",
     "src/client/reader.js": "643aec955c5beb6f902c737313dbc1a8232150fcb5d800350aa7fb1fb69f1760",
     "src/cname.11ty.js": "890f963f42fa8d20dce35f2784e099dcb6d7c03840909db3c9fa10c6a94cbeca",
@@ -73,7 +73,7 @@
     "src/search-index.11ty.js": "700dc2a2be0ef20de3a828a4612fcf7a082691eade29c6e1d75f09c24b6c6024",
     "src/search.njk": "63f2e8aeebb63c90da2e375eece639ce096cad1eff7f28628cafc46faf7ceee6",
     "src/sitemap.11ty.js": "4f233e94fb4a913ad5659116518432ed264984a7b622eba3558c77b4ec6435dc",
-    "src/styles/theme.css": "56fe8387182aee00df73f24d853f9d98fe0026f9e627e193e6d9deba9a4f631e",
+    "src/styles/theme.css": "3ffd6387417d3cd224fea52cd0cfc5e46b4a5eafdfd97b6a379c2761975960b2",
     "src/version.njk": "c0833dcf14a246c069903d35f8be92d410935b968a26346af237bc1392c88340",
     "static/favicon.ico": "ad3cb0b02f0164f3af6280d0bfe712879d55cec0e9a7a567f658aaddca5a55a2",
     "static/robots.txt": "16ceb5ee3e0dc13aa9adf31a3ebbe45a1d965b8c2b9f72eaf84e5911e140ed95"

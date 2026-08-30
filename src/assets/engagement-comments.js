@@ -42,10 +42,13 @@ function commentsController(root, endpoint) {
 
   async function write(operation, payload) {
     if (!sessionUser.value) { requestSignIn({ kind: 'comment' }); return false; }
-    state.busy = true; state.status = ''; render();
+    state.busy = true;
+    state.status = operation === 'comment.create' ? 'Posting comment…' : 'Saving comment…';
+    render();
     try {
       await sendEngagementWrite(operation, payload);
       await load('', { fresh: true });
+      state.status = '';
       return true;
     } catch (error) {
       state.status = engagementErrorMessage(error.message);
@@ -57,7 +60,9 @@ function commentsController(root, endpoint) {
     const formNode = element('form', 'gala-comment__form');
     const field = element('textarea');
     field.rows = 3; field.value = initial; field.placeholder = label; field.setAttribute('aria-label', label);
-    const send = element('button', '', 'Post'); send.type = 'submit'; send.disabled = state.busy;
+    const send = element('button', state.busy ? 'gala-comment__submit--busy' : '',
+      state.busy ? 'Posting…' : 'Post');
+    send.type = 'submit'; send.disabled = state.busy;
     formNode.append(field, send);
     formNode.addEventListener('submit', async (event) => {
       event.preventDefault();

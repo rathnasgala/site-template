@@ -159,6 +159,15 @@ test('a write is followed by a refresh that bypasses the browser cache', () => {
   assert.match(island, /load\('', \{ fresh: true \}\)/);
 });
 
+test('posting a comment stays visibly busy through persistence and refresh', () => {
+  assert.match(island, /state\.status = operation === 'comment\.create' \? 'Posting comment…' : 'Saving comment…'/);
+  assert.match(island, /state\.busy \? 'gala-comment__submit--busy' : ''/);
+  assert.match(island, /state\.busy \? 'Posting…' : 'Post'/);
+  assert.match(island, /send\.disabled = state\.busy/);
+  assert.match(island, /await sendEngagementWrite\(operation, payload\);\s*await load\('', \{ fresh: true \}\);\s*state\.status = ''/);
+  assert.match(components, /data-engagement-status aria-live="polite"/);
+});
+
 test('ordinary loads and cursor pages still use the cache', () => {
   // `fresh` is the fourth argument. The cursor page passes `true` as the third - that is
   // `appendComments` - so the two are distinguished by shape, not by counting `true`s.

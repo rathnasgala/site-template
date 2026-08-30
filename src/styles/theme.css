@@ -749,6 +749,17 @@ button:focus-visible {
   resize: vertical;
 }
 .gala-comment__form textarea:focus-visible { outline: 2px solid var(--gala-color-accent); outline-offset: 1px; }
+.gala-comment__submit--busy { display: inline-flex; align-items: center; gap: var(--gala-space-xs); }
+.gala-comment__submit--busy::before {
+  content: '';
+  inline-size: .9rem;
+  block-size: .9rem;
+  box-sizing: border-box;
+  border: .125rem solid currentcolor;
+  border-block-start-color: transparent;
+  border-radius: 50%;
+  animation: gala-spin .8s linear infinite;
+}
 .gala-comment__controls { display: flex; gap: var(--gala-space-xs); }
 .gala-comments__status, .gala-comments__empty, .gala-comments__prompt {
   color: var(--gala-color-muted);

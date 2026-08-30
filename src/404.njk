@@ -8,5 +8,5 @@ eleventyExcludeFromCollections: true
   <p class="gala-badge">404</p>
   <h1>Page not found</h1>
   <p>The page may have moved or no longer exists.</p>
-  <a class="gala-button" href="{{ '/' | url }}">Return home</a>
+  <a class="gala-button" href="{{ '/' | publicationUrl(page.url) }}">Return home</a>
 </section>

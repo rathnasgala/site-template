@@ -19,8 +19,8 @@ test('appearance customization uses a generated stylesheet, not inline style att
 test('the browser receives the shared reader entry point and a version-page-only entry point', () => {
   const executable = [...layout.matchAll(/<script(?:\s+[^>]*)?src="([^"]+)"/g)].map((match) => match[1]);
   assert.deepEqual(executable, [
-    "{{ '/assets/reader.js' | url }}",
-    "{{ '/assets/version.js' | url }}"
+    "{{ '/assets/reader.js' | publicationUrl(page.url) }}",
+    "{{ '/assets/version.js' | publicationUrl(page.url) }}"
   ]);
-  assert.match(layout, /\{% if versionPage %\}<script src="{{ '\/assets\/version\.js' \| url }}"/);
+  assert.match(layout, /\{% if versionPage %\}<script src="{{ '\/assets\/version\.js' \| publicationUrl\(page\.url\) }}"/);
 });

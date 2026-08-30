@@ -24,20 +24,20 @@
     <script type="application/ld+json">{{ seo.structuredDataJson | safe }}</script>
     {% endif %}
     {% if post.publicationState == "tombstoned" %}<meta name="robots" content="noindex">{% endif %}
-    <link rel="stylesheet" href="{{ '/assets/theme.css' | url }}">
-    <link rel="stylesheet" href="{{ '/assets/accent.css' | url }}">
-    <link rel="stylesheet" href="{{ '/custom.css' | url }}">
-    <link rel="icon" href="{{ '/assets/favicon.svg' | url }}" type="image/svg+xml">
-    <script src="{{ '/assets/reader.js' | url }}" defer></script>
-    {% if versionPage %}<script src="{{ '/assets/version.js' | url }}" defer></script>{% endif %}
+    <link rel="stylesheet" href="{{ '/assets/theme.css' | publicationUrl(page.url) }}">
+    <link rel="stylesheet" href="{{ '/assets/accent.css' | publicationUrl(page.url) }}">
+    <link rel="stylesheet" href="{{ '/custom.css' | publicationUrl(page.url) }}">
+    <link rel="icon" href="{{ '/assets/favicon.svg' | publicationUrl(page.url) }}" type="image/svg+xml">
+    <script src="{{ '/assets/reader.js' | publicationUrl(page.url) }}" defer></script>
+    {% if versionPage %}<script src="{{ '/assets/version.js' | publicationUrl(page.url) }}" defer></script>{% endif %}
   </head>
   <body{% if post %} class="gala-page--article"{% endif %}>
     <a class="gala-skip-link" href="#main-content">Skip to content</a>
     <header class="gala-site-header">
-      <a class="gala-site-name" href="{{ '/' | url }}" aria-label="Home">{{ site.site.name }}</a>
+      <a class="gala-site-name" href="{{ '/' | publicationUrl(page.url) }}" aria-label="Home">{{ site.site.name }}</a>
       <nav class="gala-site-header__actions" aria-label="Site controls">
         {% if post %}<a class="gala-header-link" href="#article">Article</a><a class="gala-header-link" href="#conversation">Conversation</a>{% endif %}
-        {% if site.contact.enabled %}<a class="gala-icon-control" href="{{ '/contact/' | url }}" aria-label="Contact author" title="Contact">
+        {% if site.contact.enabled %}<a class="gala-icon-control" href="{{ '/contact/' | publicationUrl(page.url) }}" aria-label="Contact author" title="Contact">
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.4" width="18" height="13.2" rx="2.2"/><path d="m3.9 7.3 7.2 5.1a1.6 1.6 0 0 0 1.8 0l7.2-5.1"/></svg>
         </a>{% endif %}
         <button class="gala-icon-control" type="button" data-theme-mode-toggle aria-label="Color mode: system. Activate for light." title="Appearance">
@@ -65,7 +65,7 @@
             {% if site.site.authorProfile.profileUrl %}<a class="gala-page-footer__author" href="{{ site.site.authorProfile.profileUrl | escape }}" rel="author">{{ site.site.authorProfile.displayName }}</a>{% else %}<strong class="gala-page-footer__author">{{ site.site.authorProfile.displayName }}</strong>{% endif %}
             {% if site.site.publisher.name %}<span>Published by {% if site.site.publisher.url %}<a href="{{ site.site.publisher.url | escape }}" rel="publisher">{{ site.site.publisher.name }}</a>{% else %}{{ site.site.publisher.name }}{% endif %}</span>{% endif %}
             <span>&copy; {{ site.site.name }}</span>
-            {% if buildIdentity %}<span><a href="{{ buildIdentity.versionUrl }}" rel="external" aria-label="Publication build {{ buildIdentity.commit }}">{{ buildIdentity.shortCommit }}</a></span>{% endif %}
+            {% if buildIdentity %}<span><a href="{{ buildIdentity.versionUrl | publicationUrl(page.url) }}" rel="external" aria-label="Publication build {{ buildIdentity.commit }}">{{ buildIdentity.shortCommit }}</a></span>{% endif %}
           </p>
           {% if site.site.authorProfile.bio %}<p class="gala-page-footer__bio">{{ site.site.authorProfile.bio }}</p>{% endif %}
         </div>
@@ -91,8 +91,8 @@
     </dialog>
     <dialog id="gala-search-dialog" class="gala-dialog" aria-labelledby="gala-search-title">
       <header class="gala-dialog__header"><h2 id="gala-search-title">Search</h2><form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close search">Close</button></form></header>
-      <section data-gala-search data-index-url="{{ '/search-index.json' | url }}">
-        <form class="gala-search" action="{{ '/search/' | url }}" role="search">
+      <section data-gala-search data-index-url="{{ '/search-index.json' | publicationUrl(page.url) }}">
+        <form class="gala-search" action="{{ '/search/' | publicationUrl(page.url) }}" role="search">
           <label for="gala-dialog-search-query">Search published posts</label>
           <input id="gala-dialog-search-query" name="q" type="search" autocomplete="off">
           <button type="submit">Search</button>

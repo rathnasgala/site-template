@@ -29,7 +29,7 @@ test('publication owns its version page and binds API access to its site identit
   assert.match(behavior, /data-version-retry/);
   assert.match(base, /assets\/version\.js/);
   assert.match(await readFile(new URL('../eleventy.config.js', import.meta.url), 'utf8'),
-    /versionUrl: `\$\{publicationPathPrefix\}\/s\/version\/`/);
+    /versionUrl: '\/s\/version\/'/);
 });
 
 test('version page exposes repository and exact publication commit without an App redirect', async () => {

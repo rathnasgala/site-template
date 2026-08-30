@@ -21,7 +21,7 @@ test('provides every required component and supporting control', async () => {
 test('shared header uses accessible icons and opens search and settings without document navigation', async () => {
   const source = await readFile(layout, 'utf8');
   const behavior = await readFile(interactions, 'utf8');
-  assert.match(source, /href="{{ '\/' \| url }}" aria-label="Home"/);
+  assert.match(source, /href="{{ '\/' \| publicationUrl\(page\.url\) }}" aria-label="Home"/);
   for (const label of ['Appearance', 'Settings', 'Search', 'Account']) {
     assert.match(source, new RegExp(`(?:aria-label|title)="${label}`));
   }

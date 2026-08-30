@@ -208,7 +208,7 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   assert.match(published, /<strong>body<\/strong>/);
   assert.match(published, /1 min read/);
   assert.ok(await bytes(path.join(root, '_site', 'favicon.ico')) > 0);
-  assert.match(published, /href="\/blog\/assets\/theme\.css"/);
+  assert.match(published, /href="\.\.\/\.\.\/assets\/theme\.css"/);
   assert.doesNotMatch(published, /wrong-environment-prefix/);
   assert.match(
     published,
@@ -244,13 +244,13 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   assert.match(published, /data-language-preference/);
   assert.match(
     published,
-    /href="\/blog\/s\/version\/"[^>]*>a{8}<\/a>/
+    /href="\.\.\/\.\.\/s\/version\/"[^>]*>a{8}<\/a>/
   );
   const versionPage = await readFile(path.join(root, '_site', 's', 'version', 'index.html'), 'utf8');
   assert.match(versionPage, /data-site-id="01K00000000000000000000010"/);
   assert.match(versionPage, /data-repository="fixture-owner\/fixture-site"/);
   assert.match(versionPage, /data-publication-commit="a{40}"/);
-  assert.match(versionPage, /src="\/blog\/assets\/version\.js"/);
+  assert.match(versionPage, /src="\.\.\/\.\.\/assets\/version\.js"/);
   assert.doesNotMatch(published, /data-engagement-snapshot|data-engagement-live/);
   assert.match(published, /title="2 reactions"/);
   assert.match(published, /title="3 comments"/);
@@ -278,7 +278,7 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   assert.doesNotMatch(sitemap, /deleted-post/);
   const index = await readFile(path.join(root, '_site', 'index.html'), 'utf8');
   assert.match(index, /class="gala-card-index"/);
-  assert.match(index, /href="\/blog\/en\/validated\/"/);
+  assert.match(index, /href="\.\/en\/validated\/"/);
   assert.match(index, />Validated<\/a>/);
   assert.match(index, />Validé<\/a>/);
   assert.doesNotMatch(index, /Deleted/);
@@ -294,8 +294,8 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   assert.equal(searchIndex.entries.some(({ title }) => title === 'Deleted'), false);
   const search = await readFile(path.join(root, '_site', 'search', 'index.html'), 'utf8');
   assert.match(search, /data-gala-search/);
-  assert.match(search, /data-index-url="\/blog\/search-index\.json"/);
-  assert.match(search, /src="\/blog\/assets\/reader\.js"/);
+  assert.match(search, /data-index-url="\.\.\/search-index\.json"/);
+  assert.match(search, /src="\.\.\/assets\/reader\.js"/);
   assert.doesNotMatch(search, /assets\/(?:search|interactions|preferences|theme-mode|engagement-comments|engagement-transport)\.js/);
   /*
    * There is no settings page. The two reader settings live in the header's own dialog, and a

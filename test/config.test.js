@@ -7,9 +7,23 @@ import { parse } from 'yaml';
 import {
   loadSiteConfiguration, validateCanonicalUrlTemplate, validateProfile
 } from '../lib/site-config.js';
+import { publicationUrl } from '../eleventy.config.js';
 
 const config = parse(await readFile(new URL('../site.config.yml', import.meta.url), 'utf8'));
 const managed = JSON.parse(await readFile(new URL('../.gala/managed-files.json', import.meta.url), 'utf8'));
+
+test('publication-local URLs resolve under both a project path and a custom-domain root', () => {
+  assert.equal(publicationUrl('/assets/theme.css', '/'), './assets/theme.css');
+  const nestedAsset = publicationUrl('/assets/theme.css', '/en/article/');
+  assert.equal(nestedAsset, '../../assets/theme.css');
+  assert.equal(new URL(nestedAsset, 'https://owner.github.io/repository/en/article/').pathname,
+    '/repository/assets/theme.css');
+  assert.equal(new URL(nestedAsset, 'https://blog.example.com/en/article/').pathname,
+    '/assets/theme.css');
+  assert.equal(publicationUrl('/', '/en/article/'), '../../');
+  assert.equal(publicationUrl('/search/', '/en/article/'), '../../search/');
+  assert.throws(() => publicationUrl('https://example.com/x', '/'), /must start with/);
+});
 
 test('shipped example post claims no article identity', async () => {
   // Every repository generated from this template is byte-identical, so a hardcoded id meant

@@ -121,6 +121,15 @@ document.addEventListener('click', async (event) => {
     return;
   }
 
+  // FedCM requires the relying party to call navigator.credentials.get synchronously from a
+  // top-level user gesture. A click inside the cross-origin session frame followed by postMessage
+  // loses that activation before it reaches this page, so the account control owns sign-in.
+  const accountControl = event.target.closest('[data-user-control]');
+  if (accountControl && !sessionUser && sessionFrameToken) {
+    fedCmSession('active');
+    return;
+  }
+
   const dialogControl = event.target.closest('[data-open-dialog]');
   if (dialogControl) {
     const dialog = document.getElementById(dialogControl.dataset.openDialog);
@@ -328,6 +337,33 @@ const sessionOrigin = sessionFrame ? new URL(sessionFrame.src).origin : null;
 let sessionFrameReady = false;
 let pendingSessionTransferCode = null;
 let sessionFrameToken = null;
+let fedCmController = null;
+const FEDCM_GRANT_COOKIE = 'gala-fedcm-grant=1';
+
+function hasFedCmGrant() {
+  try {
+    return document.cookie.split(';').some((value) => value.trim() === FEDCM_GRANT_COOKIE);
+  } catch (error) {
+    console.warn('Gala could not read this publication\'s FedCM grant marker.', error);
+    return false;
+  }
+}
+
+function rememberFedCmGrant() {
+  try {
+    document.cookie = 'gala-fedcm-grant=1; Max-Age=31536000; Path=/; SameSite=Strict; Secure';
+  } catch (error) {
+    console.warn('Gala could not remember this publication\'s FedCM grant.', error);
+  }
+}
+
+function forgetFedCmGrant() {
+  try {
+    document.cookie = 'gala-fedcm-grant=; Max-Age=0; Path=/; SameSite=Strict; Secure';
+  } catch (error) {
+    console.warn('Gala could not clear this publication\'s FedCM grant.', error);
+  }
+}
 
 function deliverSessionTransfer() {
   if (!sessionFrameReady || !sessionFrame || !pendingSessionTransferCode) return;
@@ -355,26 +391,40 @@ async function fedCmSession(mode) {
     if (status) status.textContent = 'FedCM is not available in this browser. Use a current browser to sign in.';
     return false;
   }
+  if (fedCmController) {
+    if (mode === 'passive') return false;
+    fedCmController.abort();
+  }
+  const controller = new AbortController();
+  fedCmController = controller;
   try {
     const siteId = new URL(sessionFrame.src).searchParams.get('siteId') ?? '';
     const provider = {
       configURL: 'https://api.gala67.com/v1/fedcm/config.json',
       clientId: siteId,
+      fields: ['name', 'email'],
       params: { nonce: sessionFrameToken }
     };
-    if (mode === 'active') provider.mode = 'active';
+    const identity = { providers: [provider] };
+    if (mode === 'active') identity.mode = 'active';
     const credential = await navigator.credentials.get({
-      identity: { providers: [provider] },
-      mediation: mode === 'active' ? 'required' : 'silent'
+      identity,
+      mediation: mode === 'active' ? 'required' : 'silent',
+      signal: controller.signal
     });
     if (typeof credential?.token !== 'string') return false;
+    if (mode === 'active') rememberFedCmGrant();
     pendingSessionTransferCode = credential.token;
     deliverSessionTransfer();
     return true;
   } catch (error) {
-    if (error?.name !== 'NotAllowedError') console.error('Gala FedCM sign-in failed.', error);
+    if (mode === 'active' && error?.name !== 'NotAllowedError' && error?.name !== 'AbortError') {
+      console.error('Gala FedCM sign-in failed.', error);
+    }
     if (mode === 'active' && status) status.textContent = 'Sign-in did not finish. Try again.';
     return false;
+  } finally {
+    if (fedCmController === controller) fedCmController = null;
   }
 }
 
@@ -499,6 +549,13 @@ async function mutateEngagement(region, operation, payload) {
 if (sessionFrame) {
   window.addEventListener('message', (event) => {
     if (event.origin !== sessionOrigin || event.source !== sessionFrame.contentWindow) return;
+    if (event.data?.type === 'gala-fedcm-sign-out') {
+      forgetFedCmGrant();
+      navigator.credentials?.preventSilentAccess?.().catch((error) => {
+        console.error('Gala could not disable silent FedCM access after sign-out.', error);
+      });
+      return;
+    }
     if (event.data?.type === 'gala-engagement-result') {
       const pending = pendingEngagementWrites.get(event.data.requestId);
       if (!pending) return;
@@ -532,7 +589,10 @@ if (sessionFrame) {
     }
     if (event.data?.type !== 'gala-session') return;
     sessionFrameReady = true;
-    if (typeof event.data.frameToken === 'string') sessionFrameToken = event.data.frameToken;
+    if (typeof event.data.frameToken === 'string') {
+      sessionFrameToken = event.data.frameToken;
+      document.querySelector('[data-user-control]')?.setAttribute('data-fedcm-ready', 'true');
+    }
     if (pendingSessionTransferCode) deliverSessionTransfer();
     sessionUser = event.data.user && typeof event.data.user.id === 'string' ? event.data.user : null;
     const control = document.querySelector('[data-user-control]');
@@ -564,11 +624,6 @@ if (sessionFrame) {
     });
     // Signed in on the back of an interrupted action: finish what they were doing.
     if (sessionUser && pendingIntent) resumeIntent();
-    if (!sessionUser && sessionFrameToken) fedCmSession('passive');
+    if (!sessionUser && sessionFrameToken && hasFedCmGrant()) fedCmSession('passive');
   });
 }
-
-window.addEventListener('message', (event) => {
-  if (event.origin !== sessionOrigin || event.source !== sessionFrame?.contentWindow) return;
-  if (event.data?.type === 'gala-fedcm-sign-in') fedCmSession('active');
-});

@@ -111,6 +111,32 @@ test('matches the default language to a canonical-equivalent published variant',
   ]);
 });
 
+test('keeps unrelated ID-less preview posts in separate hreflang clusters', () => {
+  const posts = [
+    {
+      id: null, source: 'content/posts/one/index.en.md', language: 'en',
+      pageUrl: 'https://example.com/en/one/', publicationState: 'published'
+    },
+    {
+      id: null, source: 'content/posts/two/index.en.md', language: 'en',
+      pageUrl: 'https://example.com/en/two/', publicationState: 'published'
+    }
+  ];
+  const clusters = articleHreflang(posts, {
+    site: { defaultLanguage: 'en' },
+    hosting: { canonicalBaseUrl: 'https://example.com', pathPrefix: '/' }
+  });
+
+  assert.deepEqual(clusters.get(posts[0].source), [
+    { hreflang: 'en', href: posts[0].pageUrl },
+    { hreflang: 'x-default', href: posts[0].pageUrl }
+  ]);
+  assert.deepEqual(clusters.get(posts[1].source), [
+    { hreflang: 'en', href: posts[1].pageUrl },
+    { hreflang: 'x-default', href: posts[1].pageUrl }
+  ]);
+});
+
 test('sitemap includes every alternate and escapes untrusted metadata', () => {
   const sitemap = renderSitemap([{
     url: 'https://example.com/en/post/',

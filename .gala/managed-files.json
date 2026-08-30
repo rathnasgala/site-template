@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "2.0.20",
+    "version": "2.0.21",
     "availableDesignThemes": [
       "editorial",
       "modern",
@@ -28,7 +28,7 @@
     "lib/provider-fixtures/share-intents.v1.json": "66a8eedfcff711253ee45ceb94b53f7d5a6be3ddbbb3d1f0d4e31a114326cc0a",
     "lib/publication-state.js": "1b59c29a18bbb1193bddea898dac3a4fb832c7bc4751263be086f3d64392dea0",
     "lib/render-markdown.js": "275b7da721aef1f68cda515673153471c0d597061e8fdf867c5f2b32c98b91db",
-    "lib/seo.js": "19cf1d67d5b711b8d3a533f207f267e770ee46fd4a4e6561c5f7fd4e9c1989ff",
+    "lib/seo.js": "523763e49a06e1dd995adb6cc3d78997796cb02e237ec72b5565076475e48c93",
     "lib/share-targets.js": "458aff86fab2b62a364442cd8c612565c6e0b53eef2f20cb6237cc562b1e0731",
     "lib/site-config.js": "e646e031b46a1f8d71ea3afce8cca45d31e65d7b39cbdac10ab5c62934dfbf7e",
     "package-lock.json": "dc11470b1ad897c58d91745f23ff25711c593e62972ec9fb83f4e10fd77e1ecd",

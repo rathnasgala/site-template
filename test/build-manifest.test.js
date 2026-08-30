@@ -34,7 +34,7 @@ test('accepts effective emitted posts and no interpretation flags', () => {
   }), /publicationState/);
 });
 
-test('accepts scheduled posts only in an explicitly marked preview manifest', () => {
+test('accepts missing post identities only in an explicitly marked preview manifest', () => {
   const scheduled = { ...valid.posts[0], id: null, publicationState: 'not-emitted' };
   assert.equal(validateBuildManifest({
     ...valid,
@@ -46,9 +46,14 @@ test('accepts scheduled posts only in an explicitly marked preview manifest', ()
     preview: false,
     posts: [{ ...scheduled, id: valid.posts[0].id }]
   }), /publicationState/);
-  assert.throws(() => validateBuildManifest({
+  assert.equal(validateBuildManifest({
     ...valid,
     preview: true,
+    posts: [{ ...valid.posts[0], id: null, publicationState: 'published' }]
+  }).posts[0].id, null);
+  assert.throws(() => validateBuildManifest({
+    ...valid,
+    preview: false,
     posts: [{ ...valid.posts[0], id: null, publicationState: 'published' }]
   }), /id is invalid/);
   const second = {

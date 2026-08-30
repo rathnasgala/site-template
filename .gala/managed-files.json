@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "2.0.19",
+    "version": "2.0.20",
     "availableDesignThemes": [
       "editorial",
       "modern",
@@ -11,7 +11,7 @@
     "securityAdvisories": []
   },
   "requiredBudgets": {
-    "managedJavaScriptBytes": 72023,
+    "managedJavaScriptBytes": 72168,
     "managedCssBytes": 34816
   },
   "files": {
@@ -19,7 +19,7 @@
     ".gitignore": "b5fa24e10155097a0d372926fd2e59e6072e7cc2cb6399bbfb4beb8b33ea315b",
     "eleventy.config.js": "7772953f8c55673d9e11fb803c75470f8a61747de9e1cec0d03bbbedb7fae246",
     "lib/accent.js": "24e5d2bcf00e6b3ad86cf8942e56dcb98b0d06ff8e0673ccb7cc85fa732e0837",
-    "lib/build-manifest.js": "b6fd412256515603a075d1fcf5f9fb57f197b4fd5f92c9ca28ca5fe2486daf11",
+    "lib/build-manifest.js": "4e103d99231789563b6000f900e7fc9445705971f82d3c52d96c3332c801777e",
     "lib/engagement-snapshot.js": "298c11b1ab135a3a98a4e31b6320ab60dfd7fda6a9d9053df37d86282a5a6687",
     "lib/performance-budget.js": "70c5d1d697302466e1fa982fd07b19abb299e3fcae0bb05aa8cdebf5d7b69241",
     "lib/prism-compiled-output.js": "0c1f93d025c70dbec10c78f17f59ae10a9a6de773b58adb2f26f42de62f7be2c",
@@ -53,10 +53,10 @@
     "src/assets/engagement-comments.js": "eda0fee471c7e42ee01a25b8aa14ed6ae9690d52b3fbb34027d97534ab62998b",
     "src/assets/engagement-transport.js": "7f69815c4eb4fc0e127a5c09702da4189130d47b73b4598fce4196d7d6f5cbe8",
     "src/assets/favicon.svg": "8615e3d96fe37ae9ed14afb1886e7c0e690eef5b10be66ca91cccfd085a74bb6",
-    "src/assets/interactions.js": "f633c3b7272740409c4259196308aeddf8da50dd780a20c25f39406dbd073c13",
+    "src/assets/interactions.js": "2c59352ef14e46feabc0106c4ec9440b6b2e047daa441f72b4d1604d7cc0d1c5",
     "src/assets/preferences.js": "789127bee013ed6a1bbf8cefd7b9109291c16220e7a6e09314e3c93c54731d1d",
     "src/assets/prism-session.js": "1fab23725b843006c3f589af7669ef3ad6ad01f3264a3b00564e64b56738d2cd",
-    "src/assets/reader.js": "320aef7258c3ea2c05e47f789ccd0ea69c2d1acfa942e7ee8103654b96fdce9e",
+    "src/assets/reader.js": "a55efa63d8b6fee9afb1eb1fe4166d289aef56673e130f571c1be63598b9d3c3",
     "src/assets/search.js": "df425f0239277792ad39f2138bc89cb66cc4ecda5ed59042d46abc2f05372088",
     "src/assets/theme-mode.js": "d81af8317b59f6d94dc8154c1dcba9d3e16accb37348bc3fce127712141d6c63",
     "src/assets/theme.css": "7391086efd6f61791c47bbdf3523d7452e17b1cdb1fc91339861fe2f0a2c884b",

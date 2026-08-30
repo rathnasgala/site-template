@@ -640,6 +640,9 @@ if (sessionFrame) {
     });
     // Signed in on the back of an interrupted action: finish what they were doing.
     if (sessionUser && pendingIntent) resumeIntent();
-    if (!sessionUser && sessionFrameToken && hasFedCmGrant()) fedCmSession('passive');
+    const resumeFinished = !resumeCode || event.data.resumeRejected === true;
+    if (!sessionUser && sessionFrameToken && resumeFinished && hasFedCmGrant()) {
+      fedCmSession('passive');
+    }
   });
 }

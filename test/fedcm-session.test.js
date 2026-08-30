@@ -25,7 +25,7 @@ test('reader identity uses FedCM without popup or publication-visible bearer sto
   assert.match(interactions, /if \(accountControl && !sessionUser && sessionFrameToken\) \{\s*fedCmSession\(['"]active['"]\);\s*return;/);
   assert.match(interactions, /setAttribute\(['"]data-fedcm-ready['"], ['"]true['"]\)/);
   assert.match(interactions, /document\.cookie = ['"]gala-fedcm-grant=1; Max-Age=31536000; Path=\/; SameSite=Strict; Secure['"]/);
-  assert.match(interactions, /if \(!sessionUser && sessionFrameToken && hasFedCmGrant\(\)\) fedCmSession\(['"]passive['"]\)/);
+  assert.match(interactions, /sessionFrameToken && resumeFinished && hasFedCmGrant\(\)/);
   assert.match(interactions, /navigator\.credentials\?\.preventSilentAccess/);
 });
 
@@ -35,6 +35,8 @@ test('the reader waits for the API frame load before posting and restores an opa
   assert.match(interactions, /localStorage\.getItem\(resumeStorageKey\)/);
   assert.match(interactions, /localStorage\.setItem\(resumeStorageKey, code\)/);
   assert.match(interactions, /event\.data\.resumeRejected === true/);
+  assert.match(interactions, /const resumeFinished = !resumeCode \|\| event\.data\.resumeRejected === true/);
+  assert.match(interactions, /sessionFrameToken && resumeFinished && hasFedCmGrant\(\)/);
 });
 
 test('an explicit sign-in cancels passive discovery and sends Chrome the active-mode request shape', async () => {

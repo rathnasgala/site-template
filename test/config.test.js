@@ -138,6 +138,23 @@ performance:
   await assert.rejects(() => loadSiteConfiguration({ root }), /Unsupported legacy design\.palette/);
 });
 
+test('treats a YAML-null optional accent as absent instead of failing the build', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'gala-config-null-accent-'));
+  await writeFile(path.join(root, 'site.config.yml'), `schemaVersion: 1
+design:
+  theme: modern
+  colorMode: system
+  accent: #263c35
+performance:
+  budgets:
+    managedJavaScriptBytes: 32768
+    managedCssBytes: 16384
+    ordinaryHtmlBytes: 32768
+`);
+
+  assert.equal((await loadSiteConfiguration({ root })).design.accent, null);
+});
+
 test('loads an action-selected checkout-relative config and rejects traversal', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'gala-config-'));
   await mkdir(path.join(root, 'fixtures'));

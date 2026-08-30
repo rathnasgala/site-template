@@ -10,7 +10,7 @@ test('reader identity uses FedCM without popup or publication-visible bearer sto
   assert.match(layout, /allow="identity-credentials-get"/);
   assert.match(interactions, /navigator\.credentials\.get/);
   assert.match(interactions, /configURL:\s*['"]https:\/\/api\.gala67\.com\/v1\/fedcm\/config\.json/);
-  assert.match(interactions, /clientId:\s*siteId/);
+  assert.match(interactions, /clientId:\s*sessionSiteId/);
   assert.match(interactions, /fields:\s*\['name',\s*'email'\]/);
   assert.match(interactions, /params:\s*\{\s*nonce:\s*sessionFrameToken\s*\}/);
   assert.match(interactions, /if\s*\(mode\s*===\s*['"]active['"]\)\s*identity\.mode\s*=\s*['"]active['"]/);
@@ -18,12 +18,23 @@ test('reader identity uses FedCM without popup or publication-visible bearer sto
   assert.match(interactions, /type:\s*['"]gala-session-transfer['"]/);
   assert.doesNotMatch(interactions, /window\.open|\/v1\/widget\/session\/sign-in/);
   assert.doesNotMatch(interactions, /gala-reader-session|Authorization|Bearer/);
+  assert.match(interactions, /gala\.reader\.resume\.\$\{sessionSiteId\}/);
+  assert.match(interactions, /type:\s*['"]gala-session-resume['"]/);
+  assert.doesNotMatch(interactions, /localStorage\.setItem\([^,]+,\s*session/);
   assert.doesNotMatch(layout, /data-user-control[^>]+disabled/);
   assert.match(interactions, /if \(accountControl && !sessionUser && sessionFrameToken\) \{\s*fedCmSession\(['"]active['"]\);\s*return;/);
   assert.match(interactions, /setAttribute\(['"]data-fedcm-ready['"], ['"]true['"]\)/);
   assert.match(interactions, /document\.cookie = ['"]gala-fedcm-grant=1; Max-Age=31536000; Path=\/; SameSite=Strict; Secure['"]/);
   assert.match(interactions, /if \(!sessionUser && sessionFrameToken && hasFedCmGrant\(\)\) fedCmSession\(['"]passive['"]\)/);
   assert.match(interactions, /navigator\.credentials\?\.preventSilentAccess/);
+});
+
+test('the reader waits for the API frame load before posting and restores an opaque session handle', () => {
+  assert.match(interactions, /sessionFrame\.addEventListener\(['"]load['"], requestSessionState\)/);
+  assert.doesNotMatch(interactions, /sessionFrame\.addEventListener\(['"]load['"], requestSessionState\);\s*requestSessionState\(\)/);
+  assert.match(interactions, /localStorage\.getItem\(resumeStorageKey\)/);
+  assert.match(interactions, /localStorage\.setItem\(resumeStorageKey, code\)/);
+  assert.match(interactions, /event\.data\.resumeRejected === true/);
 });
 
 test('an explicit sign-in cancels passive discovery and sends Chrome the active-mode request shape', async () => {
@@ -54,6 +65,7 @@ test('an explicit sign-in cancels passive discovery and sends Chrome the active-
       }
     },
     sessionFrame: { src: 'https://api.gala67.com/v1/widget/session?siteId=01K00000000000000000000010' },
+    sessionSiteId: '01K00000000000000000000010',
     sessionFrameToken: 'a'.repeat(43),
     pendingSessionTransferCode: null,
     deliverSessionTransfer() {},

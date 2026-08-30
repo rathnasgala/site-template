@@ -334,6 +334,8 @@ const pendingEngagementWrites = new Map();
 let pendingIntent = null;
 const sessionFrame = document.querySelector('[data-gala-session-frame]');
 const sessionOrigin = sessionFrame ? new URL(sessionFrame.src).origin : null;
+const sessionSiteId = sessionFrame ? new URL(sessionFrame.src).searchParams.get('siteId') ?? '' : '';
+const resumeStorageKey = `gala.reader.resume.${sessionSiteId}`;
 let sessionFrameReady = false;
 let pendingSessionTransferCode = null;
 let sessionFrameToken = null;
@@ -378,10 +380,16 @@ function requestSessionState() {
 }
 
 if (sessionFrame) {
-  // If the frame already loaded, the immediate request reaches it. If it is still loading, the
-  // load handler repeats the request. This covers both orderings without timing assumptions.
+  // Wait for navigation away from the inherited about:blank origin before targeting the API.
   sessionFrame.addEventListener('load', requestSessionState);
-  requestSessionState();
+}
+
+function storedResumeCode() {
+  try { return localStorage.getItem(resumeStorageKey); } catch { return null; }
+}
+
+function rememberResumeCode(code) {
+  try { code ? localStorage.setItem(resumeStorageKey, code) : localStorage.removeItem(resumeStorageKey); } catch {}
 }
 
 async function fedCmSession(mode) {
@@ -398,10 +406,9 @@ async function fedCmSession(mode) {
   const controller = new AbortController();
   fedCmController = controller;
   try {
-    const siteId = new URL(sessionFrame.src).searchParams.get('siteId') ?? '';
     const provider = {
       configURL: 'https://api.gala67.com/v1/fedcm/config.json',
-      clientId: siteId,
+      clientId: sessionSiteId,
       fields: ['name', 'email'],
       params: { nonce: sessionFrameToken }
     };
@@ -550,6 +557,7 @@ if (sessionFrame) {
   window.addEventListener('message', (event) => {
     if (event.origin !== sessionOrigin || event.source !== sessionFrame.contentWindow) return;
     if (event.data?.type === 'gala-fedcm-sign-out') {
+      rememberResumeCode(null);
       forgetFedCmGrant();
       navigator.credentials?.preventSilentAccess?.().catch((error) => {
         console.error('Gala could not disable silent FedCM access after sign-out.', error);
@@ -589,12 +597,20 @@ if (sessionFrame) {
     }
     if (event.data?.type !== 'gala-session') return;
     sessionFrameReady = true;
+    const resumeCode = storedResumeCode();
+    if (!event.data.user && resumeCode) {
+      sessionFrame.contentWindow?.postMessage({
+        type: 'gala-session-resume', resumeCode,
+      }, sessionOrigin);
+    }
     if (typeof event.data.frameToken === 'string') {
       sessionFrameToken = event.data.frameToken;
       document.querySelector('[data-user-control]')?.setAttribute('data-fedcm-ready', 'true');
     }
     if (pendingSessionTransferCode) deliverSessionTransfer();
     sessionUser = event.data.user && typeof event.data.user.id === 'string' ? event.data.user : null;
+    if (typeof event.data.resumeCode === 'string') rememberResumeCode(event.data.resumeCode);
+    else if (event.data.resumeRejected === true) rememberResumeCode(null);
     const control = document.querySelector('[data-user-control]');
     const displayName = sessionUser?.displayName;
     if (control) {

@@ -117,10 +117,13 @@ test('authenticated writes use only the typed platform-frame protocol', () => {
   assert.match(transport, /event\.source !== sessionFrame\.contentWindow/);
   assert.match(transport, /event\.data\?\.type === 'gala-engagement-result'/);
   assert.match(transport, /crypto\.randomUUID\(\)/);
-  // The reader's token belongs to the API's origin. Neither the page nor an island may hold it.
+  // The reader's bearer belongs to the API origin. The publication may persist only the opaque,
+  // publication-bound resume capability covered by fedcm-session.test.js.
   for (const source of [behavior, island, transport]) {
-    assert.doesNotMatch(source, /Authorization|Bearer|gala-reader-session|localStorage/);
+    assert.doesNotMatch(source, /Authorization|Bearer|gala-reader-session/);
   }
+  assert.doesNotMatch(island, /localStorage/);
+  assert.doesNotMatch(transport, /localStorage/);
 });
 
 test('reader controls are accessible and include all low-risk write classes', () => {

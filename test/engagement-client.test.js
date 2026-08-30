@@ -11,11 +11,11 @@ const island = await readFile(new URL('../src/assets/engagement-comments.js', im
 const transport = await readFile(new URL('../src/assets/engagement-transport.js', import.meta.url), 'utf8');
 
 test('sign-in relays only the opaque one-time transfer code to the account frame', () => {
-  assert.match(behavior, /typeof event\.data\.transferCode !== 'string'/);
+  assert.match(behavior, /typeof credential\?\.token !== 'string'/);
   assert.match(behavior, /type: 'gala-session-transfer', transferCode: pendingSessionTransferCode/);
-  // A successful popup may return before the cross-origin frame has announced readiness. The
-  // opaque code must wait for that announcement instead of being posted into an unloaded frame.
-  assert.match(behavior, /pendingSessionTransferCode = event\.data\.transferCode/);
+  // FedCM may return before the cross-origin frame has announced readiness. The opaque code must
+  // wait for that announcement instead of being posted into an unloaded frame.
+  assert.match(behavior, /pendingSessionTransferCode = credential\.token/);
   assert.match(behavior, /if \(pendingSessionTransferCode\) deliverSessionTransfer\(\)/);
   assert.match(behavior, /sessionFrame\.addEventListener\('load', requestSessionState\)/);
   assert.match(behavior, /type: 'gala-session-request'/);
@@ -23,8 +23,9 @@ test('sign-in relays only the opaque one-time transfer code to the account frame
 });
 
 test('a blocked or cancelled sign-in never manufactures an authenticated reader', () => {
-  assert.match(behavior, /if \(!window\.open\(signIn,[\s\S]*pendingIntent = null/);
-  assert.doesNotMatch(behavior, /gala-session-established[^\n]*user:/);
+  assert.match(behavior, /catch \(error\)[\s\S]*Sign-in did not finish\. Try again\./);
+  assert.match(behavior, /sessionUser = event\.data\.user && typeof event\.data\.user\.id === 'string'/);
+  assert.doesNotMatch(behavior, /sessionUser\s*=\s*credential/);
 });
 
 test('published article islands request the neutral public bundle without credentials', () => {

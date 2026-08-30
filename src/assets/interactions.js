@@ -327,6 +327,7 @@ const sessionFrame = document.querySelector('[data-gala-session-frame]');
 const sessionOrigin = sessionFrame ? new URL(sessionFrame.src).origin : null;
 let sessionFrameReady = false;
 let pendingSessionTransferCode = null;
+let sessionFrameToken = null;
 
 function deliverSessionTransfer() {
   if (!sessionFrameReady || !sessionFrame || !pendingSessionTransferCode) return;
@@ -347,6 +348,36 @@ if (sessionFrame) {
   requestSessionState();
 }
 
+async function fedCmSession(mode) {
+  const status = document.querySelector('[data-engagement-status]');
+  if (!sessionFrameToken) return false;
+  if (!globalThis.IdentityCredential || typeof navigator.credentials?.get !== 'function') {
+    if (status) status.textContent = 'FedCM is not available in this browser. Use a current browser to sign in.';
+    return false;
+  }
+  try {
+    const siteId = new URL(sessionFrame.src).searchParams.get('siteId') ?? '';
+    const provider = {
+      configURL: 'https://api.gala67.com/v1/fedcm/config.json',
+      clientId: siteId,
+      params: { nonce: sessionFrameToken }
+    };
+    if (mode === 'active') provider.mode = 'active';
+    const credential = await navigator.credentials.get({
+      identity: { providers: [provider] },
+      mediation: mode === 'active' ? 'required' : 'silent'
+    });
+    if (typeof credential?.token !== 'string') return false;
+    pendingSessionTransferCode = credential.token;
+    deliverSessionTransfer();
+    return true;
+  } catch (error) {
+    if (error?.name !== 'NotAllowedError') console.error('Gala FedCM sign-in failed.', error);
+    if (mode === 'active' && status) status.textContent = 'Sign-in did not finish. Try again.';
+    return false;
+  }
+}
+
 function requestSession(intent) {
   const field = intent.field;
   pendingIntent = {
@@ -357,20 +388,10 @@ function requestSession(intent) {
     draft: field ? field.value : null,
     caret: field ? field.selectionStart : null
   };
-  // One window, not three. Asking used to open a modal, containing a frame, containing a
-  // button, that opened a popup. The popup is the only part that has to exist, because it is
-  // the only one running at the top level on the origin the identity providers accept.
-  const frame = document.querySelector('[data-gala-session-frame]');
-  const status = document.querySelector('[data-engagement-status]');
-  if (!frame) return;
-  const source = new URL(frame.getAttribute('src'), window.location.href);
-  const signIn = new URL('/v1/widget/session/sign-in', source.origin);
-  signIn.searchParams.set('siteId', source.searchParams.get('siteId') ?? '');
   if (field) field.blur();
-  if (!window.open(signIn, 'gala-sign-in', 'popup,width=520,height=680')) {
-    pendingIntent = null;
-    if (status) status.textContent = 'Allow pop-ups for this site to sign in, then try again.';
-  }
+  fedCmSession('active').then((started) => {
+    if (!started) pendingIntent = null;
+  });
 }
 
 /** Puts the reader back exactly where the sign-in interrupted them. */
@@ -397,29 +418,6 @@ function resumeIntent() {
   // the same thing twice.
   element.click();
 }
-
-// Signing in happens in another window, so the moment this one is focused again is the moment
-// the reader is back and the interrupted action can be finished.
-window.addEventListener('focus', () => {
-  if (sessionUser && pendingIntent) resumeIntent();
-});
-
-/*
- * The sign-in window reports success to this page rather than to the account frame.
- *
- * It cannot reach the frame directly: a frame embedded in a publication has its storage - and its
- * BroadcastChannel - partitioned away from a window running at the top level on the API's origin,
- * so the session it wrote is invisible there. The signal carries only an opaque, one-time transfer
- * code. This page waits for the frame's readiness message before relaying that code; otherwise a
- * fast popup can return before the frame is listening and every later click asks the reader to sign
- * in once more.
- */
-window.addEventListener('message', (event) => {
-  if (!sessionFrame || event.data?.type !== 'gala-session-established') return;
-  if (event.origin !== sessionOrigin || typeof event.data.transferCode !== 'string') return;
-  pendingSessionTransferCode = event.data.transferCode;
-  deliverSessionTransfer();
-});
 
 document.querySelectorAll('[data-engagement-url]').forEach((region) => {
   refreshEngagement(region);
@@ -534,6 +532,7 @@ if (sessionFrame) {
     }
     if (event.data?.type !== 'gala-session') return;
     sessionFrameReady = true;
+    if (typeof event.data.frameToken === 'string') sessionFrameToken = event.data.frameToken;
     if (pendingSessionTransferCode) deliverSessionTransfer();
     sessionUser = event.data.user && typeof event.data.user.id === 'string' ? event.data.user : null;
     const control = document.querySelector('[data-user-control]');
@@ -565,5 +564,11 @@ if (sessionFrame) {
     });
     // Signed in on the back of an interrupted action: finish what they were doing.
     if (sessionUser && pendingIntent) resumeIntent();
+    if (!sessionUser && sessionFrameToken) fedCmSession('passive');
   });
 }
+
+window.addEventListener('message', (event) => {
+  if (event.origin !== sessionOrigin || event.source !== sessionFrame?.contentWindow) return;
+  if (event.data?.type === 'gala-fedcm-sign-in') fedCmSession('active');
+});

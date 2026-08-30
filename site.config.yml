@@ -4,7 +4,7 @@ schemaVersion: 1
 framework:
   themePackage:
     name: "@rathnasgala/theme"
-    version: 2.0.16
+    version: 2.0.17
 site:
   id: unavailable
   ownerId: unavailable

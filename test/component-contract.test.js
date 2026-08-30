@@ -118,11 +118,12 @@ test('the single action rail exposes only the supported share controls and a fal
   }
   assert.doesNotMatch(source, /facebook|instagram|linkedin|x\.com|wa\.me/i);
   assert.doesNotMatch(source, /<script|<iframe/);
-  assert.match(source, /gala-action-stats/);
+  assert.match(source, /gala-article-stats/);
   assert.match(source, /gala-action-group--reactions/);
   assert.match(source, /gala-action-group--utilities/);
   const postLayout = await readFile(new URL('../src/_includes/layouts/post.njk', import.meta.url), 'utf8');
-  assert.match(postLayout, /actionRail\(post\.canonicalUrl, engagement\)/);
+  assert.match(postLayout, /articleStats\(engagement\)/);
+  assert.match(postLayout, /actionRail\(post\.canonicalUrl\)/);
   assert.match(postLayout, /conversation\(engagement\)/);
   assert.match(postLayout, /gala-reading-layout/);
   assert.doesNotMatch(postLayout, /shareControl/);
@@ -203,7 +204,7 @@ test('long-form reading controls are compact, progressive, and measured from art
   assert.match(styles, /scroll-margin-block-start:\s*7rem/);
   assert.match(componentsSource, /&lt;1K/);
   assert.match(behavior, /function publicCount\(value\)/);
-  assert.match(styles, /\.gala-action-stats dd[^}]*font:\s*400 1\.2rem/s);
+  assert.match(styles, /\.gala-article-stats[^}]*font-size:\s*var\(--gala-text-xs\)/s);
 });
 
 test('the article visibly ends before API-backed interactions and the author footer', async () => {
@@ -213,8 +214,7 @@ test('the article visibly ends before API-backed interactions and the author foo
   assert.match(css, /\.gala-article-boundary[^}]*border-block-start:\s*\.25rem solid/s);
   assert.match(css, /\.gala-article-boundary\s*\{[^}]*width:\s*100%/s);
   assert.match(css, /@media \(min-width: 75rem\)[\s\S]*\.gala-article-boundary\s*\{[^}]*grid-column:\s*1 \/ -1/s);
-  assert.match(post, /gala-article-boundary[^<]*<strong>Conversation<\/strong>/);
-  assert.doesNotMatch(post, /gala-article-boundary[^<]*<strong>Conversation<\/strong><a/s);
+  assert.match(post, /gala-article-boundary[^<]*<strong>Conversation<\/strong>{{ articleStats\(engagement\) }}/);
   assert.match(base, /gala-page-footer__identity/);
   assert.match(base, /gala-page-footer__line/);
   assert.match(base, /gala-page-footer__bio/);
@@ -225,14 +225,16 @@ test('the article visibly ends before API-backed interactions and the author foo
   for (const link of ['Powered by Gala', 'Terms', 'Privacy']) assert.match(base, new RegExp(`>${link}<`));
 });
 
-test('the docked action rail respects the intrinsic width of every control group', async () => {
+test('the action rail contains actions while article statistics stay beside the conversation label', async () => {
   const css = await readFile(new URL('../src/styles/theme.css', import.meta.url), 'utf8');
+  const componentsSource = await readFile(components, 'utf8');
+  const postLayout = await readFile(new URL('../src/_includes/layouts/post.njk', import.meta.url), 'utf8');
   assert.match(css, /\.gala-action-rail--integrated\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) 1px minmax\(0, 1fr\)/s);
-  assert.match(css, /"reactions utility-separator utilities"[^}]*"stats stats stats"/s);
-  assert.match(css, /\.gala-action-rail--integrated \.gala-action-stats\s*\{[^}]*grid-area:\s*stats/s);
+  assert.match(css, /grid-template-areas:\s*"reactions utility-separator utilities"/s);
   assert.match(css, /\.gala-action-rail--integrated \.gala-utility-actions\s*\{[^}]*repeat\(4, 2\.5rem\)/s);
-  assert.match(css, /\.gala-action-rail--integrated \.gala-action-stats > div\s*\{[^}]*flex-direction:\s*row/s);
-  assert.match(css, /\.gala-action-stats > div \+ div\s*\{[^}]*border-inline-start:\s*1px solid var\(--gala-color-hairline\)/s);
-  assert.match(css, /\.gala-action-rail:not\(\.gala-action-rail--integrated\) \.gala-action-stats > div \+ div\s*\{[^}]*border-block-start:\s*1px solid var\(--gala-color-hairline\)/s);
+  assert.match(css, /\.gala-article-stats > div \+ div::before\s*\{[^}]*content:\s*"\\b7"/s);
+  assert.match(postLayout, /<strong>Conversation<\/strong>{{ articleStats\(engagement\) }}/);
+  assert.match(componentsSource, /<dl class="gala-article-stats"/);
+  assert.doesNotMatch(componentsSource, /gala-action-stats|data-action-stats|separator--stats/);
   assert.doesNotMatch(css, /\.gala-engagement dl > div/);
 });

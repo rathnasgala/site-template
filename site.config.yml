@@ -4,7 +4,7 @@ schemaVersion: 1
 framework:
   themePackage:
     name: "@rathnasgala/theme"
-    version: 2.0.22
+    version: 2.0.23
 site:
   id: unavailable
   ownerId: unavailable
@@ -55,6 +55,6 @@ contact:
 # their performance impact remains the author's responsibility under FR-1903.
 performance:
   budgets:
-    managedJavaScriptBytes: 72492
+    managedJavaScriptBytes: 76339
     managedCssBytes: 34816
     ordinaryHtmlBytes: 32768

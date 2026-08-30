@@ -1,7 +1,7 @@
 ---
 layout: layouts/base.njk
 ---
-{% from "components/ui.njk" import actionRail, conversation, languageSwitcher, tableOfContents %}
+{% from "components/ui.njk" import actionRail, articleStats, conversation, languageSwitcher, tableOfContents %}
 <article id="article" class="gala-article">
   {% if post.publicationState == "published" or (buildManifest.preview and post.publicationState == "not-emitted") %}<progress class="gala-reading-progress" data-reading-progress max="1" value="0" aria-label="Reading progress"></progress><header class="gala-article-header"><p class="gala-eyebrow">{% if post.publicationState == "published" %}Published{% else %}Scheduled for{% endif %} {{ post.frontmatter.publishAfterDate }} - {{ post.language }} - {{ readingMinutes }} min read</p><h1>{{ post.frontmatter.title }}</h1>{% set byline = post.frontmatter.author or site.site.author %}{% if byline and byline != "unavailable" and byline != "New Gala Site" and byline != site.site.name %}<p class="gala-byline">By {{ byline }}</p>{% endif %}</header>{% endif %}
   {% if post.publicationState == "published" %}{{ languageSwitcher(hreflangLinks, post.language) }}{% endif %}
@@ -13,7 +13,7 @@ layout: layouts/base.njk
     <div class="gala-reading-layout">
       {% if postTableOfContents.length %}{{ tableOfContents(postTableOfContents) }}{% else %}<span></span>{% endif %}
       <div class="gala-markdown">{{ content | safe }}</div>
-      {% if post.publicationState == "published" %}<div class="gala-article-boundary"><strong>Conversation</strong></div><span class="gala-action-dock" data-action-dock aria-hidden="true"></span>{{ actionRail(post.canonicalUrl, engagement) }}{% endif %}
+      {% if post.publicationState == "published" %}<div class="gala-article-boundary"><strong>Conversation</strong>{{ articleStats(engagement) }}</div><span class="gala-action-dock" data-action-dock aria-hidden="true"></span>{{ actionRail(post.canonicalUrl) }}{% endif %}
     </div>
     {% if post.publicationState == "published" %}{{ conversation(engagement) }}{% endif %}
   {% if post.publicationState == "published" %}</section>{% endif %}

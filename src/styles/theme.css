@@ -884,34 +884,6 @@ button:focus-visible {
   color: var(--gala-color-background);
   background: var(--gala-color-accent);
 }
-.gala-engagement .gala-action-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--gala-space-xs);
-  margin: 0;
-}
-.gala-action-stats > div {
-  display: flex;
-  min-block-size: 2.5rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: .4rem;
-  padding-inline: .25rem;
-}
-.gala-action-stats > div + div {
-  border-inline-start: 1px solid var(--gala-color-hairline);
-}
-.gala-action-stats dt {
-  display: grid;
-  place-items: center;
-  color: var(--gala-color-muted);
-}
-.gala-action-stats dt svg { inline-size: 1.2rem; block-size: 1.2rem; }
-.gala-action-stats dd {
-  margin: 0;
-  color: var(--gala-color-text);
-  font: 400 1.2rem/1 var(--gala-font-mono);
-}
 .gala-action-group { display: grid; }
 .gala-reaction-actions,
 .gala-utility-actions,
@@ -951,6 +923,21 @@ button:focus-visible {
   border-block-start: .25rem solid var(--gala-color-text);
   font-size: var(--gala-text-sm);
 }
+.gala-article-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--gala-space-xs);
+  margin: 0;
+  color: var(--gala-color-muted);
+  font-size: var(--gala-text-xs);
+  font-variant-numeric: tabular-nums;
+}
+.gala-article-stats > div,
+.gala-article-stats dt { display: flex; align-items: center; gap: .25rem; }
+.gala-article-stats > div + div::before { content: "\b7"; margin-inline-end: var(--gala-space-xs); }
+.gala-article-stats dt svg { inline-size: 1rem; block-size: 1rem; }
+.gala-article-stats dd { margin: 0; }
 
 @media (min-width: 75rem) {
   .gala-reading-layout {
@@ -998,21 +985,6 @@ button:focus-visible {
     padding: var(--gala-space-sm);
     border-radius: var(--gala-radius-surface);
   }
-  .gala-action-rail .gala-action-stats { gap: var(--gala-space-2xs); }
-  .gala-action-rail:not(.gala-action-rail--integrated) .gala-action-stats { grid-template-columns: 1fr; }
-  .gala-action-rail:not(.gala-action-rail--integrated) .gala-action-stats > div + div {
-    border-inline-start: 0;
-    border-block-start: 1px solid var(--gala-color-hairline);
-  }
-  .gala-action-rail .gala-action-stats > div {
-    min-block-size: 2.5rem;
-    display: grid;
-    grid-template-columns: repeat(2, 2.5rem);
-    justify-content: center;
-    gap: .25rem;
-    padding-inline: 0;
-  }
-  .gala-action-rail .gala-action-stats dd { justify-self: center; }
   .gala-action-rail .gala-reaction-actions,
   .gala-action-rail .gala-utility-actions,
   .gala-action-rail .gala-share { grid-template-columns: repeat(2, 2.5rem); }
@@ -1030,11 +1002,7 @@ button:focus-visible {
     margin: 0;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
-    grid-template-rows: auto 1px auto;
-    grid-template-areas:
-      "reactions utility-separator utilities"
-      "stats-separator stats-separator stats-separator"
-      "stats stats stats";
+    grid-template-areas: "reactions utility-separator utilities";
     justify-content: stretch;
     gap: clamp(var(--gala-space-2xs), 1vw, var(--gala-space-md));
     align-items: center;
@@ -1047,27 +1015,10 @@ button:focus-visible {
     block-size: auto;
     margin: .25rem 0;
   }
-  .gala-action-rail--integrated .gala-action-rail__separator--stats {
-    grid-area: stats-separator;
-    inline-size: auto;
-    block-size: 1px;
-    margin: 0;
-  }
   .gala-action-rail--integrated .gala-action-group--reactions { grid-area: reactions; }
   .gala-action-rail--integrated .gala-action-group--utilities { grid-area: utilities; }
   .gala-action-rail--integrated .gala-reaction-actions { grid-template-columns: repeat(6, 2.5rem); }
   .gala-action-rail--integrated .gala-utility-actions { grid-template-columns: repeat(4, 2.5rem); }
-  .gala-action-rail--integrated .gala-action-stats > div {
-    min-block-size: 2.5rem;
-    display: flex;
-    flex-direction: row;
-    gap: .4rem;
-    padding-inline: .25rem;
-  }
-  .gala-action-rail--integrated .gala-action-stats {
-    grid-area: stats;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 74.99rem) {

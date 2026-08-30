@@ -96,11 +96,16 @@ test('an explicit sign-in cancels passive discovery and sends Chrome the active-
   assert.equal(calls[1].mediation, 'required');
 });
 
-test('only a previously granted publication requests passive identity and an explicit click requests active identity', () => {
+test('FedCM remains the fast path and unsupported browsers use top-level secure sign-in', () => {
   assert.match(interactions, /mediation:\s*mode\s*===\s*['"]active['"]\s*\?\s*['"]required['"]\s*:\s*['"]silent['"]/);
   assert.match(interactions, /fedCmSession\(['"]active['"]\)/);
   assert.match(interactions, /fedCmSession\(['"]passive['"]\)/);
-  assert.match(interactions, /FedCM is not available in this browser/);
+  assert.doesNotMatch(interactions, /FedCM is not available in this browser|Use a current browser/);
+  assert.match(interactions, /new URL\(['"]\/v1\/fedcm\/login['"], sessionOrigin\)/);
+  assert.match(interactions, /url\.searchParams\.set\(['"]frame_token['"], sessionFrameToken\)/);
+  assert.match(interactions, /location\.assign\(url\)/);
+  assert.match(interactions, /#gala-session-transfer=/);
+  assert.match(interactions, /sessionStorage\.setItem\(intentStorageKey/);
 });
 
 test('a first-visit silent miss is expected, while an active FedCM failure is observable', async () => {
@@ -135,5 +140,5 @@ test('an unavailable, cancelled, or failed active sign-in does not strand the in
   assert.match(interactions, /return false;/);
   assert.match(interactions, /return true;/);
   assert.match(interactions, /fedCmSession\(['"]active['"]\)\.then\(\(started\) => \{/);
-  assert.match(interactions, /if \(!started\) pendingIntent = null;/);
+  assert.match(interactions, /if \(!started\) \{\s*pendingIntent = null;\s*rememberPendingIntent\(null\)/);
 });

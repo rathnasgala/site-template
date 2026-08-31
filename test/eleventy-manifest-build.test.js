@@ -409,7 +409,7 @@ test('Eleventy generates static root and language pagination with canonical navi
     `${await readFile(path.join(root, 'site.config.yml'), 'utf8')}pagination:\n  pageSize: 12\n`);
   await writeFile(path.join(root, '.gala', 'build', 'build-settings.json'), JSON.stringify({
     schemaVersion: 1,
-    generatedAt: '2026-06-15T12:30:00Z',
+    generatedAt: '2026-06-15T12:30:00.123456789Z',
     paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 }
   }));
 

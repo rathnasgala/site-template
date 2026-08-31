@@ -11,15 +11,22 @@ test('local builds without a platform snapshot use the documented bootstrap poli
   assert.strictEqual(await readBuildSettings(path.join(root, 'missing.json')), DEFAULT_BUILD_SETTINGS);
 });
 
-test('reads a valid signed-build artifact and rejects invalid policy order', async () => {
+test('reads signed-build artifacts at Java Instant precision and rejects invalid policy order', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'gala-build-settings-'));
   const file = path.join(root, 'settings.json');
-  await writeFile(file, JSON.stringify({
-    schemaVersion: 1,
-    generatedAt: '2026-08-30T20:00:00Z',
-    paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 }
-  }));
-  assert.equal((await readBuildSettings(file)).paginationPolicy.defaultPageSize, 24);
+  for (const generatedAt of [
+    '2026-08-30T20:00:00.1Z',
+    '2026-08-30T20:00:00.123Z',
+    '2026-08-30T20:00:00.123456Z',
+    '2026-08-30T20:00:00.123456789Z'
+  ]) {
+    await writeFile(file, JSON.stringify({
+      schemaVersion: 1,
+      generatedAt,
+      paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 }
+    }));
+    assert.equal((await readBuildSettings(file)).generatedAt, generatedAt);
+  }
 
   await writeFile(file, JSON.stringify({
     schemaVersion: 1,
@@ -31,6 +38,13 @@ test('reads a valid signed-build artifact and rejects invalid policy order', asy
   await writeFile(file, JSON.stringify({
     schemaVersion: 1,
     generatedAt: 'not-a-time',
+    paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 }
+  }));
+  await assert.rejects(() => readBuildSettings(file), /Unsupported build settings schema/);
+
+  await writeFile(file, JSON.stringify({
+    schemaVersion: 1,
+    generatedAt: '2026-08-30T20:00:00.1234567890Z',
     paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 }
   }));
   await assert.rejects(() => readBuildSettings(file), /Unsupported build settings schema/);

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "2.0.27",
+    "version": "2.0.28",
     "availableDesignThemes": [
       "editorial",
       "modern",
@@ -22,7 +22,7 @@
     "lib/article-cards.js": "8777ac4f8453dc6f313dd59b357249dcdc22beafff12f01575024effe58900d0",
     "lib/accent.js": "24e5d2bcf00e6b3ad86cf8942e56dcb98b0d06ff8e0673ccb7cc85fa732e0837",
     "lib/build-manifest.js": "4e103d99231789563b6000f900e7fc9445705971f82d3c52d96c3332c801777e",
-    "lib/build-settings.js": "f3ebc4ac166394c78d2aca50da00b39ad1ea72b7bcf7c12915cd53eb3e2b567f",
+    "lib/build-settings.js": "ddfc111fae49497e81fad4d82ace297beb69b7cb6458f692d90dc43b15089c0e",
     "lib/engagement-snapshot.js": "40e35fecea65ca51056733c28fd7c37f83311d38285c9f1b865c2e1cd734c38f",
     "lib/performance-budget.js": "70c5d1d697302466e1fa982fd07b19abb299e3fcae0bb05aa8cdebf5d7b69241",
     "lib/prism-compiled-output.js": "0c1f93d025c70dbec10c78f17f59ae10a9a6de773b58adb2f26f42de62f7be2c",

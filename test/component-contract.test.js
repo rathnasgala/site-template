@@ -80,6 +80,7 @@ test('layout and palette configuration select real managed-theme variants', asyn
   // than an empty attribute no rule answers to.
   assert.match(markup, /data-palette="{{ site\.design\.palette \| default\('default'\) }}"/);
   assert.match(markup, /data-theme="{{ site\.design\.theme \| default\('modern'\) }}"/);
+  assert.match(markup, /dir="{{ \(post\.language or language or site\.site\.defaultLanguage\) \| languageDirection }}"/);
   assert.match(styles, /:root\[data-theme='editorial'\]/);
   assert.match(styles, /:root\[data-theme='technical'\]/);
   assert.match(styles, /:root\[data-layout='portfolio'\]/);

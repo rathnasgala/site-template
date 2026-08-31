@@ -437,6 +437,50 @@ test('Eleventy localizes the Tamil index and gives language preferences real des
   assert.match(germanPost, /value="ta" data-url="\.\.\/\.\.\/ta\/"/);
 });
 
+test('Eleventy renders localized RTL indexes with RTL document direction', async () => {
+  const root = await fixture();
+  const manifestPath = path.join(root, '.gala', 'build', 'validated-posts.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  const rtlPosts = [
+    ['ar', '01K00000000000000000000011', 'مقال عربي'],
+    ['fa', '01K00000000000000000000012', 'مقاله فارسی'],
+    ['he', '01K00000000000000000000013', 'מאמר בעברית'],
+    ['ur', '01K00000000000000000000014', 'اردو مضمون']
+  ];
+  for (const [language, id, title] of rtlPosts) {
+    manifest.posts.push({
+      source: `content/posts/rtl/index.${language}.md`,
+      id,
+      rawFrontmatter: { title, publishAfterDate: '2026-06-17', language },
+      frontmatter: { title, publishAfterDate: '2026-06-17', language },
+      contentBody: title,
+      body: title,
+      slug: `rtl-${language}`,
+      language,
+      relativeUrl: `/${language}/rtl-${language}/`,
+      pageUrl: `https://example.com/blog/${language}/rtl-${language}/`,
+      canonicalUrl: `https://example.com/blog/${language}/rtl-${language}/`,
+      publicationState: 'published'
+    });
+  }
+  await writeFile(manifestPath, JSON.stringify(manifest));
+
+  await execute(process.execPath, [eleventy], { cwd: root });
+
+  const expectedSettings = new Map([
+    ['ar', 'إعدادات القارئ'],
+    ['fa', 'تنظیمات خواننده'],
+    ['he', 'הגדרות קורא'],
+    ['ur', 'قارئین کی ترتیبات']
+  ]);
+  for (const [language, settings] of expectedSettings) {
+    const index = await readFile(path.join(root, '_site', language, 'index.html'), 'utf8');
+    assert.match(index, new RegExp(`<html lang="${language}" dir="rtl"`), language);
+    assert.match(index, new RegExp(`id="gala-settings-title">${settings}</h2>`), language);
+    assert.doesNotMatch(index, /id="gala-settings-title">Reader settings<\/h2>/, language);
+  }
+});
+
 test('Eleventy fails hard instead of globbing content when the manifest is missing', async () => {
   const root = await fixture({ manifest: false });
   await assert.rejects(
@@ -479,8 +523,8 @@ test('Eleventy generates static root and language pagination with canonical navi
   assert.equal((rootSecond.match(/class="gala-card"/g) ?? []).length, 2);
   assert.equal((englishSecond.match(/class="gala-card"/g) ?? []).length, 1);
   assert.match(rootFirst, /Page 1 of 2/);
-  assert.match(rootFirst, /href="\.\/2\/" rel="next"/);
-  assert.match(rootSecond, /href="\.\.\/" rel="prev"/);
+  assert.match(rootFirst, /href="\.\/2\/" rel="next">Older articles<\/a>/);
+  assert.match(rootSecond, /href="\.\.\/" rel="prev">Newer articles<\/a>/);
   assert.match(rootSecond, /<link rel="canonical" href="https:\/\/example\.com\/blog\/2\/">/);
   assert.match(englishSecond, /<link rel="canonical" href="https:\/\/example\.com\/blog\/en\/2\/">/);
 });

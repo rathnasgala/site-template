@@ -8,7 +8,24 @@ import {
   loadSiteConfiguration, validateCanonicalUrlTemplate, validatePagination, validateProfile
 } from '../lib/site-config.js';
 import { languageDestination, publicationUrl } from '../eleventy.config.js';
-import { uiLabels } from '../lib/ui-localization.js';
+import {
+  SUPPORTED_UI_LANGUAGES,
+  WEB_CONTENT_TOP_50,
+  formatUiMessage,
+  languageDirection,
+  resolvedUiLanguage,
+  uiLabels
+} from '../lib/ui-localization.js';
+
+const EXPECTED_WEB_CONTENT_TOP_50 = [
+  'en', 'es', 'de', 'ja', 'fr', 'pt', 'ru', 'it', 'nl', 'pl',
+  'tr', 'zh', 'id', 'cs', 'fa', 'vi', 'ko', 'uk', 'ar', 'hu',
+  'sv', 'ro', 'el', 'da', 'fi', 'he', 'sk', 'th', 'bg', 'hr',
+  'sr', 'nb', 'lt', 'sl', 'ca', 'et', 'no', 'lv', 'bn', 'hi',
+  'bs', 'az', 'ka', 'is', 'uz', 'ms', 'mk', 'kk', 'sq', 'hy'
+];
+
+const EXPECTED_ADDITIONAL_LANGUAGES = ['ta', 'ur', 'ne', 'ml', 'kn', 'te', 'mr'];
 
 const config = parse(await readFile(new URL('../site.config.yml', import.meta.url), 'utf8'));
 const managed = JSON.parse(await readFile(new URL('../.gala/managed-files.json', import.meta.url), 'utf8'));
@@ -39,11 +56,64 @@ test('language destinations prefer an exact translation and otherwise use the la
   assert.equal(languageDestination('en', '/ta/article/', alternates), '../../en/');
 });
 
-test('Tamil regional variants use Tamil UI while unknown UI locales fall back safely', () => {
+test('ships the pinned top 50 web-content UI languages plus requested Indian languages', () => {
+  assert.deepEqual(WEB_CONTENT_TOP_50, EXPECTED_WEB_CONTENT_TOP_50);
+  assert.deepEqual(SUPPORTED_UI_LANGUAGES, [
+    ...EXPECTED_WEB_CONTENT_TOP_50, ...EXPECTED_ADDITIONAL_LANGUAGES
+  ]);
+  assert.equal(new Set(SUPPORTED_UI_LANGUAGES).size, 57);
+
+  const requiredKeys = Object.keys(uiLabels('en')).sort();
+  for (const language of SUPPORTED_UI_LANGUAGES) {
+    const labels = uiLabels(language);
+    assert.deepEqual(Object.keys(labels).sort(), requiredKeys, language);
+    for (const [key, value] of Object.entries(labels)) {
+      assert.equal(typeof value, 'string', `${language}.${key}`);
+      assert.notEqual(value.trim(), '', `${language}.${key}`);
+    }
+    assert.match(labels.readingTime, /\{count\}/, `${language}.readingTime`);
+    assert.match(labels.pagePosition, /\{current\}/, `${language}.pagePosition current`);
+    assert.match(labels.pagePosition, /\{total\}/, `${language}.pagePosition total`);
+  }
+});
+
+test('regional and script variants resolve without serving the wrong writing system', () => {
+  assert.equal(resolvedUiLanguage('fr-CA'), 'fr');
+  assert.equal(resolvedUiLanguage('pt-BR'), 'pt');
+  assert.equal(resolvedUiLanguage('iw-IL'), 'he');
+  assert.equal(resolvedUiLanguage('zh-CN'), 'zh-Hans');
+  assert.equal(resolvedUiLanguage('zh-TW'), 'zh-Hant');
+  assert.equal(resolvedUiLanguage('zh-HK'), 'zh-Hant');
+  assert.equal(resolvedUiLanguage('sr-Cyrl'), 'sr');
+  assert.equal(resolvedUiLanguage('sr-Latn'), 'sr-Latn');
+  assert.match(uiLabels('zh-TW').published, /[發表]/);
+  assert.match(uiLabels('sr-Latn').published, /^[A-Za-zĀ-ſ ]+$/u);
+});
+
+test('localized messages preserve grammar placeholders and document direction', () => {
+  assert.equal(formatUiMessage(uiLabels('en').readingTime, 4), '4 min read');
+  assert.equal(formatUiMessage(uiLabels('en').pagePosition, 2, 7), 'Page 2 of 7');
+  assert.equal(formatUiMessage(uiLabels('ja').readingTime, 4), '読了時間 4 分');
+  assert.equal(formatUiMessage(uiLabels('zh-TW').pagePosition, 2, 7), '第 2 頁（共 7 頁）');
+  for (const language of ['ar', 'fa', 'he', 'ur']) {
+    assert.equal(languageDirection(language), 'rtl', language);
+  }
+  for (const language of ['en', 'ta', 'zh-Hant']) {
+    assert.equal(languageDirection(language), 'ltr', language);
+  }
+});
+
+test('Tamil regional variants use Tamil UI while unknown UI locales fall back entirely to English', () => {
   assert.equal(uiLabels('ta-IN').languageIndexTitle, 'தமிழ் கட்டுரைகள்');
   assert.equal(uiLabels('ta-IN').published, 'வெளியிடப்பட்டது');
-  assert.equal(uiLabels('fr').published, 'Published');
-  assert.match(uiLabels('fr').languageIndexTitle, /français/i);
+  assert.equal(uiLabels('ta-IN').previous, 'புதிய கட்டுரைகள்');
+  assert.equal(uiLabels('ta-IN').next, 'பழைய கட்டுரைகள்');
+  assert.equal(uiLabels('en').previous, 'Newer articles');
+  assert.equal(uiLabels('en').next, 'Older articles');
+  assert.equal(uiLabels('fr').published, 'Publié');
+  assert.equal(uiLabels('sw').published, 'Published');
+  assert.equal(uiLabels('sw').languageIndexTitle, 'Articles in Swahili');
+  assert.equal(uiLabels('sw').readerSettings, 'Reader settings');
   assert.equal(uiLabels('bad_language').languageIndexTitle, 'English articles');
 });
 

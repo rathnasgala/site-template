@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ post.language or language or site.site.defaultLanguage }}" data-theme="{{ site.design.theme | default('modern') }}" data-layout="{{ site.design.layout | default('article-first') }}" data-palette="{{ site.design.palette | default('default') }}" data-mode="{{ site.design.colorMode | default('system') }}">
+<html lang="{{ post.language or language or site.site.defaultLanguage }}" dir="{{ (post.language or language or site.site.defaultLanguage) | languageDirection }}" data-theme="{{ site.design.theme | default('modern') }}" data-layout="{{ site.design.layout | default('article-first') }}" data-palette="{{ site.design.palette | default('default') }}" data-mode="{{ site.design.colorMode | default('system') }}">
   {% set indexPage = articleIndex or (rootArticleIndex if not post and page.url == '/') %}
   {% set currentLanguage = post.language or language %}
   {% set ui = (currentLanguage or site.site.defaultLanguage) | uiLabels %}

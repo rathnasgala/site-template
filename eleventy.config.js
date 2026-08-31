@@ -9,7 +9,13 @@ import { createHash } from 'node:crypto';
 import { groupArticleCards } from './lib/article-cards.js';
 import { readBuildSettings } from './lib/build-settings.js';
 import { createArticleIndexes, resolvePageSize } from './lib/article-pagination.js';
-import { canonicalLanguage, languageName, uiLabels } from './lib/ui-localization.js';
+import {
+  canonicalLanguage,
+  formatUiMessage,
+  languageDirection,
+  languageName,
+  uiLabels
+} from './lib/ui-localization.js';
 
 const themeBootstrap = "(function(){try{var m=localStorage.getItem('gala-color-mode');if(m==='light'||m==='dark'||m==='system')document.documentElement.dataset.mode=m}catch(e){}})();";
 
@@ -105,7 +111,9 @@ export default async function (eleventyConfig) {
     createHash('sha256').update(String(value)).digest('base64'));
   eleventyConfig.addFilter('publicationUrl', publicationUrl);
   eleventyConfig.addFilter('languageDestination', languageDestination);
+  eleventyConfig.addFilter('languageDirection', languageDirection);
   eleventyConfig.addFilter('languageName', languageName);
+  eleventyConfig.addFilter('uiMessage', formatUiMessage);
   eleventyConfig.addFilter('uiLabels', uiLabels);
   eleventyConfig.setLibrary('md', markdownLibrary);
   eleventyConfig.addPassthroughCopy({ static: '/' });

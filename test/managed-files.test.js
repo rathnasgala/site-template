@@ -25,6 +25,7 @@ const expectedRuntimeFiles = [
   'lib/seo.js',
   'lib/share-targets.js',
   'lib/ui-localization.js',
+  'lib/ui-locales.js',
   'package-lock.json',
   'package.json',
   'scripts/build-reader.js',

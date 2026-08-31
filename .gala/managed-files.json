@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "2.0.29",
+    "version": "2.0.30",
     "availableDesignThemes": [
       "editorial",
       "modern",
@@ -17,7 +17,7 @@
   "files": {
     ".gala/publish.yml.template": "d93da94c10378693cdd927cd6623a003ff57c15d8b8aeba3644c914f2753d824",
     ".gitignore": "b5fa24e10155097a0d372926fd2e59e6072e7cc2cb6399bbfb4beb8b33ea315b",
-    "eleventy.config.js": "b9287218759044af138e1568486db0baa2ee3f7c1fd570c56fffc19a5586ccf6",
+    "eleventy.config.js": "de5d8e4942c5bf9759e2758c24e2be316687937be4285157cd2230ac5a5ad6aa",
     "lib/article-pagination.js": "adea565a202eb5d16e4f13cf70aba9f589a8c1e8af787ff2e36848fcd6293e85",
     "lib/article-cards.js": "8777ac4f8453dc6f313dd59b357249dcdc22beafff12f01575024effe58900d0",
     "lib/accent.js": "24e5d2bcf00e6b3ad86cf8942e56dcb98b0d06ff8e0673ccb7cc85fa732e0837",
@@ -34,7 +34,8 @@
     "lib/render-markdown.js": "275b7da721aef1f68cda515673153471c0d597061e8fdf867c5f2b32c98b91db",
     "lib/seo.js": "523763e49a06e1dd995adb6cc3d78997796cb02e237ec72b5565076475e48c93",
     "lib/share-targets.js": "458aff86fab2b62a364442cd8c612565c6e0b53eef2f20cb6237cc562b1e0731",
-    "lib/ui-localization.js": "974dfe65e5cb33c05f7c0104056359f12e07f0c33934fd9a942beaaa9ef1226b",
+    "lib/ui-localization.js": "f1a707575f94e27f3569fe0cd42be13c72d7846ddfc95952b161c2d9666ed1b5",
+    "lib/ui-locales.js": "5eada3bf9c13c829c66b44a40a41cfc66cb39ff173f3f66e2416097c78e8f10a",
     "lib/site-config.js": "e44a0ddcdeec55550455c4c820a8023aefbd99bd4fea13b124b2b977f19cd87d",
     "package-lock.json": "dc11470b1ad897c58d91745f23ff25711c593e62972ec9fb83f4e10fd77e1ecd",
     "package.json": "7a3c2b559054b1613d84cbda3a1fd370bc725818f9f418f0fe90cf3f8f0a9caa",
@@ -45,8 +46,8 @@
     "src/_data/feedLinks.js": "8317ec93ef58d2d73d0b23f753109e8485026249c877c2904c2b3b5c8d336782",
     "src/_data/languages.js": "1358748f7fa2f74406d3295a030827d6229a53e94da72cf712e719d7a356aeac",
     "src/_data/site.js": "41e60190d22337321d480a29be9774eaa93a98b848e92b5139129ae97c44fd97",
-    "src/_includes/components/ui.njk": "7fecb622e42a26c46495cc480e7d1231d3fe9f1a6eda3b8d3d23137910bdc7c7",
-    "src/_includes/layouts/base.njk": "6d2c1c71810ddd2612f7584f9f0991bf8534c45e7f9e68ff1b1eaa72a01210a9",
+    "src/_includes/components/ui.njk": "785d774970249baba1fba8e633fefb3eeb7394a837317b26a5ca8878e66c4693",
+    "src/_includes/layouts/base.njk": "ad3d934dce23fb6d45ce4e6a3259df83ab9d07bec82f562c45b202030ab2045d",
     "src/_includes/layouts/language-index.njk": "7dd1523c296775553f10ed2eafaf8ff5ac9adbeefa4c2fe0164aec292ee670cc",
     "src/_includes/layouts/post.njk": "64f6ebe4613053ab0c4b6f748684622bba39e5c72754caa88d1e2b237a14a3c5",
     "src/_includes/layouts/prism-configuration.njk": "c984441ac50465eb6ee0e050c68c054e3a0bca98960fb92fb2f5795443301594",

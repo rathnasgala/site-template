@@ -27,7 +27,28 @@ test('reads non-negative committed counts', async () => {
     }
   }));
   const entry = engagementFor(await readEngagementSnapshot(file), '01K00000000000000000000000');
-  assert.deepEqual(entry, { available: true, reactions: 2, comments: 3, views: 5 });
+  assert.deepEqual(entry, {
+    available: true,
+    reactions: 2,
+    comments: 3,
+    views: 5,
+    activeReadingSeconds: 0
+  });
+});
+
+test('reads active time while keeping old snapshots compatible', async () => {
+  const snapshot = {
+    articles: {
+      id: { reactions: 2, comments: 3, views: 5, activeReadingSeconds: 901 }
+    }
+  };
+  assert.equal(engagementFor(snapshot, 'id').activeReadingSeconds, 901);
+  assert.throws(
+    () => engagementFor({ articles: {
+      id: { reactions: 0, comments: 0, views: 0, activeReadingSeconds: -1 }
+    } }, 'id'),
+    /Invalid activeReadingSeconds/
+  );
 });
 
 test('rejects malformed schema and fabricated negative counts', async () => {

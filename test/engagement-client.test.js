@@ -82,6 +82,72 @@ test('published articles send one best-effort privacy-reduced view beacon', () =
   assert.match(behavior, /\.catch\(\(\) => \{\}\)/);
 });
 
+test('published articles aggregate only bounded active foreground reading time', () => {
+  assert.match(behavior, /replace\(\/\\\/engagement\$\/, '\/reading-time'\)/);
+  assert.match(behavior, /document\.visibilityState === 'visible' && document\.hasFocus\(\)/);
+  assert.match(behavior, /Math\.min\([\s\S]*ACTIVE_READING_HEARTBEAT_MS/);
+  assert.match(behavior, /Math\.floor\(accruedMilliseconds \/ 1_000\)/);
+  assert.match(behavior, /JSON\.stringify\(\{ activeSeconds \}\)/);
+  assert.match(behavior, /document\.addEventListener\('visibilitychange', flush\)/);
+  assert.match(behavior, /window\.addEventListener\('pagehide'/);
+  assert.match(behavior, /recordActiveReadingTime\(region\)/);
+  assert.doesNotMatch(behavior, /reading-time[\s\S]{0,400}(session|reader|user)Id/);
+});
+
+test('active reading heartbeats stop accruing while the page is hidden', () => {
+  let now = 0;
+  let interval;
+  let cleared = false;
+  const documentEvents = new Map();
+  const windowEvents = new Map();
+  const requests = [];
+  const document = {
+    visibilityState: 'visible',
+    hasFocus: () => true,
+    addEventListener(name, listener) { documentEvents.set(name, listener); },
+    removeEventListener(name) { documentEvents.delete(name); },
+    querySelectorAll() { return []; },
+    querySelector() { return null; }
+  };
+  const window = {
+    addEventListener(name, listener) { windowEvents.set(name, listener); },
+    removeEventListener(name) { windowEvents.delete(name); },
+    isSecureContext: true,
+    location: { href: 'https://author.example/en/post/' }
+  };
+  const context = {
+    URL,
+    window,
+    navigator: {},
+    document,
+    Set,
+    performance: { now: () => now },
+    setInterval(listener) { interval = listener; return 1; },
+    clearInterval() { cleared = true; },
+    fetch(url, options) { requests.push({ url: String(url), options }); return Promise.resolve(); }
+  };
+  vm.runInNewContext(behavior, context);
+  context.recordActiveReadingTime({
+    dataset: { engagementUrl: 'https://api.gala67.com/v1/articles/id/engagement' }
+  });
+
+  now = 15_000;
+  interval();
+  assert.equal(JSON.parse(requests[0].options.body).activeSeconds, 15);
+  assert.match(requests[0].url, /\/reading-time$/);
+
+  now = 20_000;
+  document.visibilityState = 'hidden';
+  documentEvents.get('visibilitychange')();
+  assert.equal(JSON.parse(requests[1].options.body).activeSeconds, 5);
+
+  now = 60_000;
+  interval();
+  assert.equal(requests.length, 2);
+  windowEvents.get('pagehide')();
+  assert.equal(cleared, true);
+});
+
 test('live totals use the aggregate comment count rather than first-page length', () => {
   const context = {
     URL,

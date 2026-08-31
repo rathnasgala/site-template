@@ -309,6 +309,62 @@ function recordView(region) {
   }).catch(() => {});
 }
 
+const ACTIVE_READING_HEARTBEAT_MS = 15_000;
+
+/*
+ * Active reading time is deliberately an article/day aggregate, not a session trail. A tab earns
+ * time only while it is visible and owns browser focus. Every observation is capped at one
+ * heartbeat so a suspended browser cannot turn an overnight pause into reading time.
+ */
+function recordActiveReadingTime(region) {
+  const requestUrl = new URL(region.dataset.engagementUrl);
+  requestUrl.pathname = requestUrl.pathname.replace(/\/engagement$/, '/reading-time');
+  let accruedMilliseconds = 0;
+  let lastObservedAt = performance.now();
+  let wasActive = document.visibilityState === 'visible' && document.hasFocus();
+  let stopped = false;
+
+  const observe = () => {
+    const now = performance.now();
+    if (wasActive) {
+      accruedMilliseconds += Math.min(
+        Math.max(0, now - lastObservedAt),
+        ACTIVE_READING_HEARTBEAT_MS
+      );
+    }
+    lastObservedAt = now;
+    wasActive = document.visibilityState === 'visible' && document.hasFocus();
+  };
+
+  const flush = () => {
+    if (stopped) return;
+    observe();
+    const activeSeconds = Math.floor(accruedMilliseconds / 1_000);
+    if (activeSeconds < 1) return;
+    accruedMilliseconds -= activeSeconds * 1_000;
+    fetch(requestUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ activeSeconds }),
+      credentials: 'omit',
+      keepalive: true
+    }).catch(() => {});
+  };
+
+  const interval = setInterval(flush, ACTIVE_READING_HEARTBEAT_MS);
+  document.addEventListener('visibilitychange', flush);
+  window.addEventListener('focus', observe);
+  window.addEventListener('blur', flush);
+  window.addEventListener('pagehide', () => {
+    flush();
+    stopped = true;
+    clearInterval(interval);
+    document.removeEventListener('visibilitychange', flush);
+    window.removeEventListener('focus', observe);
+    window.removeEventListener('blur', flush);
+  }, { once: true });
+}
+
 /*
  * The comments island asks for a sign-in when the reader reaches for something that needs one.
  * Opening the window and replaying the interrupted intent stays here, because that is a property
@@ -548,6 +604,7 @@ acceptRedirectedSessionTransfer();
 document.querySelectorAll('[data-engagement-url]').forEach((region) => {
   refreshEngagement(region);
   recordView(region);
+  recordActiveReadingTime(region);
 });
 
 function engagementErrorMessage(code) {

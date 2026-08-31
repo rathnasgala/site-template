@@ -3,6 +3,7 @@ layout: layouts/base.njk
 title: Home
 permalink: /index.html
 ---
-{% from "components/ui.njk" import cardIndex %}
+{% from "components/ui.njk" import cardIndex, pagination %}
 <h1>{{ site.site.name }}</h1>
-{{ cardIndex(buildManifest.posts, buildManifest.preview, page.url) }}
+{{ cardIndex(rootArticleIndex.cards, buildManifest.preview, page.url) }}
+{{ pagination(rootArticleIndex.previousUrl, rootArticleIndex.nextUrl, rootArticleIndex.pageNumber, rootArticleIndex.totalPages, page.url) }}

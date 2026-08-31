@@ -47,6 +47,9 @@ test('comment cursors append nested thread pages without navigating', () => {
   // The server refuses a reply below its own limit, so one is never offered.
   assert.match(island, /const MAXIMUM_DEPTH = 5/);
   assert.match(island, /comment\.depth < MAXIMUM_DEPTH/);
+  assert.match(island, /language: document\.documentElement\.lang/);
+  assert.match(island, /comment\.language/);
+  assert.match(island, /gala-comment__language/);
 });
 
 test('untrusted API fields are never written as markup', () => {

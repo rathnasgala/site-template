@@ -6,6 +6,9 @@ import { verifyPrismCompiledOutput } from './lib/prism-compiled-output.js';
 import { lstat, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { groupArticleCards } from './lib/article-cards.js';
+import { readBuildSettings } from './lib/build-settings.js';
+import { createArticleIndexes, resolvePageSize } from './lib/article-pagination.js';
 
 const themeBootstrap = "(function(){try{var m=localStorage.getItem('gala-color-mode');if(m==='light'||m==='dark'||m==='system')document.documentElement.dataset.mode=m}catch(e){}})();";
 
@@ -40,7 +43,11 @@ async function verifiedMediaSource(postSource, mediaSource) {
 }
 
 export default async function (eleventyConfig) {
-  const [manifest, site] = await Promise.all([readBuildManifest(), loadSiteConfiguration()]);
+  const [manifest, site, buildSettings] = await Promise.all([
+    readBuildManifest(),
+    loadSiteConfiguration(),
+    readBuildSettings(path.resolve('.gala', 'build', 'build-settings.json'))
+  ]);
   const attributionTier = process.env.GALA_ATTRIBUTION_TIER === 'PAID' ? 'PAID' : 'FREE';
   const buildCommit = process.env.GALA_BUILD_COMMIT;
   if (buildCommit != null && !/^[0-9a-f]{40}$/.test(buildCommit)) {
@@ -58,6 +65,31 @@ export default async function (eleventyConfig) {
   eleventyConfig.addGlobalData('attributionTier', attributionTier);
   eleventyConfig.addGlobalData('buildIdentity', buildIdentity);
   eleventyConfig.addGlobalData('themeBootstrap', themeBootstrap);
+  const articleCards = groupArticleCards(
+    manifest.posts,
+    site.site.defaultLanguage,
+    manifest.preview
+  );
+  const articleCardsByLanguage = Object.fromEntries(
+    [...new Set([site.site.defaultLanguage, ...manifest.posts.map(({ language }) => language)])]
+      .map((language) => [language, groupArticleCards(
+        manifest.posts.filter((post) => post.language === language),
+        language,
+        manifest.preview
+      )])
+  );
+  const pageSize = resolvePageSize(site.pagination.pageSize, buildSettings.paginationPolicy);
+  const articleIndexes = createArticleIndexes({
+    rootCards: articleCards,
+    cardsByLanguage: articleCardsByLanguage,
+    pageSize,
+    hosting: site.hosting
+  });
+  eleventyConfig.addGlobalData('rootArticleIndex', articleIndexes.root[0]);
+  eleventyConfig.addGlobalData('articleIndexesByLanguage', Object.freeze(Object.fromEntries(
+    Object.entries(articleIndexes.byLanguage).map(([language, pages]) => [language, pages[0]])
+  )));
+  eleventyConfig.addGlobalData('additionalArticleIndexes', articleIndexes.additional);
   eleventyConfig.addFilter('sha256Csp', (value) =>
     createHash('sha256').update(String(value)).digest('base64'));
   eleventyConfig.addFilter('publicationUrl', publicationUrl);

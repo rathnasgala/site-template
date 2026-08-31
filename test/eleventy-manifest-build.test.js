@@ -122,10 +122,10 @@ performance:
           source: 'content/posts/without-snapshot/index.de.md',
           id: '01K00000000000000000000002',
           rawFrontmatter: {
-            title: 'Without snapshot', publishAfterDate: '2026-06-15', language: 'de'
+            title: 'Without snapshot', publishAfterDate: '2026-06-16', language: 'de'
           },
           frontmatter: {
-            title: 'Without snapshot', publishAfterDate: '2026-06-15', language: 'de'
+            title: 'Without snapshot', publishAfterDate: '2026-06-16', language: 'de'
           },
           contentBody: 'No snapshot entry.',
           body: 'No snapshot entry.',
@@ -280,8 +280,27 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   assert.match(index, /class="gala-card-index"/);
   assert.match(index, /href="\.\/en\/validated\/"/);
   assert.match(index, />Validated<\/a>/);
-  assert.match(index, />Validé<\/a>/);
+  assert.equal((index.match(/class="gala-card"/g) ?? []).length, 2);
+  assert.equal((index.match(/>Validated<\/a>/g) ?? []).length, 1);
+  assert.match(index, /aria-label="Available languages"/);
+  assert.match(index, /hreflang="en"[^>]*>English<\/a>/);
+  assert.match(index, /hreflang="fr"[^>]*>fran[cç]ais<\/a>/i);
+  assert.doesNotMatch(index, />Validé<\/a>/);
   assert.doesNotMatch(index, /Deleted/);
+  assert.ok(index.indexOf('Without snapshot') < index.indexOf('Validated'));
+  assert.match(index, /Published <time datetime="2026-06-15">2026-06-15<\/time>/);
+  assert.match(index, /1 min read/);
+  const englishIndex = await readFile(path.join(root, '_site', 'en', 'index.html'), 'utf8');
+  assert.match(englishIndex, /<html lang="en"/);
+  assert.match(englishIndex, /class="gala-card-index"/);
+  assert.equal((englishIndex.match(/class="gala-card"/g) ?? []).length, 1);
+  assert.match(englishIndex, /href="\.\/validated\/"/);
+  assert.match(englishIndex, /Published <time datetime="2026-06-15">2026-06-15<\/time>/);
+  assert.doesNotMatch(englishIndex, /Validé|Available languages/);
+  const frenchIndex = await readFile(path.join(root, '_site', 'fr', 'index.html'), 'utf8');
+  assert.match(frenchIndex, /<html lang="fr"/);
+  assert.match(frenchIndex, />Validé<\/a>/);
+  assert.doesNotMatch(frenchIndex, />Validated<\/a>|Available languages/);
   const searchIndex = JSON.parse(await readFile(
     path.join(root, '_site', 'search-index.json'),
     'utf8'
@@ -311,6 +330,8 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   assert.doesNotMatch(home, /Open settings page/);
   for (const relative of [
     'index.html',
+    path.join('en', 'index.html'),
+    path.join('fr', 'index.html'),
     path.join('en', 'validated', 'index.html'),
     path.join('search', 'index.html')
   ]) {
@@ -341,9 +362,8 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   const frenchFeed = await readFile(path.join(root, '_site', 'feed', 'fr.xml'), 'utf8');
   assert.match(frenchFeed, /Validé/);
   assert.doesNotMatch(frenchFeed, /Deleted/);
-  const englishIndex = await readFile(path.join(root, '_site', 'en', 'index.html'), 'utf8');
   assert.match(englishIndex, /Fixture Site - en/);
-  assert.match(englishIndex, /href="https:\/\/example\.com\/blog\/en\/validated\/"/);
+  assert.match(englishIndex, /href="\.\/validated\/"/);
   assert.equal(
     await readFile(path.join(root, '_site', 'en', 'validated', 'media', 'cover image.png'), 'utf8'),
     'validated-image'
@@ -368,13 +388,69 @@ test('Eleventy fails hard instead of globbing content when the manifest is missi
   );
 });
 
+test('Eleventy generates static root and language pagination with canonical navigation', async () => {
+  const root = await fixture();
+  const manifestPath = path.join(root, '.gala', 'build', 'validated-posts.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  for (let index = 10; index < 22; index += 1) {
+    const suffix = String(index).padStart(2, '0');
+    manifest.posts.push({
+      source: `content/posts/extra-${suffix}/index.en.md`,
+      id: `01K000000000000000000000${suffix}`,
+      rawFrontmatter: { title: `Extra ${suffix}`, publishAfterDate: '2026-06-10', language: 'en' },
+      frontmatter: { title: `Extra ${suffix}`, publishAfterDate: '2026-06-10', language: 'en' },
+      contentBody: `Extra ${suffix}.`, body: `Extra ${suffix}.`, slug: `extra-${suffix}`, language: 'en',
+      relativeUrl: `/en/extra-${suffix}/`, pageUrl: `https://example.com/blog/en/extra-${suffix}/`,
+      canonicalUrl: `https://example.com/blog/en/extra-${suffix}/`, publicationState: 'published'
+    });
+  }
+  await writeFile(manifestPath, JSON.stringify(manifest));
+  await writeFile(path.join(root, 'site.config.yml'),
+    `${await readFile(path.join(root, 'site.config.yml'), 'utf8')}pagination:\n  pageSize: 12\n`);
+  await writeFile(path.join(root, '.gala', 'build', 'build-settings.json'), JSON.stringify({
+    schemaVersion: 1,
+    generatedAt: '2026-06-15T12:30:00Z',
+    paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 }
+  }));
+
+  await execute(process.execPath, [eleventy], { cwd: root });
+
+  const rootFirst = await readFile(path.join(root, '_site', 'index.html'), 'utf8');
+  const rootSecond = await readFile(path.join(root, '_site', '2', 'index.html'), 'utf8');
+  const englishSecond = await readFile(path.join(root, '_site', 'en', '2', 'index.html'), 'utf8');
+  assert.equal((rootFirst.match(/class="gala-card"/g) ?? []).length, 12);
+  assert.equal((rootSecond.match(/class="gala-card"/g) ?? []).length, 2);
+  assert.equal((englishSecond.match(/class="gala-card"/g) ?? []).length, 1);
+  assert.match(rootFirst, /Page 1 of 2/);
+  assert.match(rootFirst, /href="\.\/2\/" rel="next"/);
+  assert.match(rootSecond, /href="\.\.\/" rel="prev"/);
+  assert.match(rootSecond, /<link rel="canonical" href="https:\/\/example\.com\/blog\/2\/">/);
+  assert.match(englishSecond, /<link rel="canonical" href="https:\/\/example\.com\/blog\/en\/2\/">/);
+});
+
+test('Eleventy rejects an author page size outside the current platform policy', async () => {
+  const root = await fixture();
+  await writeFile(path.join(root, 'site.config.yml'),
+    `${await readFile(path.join(root, 'site.config.yml'), 'utf8')}pagination:\n  pageSize: 11\n`);
+  await writeFile(path.join(root, '.gala', 'build', 'build-settings.json'), JSON.stringify({
+    schemaVersion: 1,
+    generatedAt: '2026-06-15T12:30:00Z',
+    paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 }
+  }));
+
+  await assert.rejects(
+    () => execute(process.execPath, [eleventy], { cwd: root }),
+    /pagination\.pageSize 11 is outside the platform range 12-100/
+  );
+});
+
 test('local preview renders a scheduled post with an explicit schedule label', async () => {
   const root = await previewFixture();
   await execute(process.execPath, [eleventy], { cwd: root });
 
   const home = await readFile(path.join(root, '_site', 'index.html'), 'utf8');
   assert.match(home, />Scheduled post<\/a>/);
-  assert.match(home, /Scheduled for 2026-06-20/);
+  assert.match(home, /Scheduled for <time datetime="2026-06-20">2026-06-20<\/time>/);
   const post = await readFile(path.join(root, '_site', 'en', 'scheduled', 'index.html'), 'utf8');
   assert.match(post, /<h1>Scheduled post<\/h1>/);
   assert.match(post, /Scheduled for 2026-06-20/);

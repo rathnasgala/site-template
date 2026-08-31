@@ -1,3 +1,5 @@
+import { groupSearchMatches } from './article-groups.js';
+
 document.querySelectorAll('[data-gala-search]').forEach((search) => {
   const form = search.querySelector('form');
   const query = form?.elements.namedItem('q');
@@ -10,7 +12,8 @@ document.querySelectorAll('[data-gala-search]').forEach((search) => {
 
   function render(entries, term) {
     results.replaceChildren();
-    for (const entry of entries) {
+    for (const group of entries) {
+      const entry = group.primary;
       const item = document.createElement('li');
       const article = document.createElement('article');
       const heading = document.createElement('h2');
@@ -24,6 +27,21 @@ document.querySelectorAll('[data-gala-search]').forEach((search) => {
         const description = document.createElement('p');
         description.textContent = entry.description;
         article.append(description);
+      }
+      if (group.variants.length > 1) {
+        const languages = document.createElement('nav');
+        languages.className = 'gala-card__languages';
+        languages.setAttribute('aria-label', 'Available languages');
+        for (const variant of group.variants) {
+          const variantLink = document.createElement('a');
+          variantLink.className = 'gala-tag-chip';
+          variantLink.href = variant.url;
+          variantLink.hreflang = variant.language;
+          variantLink.lang = variant.language;
+          variantLink.textContent = variant.languageLabel;
+          languages.append(variantLink);
+        }
+        article.append(languages);
       }
       item.append(article);
       results.append(item);
@@ -49,14 +67,15 @@ document.querySelectorAll('[data-gala-search]').forEach((search) => {
         return payload.entries;
       });
       const needle = normalize(term);
-      const matches = (await index).filter((entry) => normalize([
+      const entries = await index;
+      const matches = entries.filter((entry) => normalize([
         entry.title,
         entry.description,
         entry.language,
         ...(Array.isArray(entry.tags) ? entry.tags : []),
         entry.body
       ].join('\n')).includes(needle));
-      render(matches, term);
+      render(groupSearchMatches(entries, matches, document.documentElement.lang), term);
     } catch {
       results.replaceChildren();
       status.textContent = 'Search is temporarily unavailable.';

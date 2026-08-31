@@ -1,0 +1,7 @@
+---
+layout: layouts/base.njk
+---
+{% from "components/ui.njk" import cardIndex, pagination %}
+<h1>{{ site.site.name }}{% if articleIndex.language %} - {{ articleIndex.language }}{% endif %}</h1>
+{{ cardIndex(articleIndex.cards, buildManifest.preview, page.url) }}
+{{ pagination(articleIndex.previousUrl, articleIndex.nextUrl, articleIndex.pageNumber, articleIndex.totalPages, page.url) }}

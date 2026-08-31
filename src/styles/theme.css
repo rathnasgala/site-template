@@ -554,6 +554,9 @@ button:focus-visible {
   border-radius: var(--gala-radius-surface);
   box-shadow: var(--gala-surface-shadow);
 }
+.gala-card__meta { color: var(--gala-color-muted); font-size: var(--gala-text-sm); }
+.gala-card__description { color: var(--gala-color-text); }
+.gala-card__languages { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-block-start: 1rem; }
 /* The one place the page moves of its own accord, and so the one place `motion` is legible:
    `subtle` is a short settle, `expressive` a longer one, `none` no movement at all. */
 .gala-card { transition: transform var(--gala-motion-base) var(--gala-ease),
@@ -564,7 +567,8 @@ button:focus-visible {
 .gala-stats-graph polyline { fill: none; stroke: var(--gala-color-accent); stroke-width: 2; }
 .gala-loading { display: grid; min-block-size: var(--gala-widget-min-block-size); place-items: center; }
 .gala-loading__indicator { inline-size: 2rem; block-size: 2rem; border: 0.25rem solid var(--gala-color-border); border-block-start-color: var(--gala-color-accent); border-radius: 50%; animation: gala-spin 0.8s linear infinite; }
-.gala-pagination { display: flex; justify-content: space-between; gap: 1rem; }
+.gala-pagination { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; margin-block-start: var(--gala-space-lg); }
+.gala-pagination > :last-child { justify-self: end; }
 .gala-search { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; }
 .gala-search label { grid-column: 1 / -1; }
 .gala-search input { min-block-size: 2.75rem; font: inherit; }
@@ -711,6 +715,7 @@ button:focus-visible {
   font-size: var(--gala-text-sm);
 }
 .gala-comment__meta strong { font-weight: 600; }
+.gala-comment__language { color: var(--gala-color-muted); }
 .gala-comment__pending { font-size: var(--gala-text-xs); color: var(--gala-color-muted); }
 .gala-comment__body { margin-block: 0; overflow-wrap: anywhere; }
 

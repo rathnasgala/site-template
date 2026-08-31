@@ -3,6 +3,7 @@ import { articleHreflang, postSeo } from '../lib/seo.js';
 import { engagementFor } from '../lib/engagement-snapshot.js';
 import { resolveShareTargets } from '../lib/share-targets.js';
 import { prismSessionBootstrap } from '../lib/prism-session.js';
+import { readingMinutes } from '../lib/reading-time.js';
 
 export default class ValidatedPostPages {
   data() {
@@ -53,11 +54,6 @@ export default class ValidatedPostPages {
     }
     return renderedDocument(post).html;
   }
-}
-
-function readingMinutes(markdown) {
-  const words = String(markdown ?? '').trim().match(/[\p{L}\p{N}]+(?:['’_-][\p{L}\p{N}]+)*/gu)?.length ?? 0;
-  return Math.max(1, Math.ceil(words / 225));
 }
 
 const renderedDocuments = new WeakMap();

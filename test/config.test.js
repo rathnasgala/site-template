@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { parse } from 'yaml';
 import {
-  loadSiteConfiguration, validateCanonicalUrlTemplate, validateProfile
+  loadSiteConfiguration, validateCanonicalUrlTemplate, validatePagination, validateProfile
 } from '../lib/site-config.js';
 import { publicationUrl } from '../eleventy.config.js';
 
@@ -94,6 +94,15 @@ test('scaffolds author-owned contact settings disabled by default', () => {
     websiteEnabled: false,
     phoneEnabled: false
   });
+});
+
+test('scaffolds the platform default and validates only a bounded integer override', () => {
+  assert.deepEqual(validatePagination(config.pagination), { pageSize: null });
+  assert.deepEqual(validatePagination(undefined), { pageSize: null });
+  assert.deepEqual(validatePagination({ pageSize: 36 }), { pageSize: 36 });
+  for (const invalid of [
+    true, { pageSize: 0 }, { pageSize: 101 }, { pageSize: 12.5 }, { pageSize: 24, cursor: true }
+  ]) assert.throws(() => validatePagination(invalid), /pagination/i);
 });
 
 test('normalizes the structured public profile and keeps legacy author fallback', () => {

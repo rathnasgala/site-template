@@ -21,6 +21,16 @@ function threads(items) {
   return build('', 0);
 }
 
+function languageName(language) {
+  if (!language || language === 'und') return 'Unknown language';
+  try {
+    return new Intl.DisplayNames([document.documentElement.lang || 'en'], { type: 'language' })
+      .of(language) ?? language;
+  } catch {
+    return language;
+  }
+}
+
 function commentsController(root, endpoint) {
   const state = { items: [], cursor: null, total: 0, busy: false, status: '', phase: 'loading' };
   const articleId = /\/v1\/articles\/([^/]+)\/engagement/.exec(endpoint)?.[1] ?? '';
@@ -77,6 +87,9 @@ function commentsController(root, endpoint) {
     item.dataset.commentId = comment.commentId; item.dataset.depth = comment.depth;
     const meta = element('p', 'gala-comment__meta');
     meta.append(element('strong', '', comment.author?.displayName ?? '[deleted]'));
+    const commentLanguage = element('span', 'gala-comment__language', languageName(comment.language));
+    if (comment.language && comment.language !== 'und') commentLanguage.lang = comment.language;
+    meta.append(commentLanguage);
     if (comment.createdAt) {
       const time = element('time', '', new Date(comment.createdAt).toLocaleDateString());
       time.dateTime = comment.createdAt; meta.append(time);
@@ -90,7 +103,10 @@ function commentsController(root, endpoint) {
           const existing = item.querySelector(':scope > .gala-comment__form');
           if (existing) { existing.remove(); return; }
           actions.after(form(`Reply to ${comment.author?.displayName ?? 'this comment'}`, '',
-            (body) => write('comment.create', { articleId, parentCommentId: comment.commentId, body })));
+            (body) => write('comment.create', {
+              articleId, parentCommentId: comment.commentId, body,
+              language: document.documentElement.lang || 'und',
+            })));
         }); actions.append(reply);
       }
       const mine = sessionUser.value && comment.author?.userId === sessionUser.value.id;
@@ -127,7 +143,9 @@ function commentsController(root, endpoint) {
     }
     const section = element('section', 'gala-comments-island'); section.setAttribute('aria-label', 'Comments');
     section.append(element('p', 'gala-comments__heading', state.total === 1 ? '1 comment' : `${state.total} comments`));
-    if (sessionUser.value) section.append(form('Add a comment', '', (body) => write('comment.create', { articleId, body })));
+    if (sessionUser.value) section.append(form('Add a comment', '', (body) => write('comment.create', {
+      articleId, body, language: document.documentElement.lang || 'und',
+    })));
     else {
       const prompt = element('p', 'gala-comments__prompt');
       const signIn = element('button', '', 'Sign in to join the conversation'); signIn.type = 'button';

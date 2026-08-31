@@ -4,7 +4,7 @@ schemaVersion: 1
 framework:
   themePackage:
     name: "@rathnasgala/theme"
-    version: 2.0.25
+    version: 2.0.26
 site:
   id: unavailable
   ownerId: unavailable
@@ -50,11 +50,15 @@ contact:
   enabled: false
   websiteEnabled: false
   phoneEnabled: false
+# Author-owned. Leave unavailable to use Gala's current platform default. A number must remain
+# within the minimum and maximum shown in the publication's Pagination settings.
+pagination:
+  pageSize: unavailable
 # Author-owned, scaffold-initialized uncompressed byte ceilings for Gala-managed
 # assets and ordinary HTML. Authored media and third-party analytics are excluded;
 # their performance impact remains the author's responsibility under FR-1903.
 performance:
   budgets:
-    managedJavaScriptBytes: 76339
+    managedJavaScriptBytes: 82944
     managedCssBytes: 34816
     ordinaryHtmlBytes: 32768

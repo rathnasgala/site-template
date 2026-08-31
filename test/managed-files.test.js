@@ -24,6 +24,7 @@ const expectedRuntimeFiles = [
   'lib/render-markdown.js',
   'lib/seo.js',
   'lib/share-targets.js',
+  'lib/ui-localization.js',
   'package-lock.json',
   'package.json',
   'scripts/build-reader.js',

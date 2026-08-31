@@ -4,6 +4,7 @@ title: Home
 permalink: /index.html
 ---
 {% from "components/ui.njk" import cardIndex, pagination %}
+{% set ui = site.site.defaultLanguage | uiLabels %}
 <h1>{{ site.site.name }}</h1>
-{{ cardIndex(rootArticleIndex.cards, buildManifest.preview, page.url) }}
-{{ pagination(rootArticleIndex.previousUrl, rootArticleIndex.nextUrl, rootArticleIndex.pageNumber, rootArticleIndex.totalPages, page.url) }}
+{{ cardIndex(rootArticleIndex.cards, buildManifest.preview, page.url, ui) }}
+{{ pagination(rootArticleIndex.previousUrl, rootArticleIndex.nextUrl, rootArticleIndex.pageNumber, rootArticleIndex.totalPages, page.url, ui) }}

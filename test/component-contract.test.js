@@ -41,7 +41,10 @@ test('shared header uses accessible icons and opens search and settings without 
   assert.match(source, /gala-dialog__header[^\n]+gala-settings-title[^\n]+gala-dialog__close/);
   assert.match(source, /gala-dialog__header[^\n]+gala-search-title[^\n]+gala-dialog__close/);
   assert.doesNotMatch(source, />Language preference</);
-  assert.match(source, />Preferred language/);
+  assert.match(source, /ui\.preferredLanguage/);
+  assert.match(source, /data-language-preference data-navigate-on-selection/);
+  assert.match(source, /data-apply-on-load/);
+  assert.match(source, /languageDestination/);
   assert.match(behavior, /event\.target instanceof HTMLDialogElement/);
   assert.match(behavior, /event\.target\.close\(\)/);
 });

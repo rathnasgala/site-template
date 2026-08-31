@@ -380,6 +380,63 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   );
 });
 
+test('Eleventy localizes the Tamil index and gives language preferences real destinations', async () => {
+  const root = await fixture();
+  const manifestPath = path.join(root, '.gala', 'build', 'validated-posts.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  manifest.posts.push({
+    source: 'content/posts/validated/index.ta.md',
+    id: '01K00000000000000000000000',
+    rawFrontmatter: {
+      title: 'சரிபார்க்கப்பட்டது', publishAfterDate: '2026-06-15', language: 'ta'
+    },
+    frontmatter: {
+      title: 'சரிபார்க்கப்பட்டது', publishAfterDate: '2026-06-15', language: 'ta'
+    },
+    contentBody: 'சரிபார்க்கப்பட்ட உள்ளடக்கம்.',
+    body: 'சரிபார்க்கப்பட்ட உள்ளடக்கம்.',
+    slug: 'validated',
+    language: 'ta',
+    relativeUrl: '/ta/validated/',
+    pageUrl: 'https://example.com/blog/ta/validated/',
+    canonicalUrl: 'https://example.com/blog/ta/validated/',
+    publicationState: 'published'
+  });
+  await writeFile(manifestPath, JSON.stringify(manifest));
+
+  await execute(process.execPath, [eleventy], { cwd: root });
+
+  const tamilIndex = await readFile(path.join(root, '_site', 'ta', 'index.html'), 'utf8');
+  assert.match(tamilIndex, /<html lang="ta"/);
+  assert.match(tamilIndex, /<h1>தமிழ் கட்டுரைகள்<\/h1>/);
+  assert.match(tamilIndex, /வெளியிடப்பட்டது <time datetime="2026-06-15">2026-06-15<\/time>/);
+  assert.match(tamilIndex, /1 நிமிட வாசிப்பு/);
+  assert.match(tamilIndex, /id="gala-settings-title">வாசகர் அமைப்புகள்<\/h2>/);
+  assert.match(tamilIndex, />விருப்ப மொழி\s*<select/);
+  assert.match(tamilIndex, /value="en" data-url="\.\.\/en\/"/);
+  assert.doesNotMatch(
+    tamilIndex,
+    /<h1>Fixture Site - ta<\/h1>|class="gala-card__meta">Published | min read<\/p>/
+  );
+
+  const rootIndex = await readFile(path.join(root, '_site', 'index.html'), 'utf8');
+  assert.match(rootIndex, /data-language-preference data-navigate-on-selection data-apply-on-load/);
+  assert.match(rootIndex, /value="ta" data-url="\.\/ta\/"[^>]*>தமிழ்<\/option>/);
+
+  const englishPost = await readFile(
+    path.join(root, '_site', 'en', 'validated', 'index.html'), 'utf8'
+  );
+  assert.match(
+    englishPost,
+    /value="ta" data-url="https:\/\/example\.com\/blog\/ta\/validated\/"[^>]*>தமிழ்<\/option>/
+  );
+
+  const germanPost = await readFile(
+    path.join(root, '_site', 'de', 'without-snapshot', 'index.html'), 'utf8'
+  );
+  assert.match(germanPost, /value="ta" data-url="\.\.\/\.\.\/ta\/"/);
+});
+
 test('Eleventy fails hard instead of globbing content when the manifest is missing', async () => {
   const root = await fixture({ manifest: false });
   await assert.rejects(

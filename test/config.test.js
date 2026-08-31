@@ -7,7 +7,8 @@ import { parse } from 'yaml';
 import {
   loadSiteConfiguration, validateCanonicalUrlTemplate, validatePagination, validateProfile
 } from '../lib/site-config.js';
-import { publicationUrl } from '../eleventy.config.js';
+import { languageDestination, publicationUrl } from '../eleventy.config.js';
+import { uiLabels } from '../lib/ui-localization.js';
 
 const config = parse(await readFile(new URL('../site.config.yml', import.meta.url), 'utf8'));
 const managed = JSON.parse(await readFile(new URL('../.gala/managed-files.json', import.meta.url), 'utf8'));
@@ -23,6 +24,27 @@ test('publication-local URLs resolve under both a project path and a custom-doma
   assert.equal(publicationUrl('/', '/en/article/'), '../../');
   assert.equal(publicationUrl('/search/', '/en/article/'), '../../search/');
   assert.throws(() => publicationUrl('https://example.com/x', '/'), /must start with/);
+});
+
+test('language destinations prefer an exact translation and otherwise use the language index', () => {
+  const alternates = [
+    { hreflang: 'x-default', href: 'https://example.com/en/article/' },
+    { hreflang: 'ta', href: 'https://example.com/ta/article/' }
+  ];
+  assert.equal(
+    languageDestination('ta', '/en/article/', alternates),
+    'https://example.com/ta/article/'
+  );
+  assert.equal(languageDestination('fr', '/en/article/', alternates), '../../fr/');
+  assert.equal(languageDestination('en', '/ta/article/', alternates), '../../en/');
+});
+
+test('Tamil regional variants use Tamil UI while unknown UI locales fall back safely', () => {
+  assert.equal(uiLabels('ta-IN').languageIndexTitle, 'தமிழ் கட்டுரைகள்');
+  assert.equal(uiLabels('ta-IN').published, 'வெளியிடப்பட்டது');
+  assert.equal(uiLabels('fr').published, 'Published');
+  assert.match(uiLabels('fr').languageIndexTitle, /français/i);
+  assert.equal(uiLabels('bad_language').languageIndexTitle, 'English articles');
 });
 
 test('shipped example post claims no article identity', async () => {

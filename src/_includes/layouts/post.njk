@@ -2,9 +2,10 @@
 layout: layouts/base.njk
 ---
 {% from "components/ui.njk" import actionRail, articleStats, conversation, languageSwitcher, tableOfContents %}
+{% set ui = post.language | uiLabels %}
 <article id="article" class="gala-article">
   {% if post.publicationState == "published" or (buildManifest.preview and post.publicationState == "not-emitted") %}<progress class="gala-reading-progress" data-reading-progress max="1" value="0" aria-label="Reading progress"></progress><header class="gala-article-header"><p class="gala-eyebrow">{% if post.publicationState == "published" %}Published{% else %}Scheduled for{% endif %} {{ post.frontmatter.publishAfterDate }} - {{ post.language }} - {{ readingMinutes }} min read</p><h1>{{ post.frontmatter.title }}</h1>{% set byline = post.frontmatter.author or site.site.author %}{% if byline and byline != "unavailable" and byline != "New Gala Site" and byline != site.site.name %}<p class="gala-byline">By {{ byline }}</p>{% endif %}</header>{% endif %}
-  {% if post.publicationState == "published" %}{{ languageSwitcher(hreflangLinks, post.language) }}{% endif %}
+  {% if post.publicationState == "published" %}{{ languageSwitcher(hreflangLinks, post.language, ui) }}{% endif %}
   {% if prismConfigurations.length %}<nav class="gala-prism-selector" aria-label="Approved editions">
     <span aria-current="page">Complete</span>
     {% for configuration in prismConfigurations %}<a href="{{ configuration.pageUrl }}" data-prism-select data-prism-article-id="{{ post.id }}" data-prism-language="{{ post.language }}" data-prism-configuration-id="{{ configuration.configurationId }}" data-prism-source-hash="{{ configuration.sourceRevisionHash }}"{% if post.prismConfigurationLinkPolicy == "NOFOLLOW" %} rel="nofollow"{% endif %}>{{ configuration.depth }} · {{ configuration.intent }}</a>{% endfor %}

@@ -1,3 +1,5 @@
+import { uiLabels } from '../lib/ui-localization.js';
+
 export default class ArticleIndexPages {
   data() {
     return {
@@ -6,7 +8,9 @@ export default class ArticleIndexPages {
       permalink: ({ articleIndex }) => articleIndex.permalink,
       eleventyComputed: {
         language: ({ articleIndex }) => articleIndex.language,
-        title: ({ articleIndex }) => articleIndex.language ?? 'Home'
+        title: ({ articleIndex }) => articleIndex.language == null
+          ? 'Home'
+          : uiLabels(articleIndex.language).languageIndexTitle
       }
     };
   }

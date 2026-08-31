@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="{{ post.language or language or site.site.defaultLanguage }}" data-theme="{{ site.design.theme | default('modern') }}" data-layout="{{ site.design.layout | default('article-first') }}" data-palette="{{ site.design.palette | default('default') }}" data-mode="{{ site.design.colorMode | default('system') }}">
   {% set indexPage = articleIndex or (rootArticleIndex if not post and page.url == '/') %}
+  {% set currentLanguage = post.language or language %}
+  {% set ui = (currentLanguage or site.site.defaultLanguage) | uiLabels %}
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -87,9 +89,9 @@
       </ul></nav>
     </footer>
     <dialog id="gala-settings-dialog" class="gala-dialog" aria-labelledby="gala-settings-title">
-      <header class="gala-dialog__header"><h2 id="gala-settings-title">Reader settings</h2><form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="Close settings">Close</button></form></header>
-      <label>Preferred language
-        <select data-language-preference>{% for language in languages %}<option value="{{ language | escape }}">{{ language }}</option>{% endfor %}</select>
+      <header class="gala-dialog__header"><h2 id="gala-settings-title">{{ ui.readerSettings }}</h2><form method="dialog" class="gala-dialog__close"><button type="submit" aria-label="{{ ui.closeSettings }}">{{ ui.close }}</button></form></header>
+      <label>{{ ui.preferredLanguage }}
+        <select data-language-preference data-navigate-on-selection{% if page.url == '/' %} data-apply-on-load{% endif %}{% if currentLanguage %} data-current-language="{{ currentLanguage | escape }}"{% endif %}>{% for availableLanguage in languages %}<option value="{{ availableLanguage | escape }}" data-url="{{ availableLanguage | languageDestination(page.url, hreflangLinks) }}"{% if availableLanguage == currentLanguage %} selected{% endif %}>{{ availableLanguage | languageName }}</option>{% endfor %}</select>
       </label>
     </dialog>
     <dialog id="gala-search-dialog" class="gala-dialog" aria-labelledby="gala-search-title">

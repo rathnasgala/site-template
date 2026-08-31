@@ -1,3 +1,5 @@
+import { uiLabels } from '../lib/ui-localization.js';
+
 export default class LanguageIndexes {
   data() {
     return {
@@ -5,7 +7,7 @@ export default class LanguageIndexes {
       layout: 'layouts/language-index.njk',
       permalink: ({ language }) => `/${language}/index.html`,
       eleventyComputed: {
-        title: ({ language }) => language,
+        title: ({ language }) => uiLabels(language).languageIndexTitle,
         articleIndex: ({ language, articleIndexesByLanguage }) => articleIndexesByLanguage[language]
       }
     };

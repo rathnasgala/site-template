@@ -9,6 +9,7 @@ import { createHash } from 'node:crypto';
 import { groupArticleCards } from './lib/article-cards.js';
 import { readBuildSettings } from './lib/build-settings.js';
 import { createArticleIndexes, resolvePageSize } from './lib/article-pagination.js';
+import { canonicalLanguage, languageName, uiLabels } from './lib/ui-localization.js';
 
 const themeBootstrap = "(function(){try{var m=localStorage.getItem('gala-color-mode');if(m==='light'||m==='dark'||m==='system')document.documentElement.dataset.mode=m}catch(e){}})();";
 
@@ -24,6 +25,16 @@ export function publicationUrl(target, pageUrl) {
   if (target.endsWith('/') && relative !== '' && !relative.endsWith('/')) relative += '/';
   if (relative === '') return './';
   return relative.startsWith('../') ? relative : `./${relative}`;
+}
+
+export function languageDestination(language, pageUrl, alternates = []) {
+  const canonical = canonicalLanguage(language);
+  const alternate = Array.isArray(alternates)
+    ? alternates.find(({ hreflang }) => hreflang !== 'x-default'
+      && canonicalLanguage(hreflang) === canonical)
+    : null;
+  if (typeof alternate?.href === 'string' && alternate.href !== '') return alternate.href;
+  return publicationUrl(`/${language}/`, pageUrl);
 }
 
 async function verifiedMediaSource(postSource, mediaSource) {
@@ -93,6 +104,9 @@ export default async function (eleventyConfig) {
   eleventyConfig.addFilter('sha256Csp', (value) =>
     createHash('sha256').update(String(value)).digest('base64'));
   eleventyConfig.addFilter('publicationUrl', publicationUrl);
+  eleventyConfig.addFilter('languageDestination', languageDestination);
+  eleventyConfig.addFilter('languageName', languageName);
+  eleventyConfig.addFilter('uiLabels', uiLabels);
   eleventyConfig.setLibrary('md', markdownLibrary);
   eleventyConfig.addPassthroughCopy({ static: '/' });
   eleventyConfig.addPassthroughCopy({

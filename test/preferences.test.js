@@ -5,25 +5,37 @@ import vm from 'node:vm';
 
 const source = await readFile(new URL('../src/assets/preferences.js', import.meta.url), 'utf8');
 
-function harness(stored = null, { navigate = true, storageThrows = false } = {}) {
+function harness(stored = null, {
+  currentLanguage = null,
+  applyOnLoad = false,
+  controlCount = 1,
+  storageThrows = false
+} = {}) {
   const values = new Map(stored == null ? [] : [['gala-language-preference', stored]]);
-  const listeners = {};
-  const options = [
-    { value: 'en', dataset: { url: 'https://example.com/en/post/' } },
-    { value: 'fr', dataset: { url: 'https://example.com/fr/post/' } }
-  ];
-  const control = {
-    options,
-    value: 'en',
-    addEventListener(type, listener) { listeners[type] = listener; },
-    hasAttribute(name) { return navigate && name === 'data-navigate-on-selection'; }
-  };
+  const listenerSets = [];
+  const controls = Array.from({ length: controlCount }, () => {
+    const listeners = {};
+    listenerSets.push(listeners);
+    return {
+      options: [
+        { value: 'en', dataset: { url: 'https://example.com/en/post/' } },
+        { value: 'fr', dataset: { url: 'https://example.com/fr/post/' } }
+      ],
+      value: 'en',
+      dataset: currentLanguage == null ? {} : { currentLanguage },
+      addEventListener(type, listener) { listeners[type] = listener; },
+      hasAttribute(name) {
+        return name === 'data-navigate-on-selection'
+          || (applyOnLoad && name === 'data-apply-on-load');
+      }
+    };
+  });
   const navigations = [];
   let ready;
   const context = {
     document: {
       addEventListener(_type, listener) { ready = listener; },
-      querySelectorAll() { return [control]; }
+      querySelectorAll() { return controls; }
     },
     localStorage: {
       getItem(key) {
@@ -39,13 +51,25 @@ function harness(stored = null, { navigate = true, storageThrows = false } = {})
   };
   vm.runInNewContext(source, context);
   ready();
-  return { control, listeners, navigations, values };
+  return {
+    control: controls[0],
+    controls,
+    listeners: listenerSets[0],
+    navigations,
+    values
+  };
 }
 
-test('stored language only highlights an option and never redirects during initialization', () => {
-  const result = harness('fr');
-  assert.equal(result.control.value, 'fr');
+test('an explicit language page reflects its language without an automatic redirect', () => {
+  const result = harness('fr', { currentLanguage: 'en' });
+  assert.equal(result.control.value, 'en');
   assert.deepEqual(result.navigations, []);
+});
+
+test('the publication root applies a stored language preference', () => {
+  const result = harness('fr', { applyOnLoad: true });
+  assert.equal(result.control.value, 'fr');
+  assert.deepEqual(result.navigations, ['https://example.com/fr/post/']);
 });
 
 test('explicit switcher selection stores preference and performs user-initiated navigation', () => {
@@ -56,9 +80,16 @@ test('explicit switcher selection stores preference and performs user-initiated 
   assert.deepEqual(result.navigations, ['https://example.com/fr/post/']);
 });
 
-test('settings selection never navigates and unavailable storage does not break selection', () => {
-  const result = harness(null, { navigate: false, storageThrows: true });
+test('changing either language control keeps the other control synchronized', () => {
+  const result = harness('en', { controlCount: 2 });
+  result.control.value = 'fr';
+  result.listeners.change();
+  assert.equal(result.controls[1].value, 'fr');
+});
+
+test('settings selection still navigates when preference storage is unavailable', () => {
+  const result = harness(null, { storageThrows: true });
   result.control.value = 'fr';
   assert.doesNotThrow(() => result.listeners.change());
-  assert.deepEqual(result.navigations, []);
+  assert.deepEqual(result.navigations, ['https://example.com/fr/post/']);
 });

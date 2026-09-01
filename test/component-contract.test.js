@@ -43,7 +43,8 @@ test('shared header uses accessible icons and opens search and settings without 
   assert.doesNotMatch(source, />Language preference</);
   assert.match(source, /ui\.preferredLanguage/);
   assert.match(source, /data-language-preference data-navigate-on-selection/);
-  assert.match(source, /data-apply-on-load/);
+  assert.match(source, /<option value=""[^>]*>\{\{ ui\.allLanguages \}\}<\/option>/);
+  assert.doesNotMatch(source, /data-apply-on-load/);
   assert.match(source, /languageDestination/);
   assert.match(behavior, /event\.target instanceof HTMLDialogElement/);
   assert.match(behavior, /event\.target\.close\(\)/);

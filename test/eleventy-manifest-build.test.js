@@ -413,6 +413,7 @@ test('Eleventy localizes the Tamil index and gives language preferences real des
   assert.match(tamilIndex, /1 நிமிட வாசிப்பு/);
   assert.match(tamilIndex, /id="gala-settings-title">வாசகர் அமைப்புகள்<\/h2>/);
   assert.match(tamilIndex, />விருப்ப மொழி\s*<select/);
+  assert.match(tamilIndex, /value="" data-url="\.\.\/">அனைத்து மொழிகளும்<\/option>/);
   assert.match(tamilIndex, /value="en" data-url="\.\.\/en\/"/);
   assert.doesNotMatch(
     tamilIndex,
@@ -420,7 +421,9 @@ test('Eleventy localizes the Tamil index and gives language preferences real des
   );
 
   const rootIndex = await readFile(path.join(root, '_site', 'index.html'), 'utf8');
-  assert.match(rootIndex, /data-language-preference data-navigate-on-selection data-apply-on-load/);
+  assert.match(rootIndex, /data-language-preference data-navigate-on-selection data-current-language=""/);
+  assert.match(rootIndex, /value="" data-url="\.\/" selected>All languages<\/option>/);
+  assert.doesNotMatch(rootIndex, /data-apply-on-load/);
   assert.match(rootIndex, /value="ta" data-url="\.\/ta\/"[^>]*>தமிழ்<\/option>/);
 
   const englishPost = await readFile(

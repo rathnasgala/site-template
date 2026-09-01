@@ -18,10 +18,11 @@ function harness(stored = null, {
     listenerSets.push(listeners);
     return {
       options: [
+        { value: '', dataset: { url: 'https://example.com/' } },
         { value: 'en', dataset: { url: 'https://example.com/en/post/' } },
         { value: 'fr', dataset: { url: 'https://example.com/fr/post/' } }
       ],
-      value: 'en',
+      value: '',
       dataset: currentLanguage == null ? {} : { currentLanguage },
       addEventListener(type, listener) { listeners[type] = listener; },
       hasAttribute(name) {
@@ -45,6 +46,10 @@ function harness(stored = null, {
       setItem(key, value) {
         if (storageThrows) throw new Error('unavailable');
         values.set(key, value);
+      },
+      removeItem(key) {
+        if (storageThrows) throw new Error('unavailable');
+        values.delete(key);
       }
     },
     window: { location: { assign(url) { navigations.push(url); } } }
@@ -66,10 +71,10 @@ test('an explicit language page reflects its language without an automatic redir
   assert.deepEqual(result.navigations, []);
 });
 
-test('the publication root applies a stored language preference', () => {
-  const result = harness('fr', { applyOnLoad: true });
-  assert.equal(result.control.value, 'fr');
-  assert.deepEqual(result.navigations, ['https://example.com/fr/post/']);
+test('the publication root never redirects from a stored language preference', () => {
+  const result = harness('fr', { currentLanguage: '', applyOnLoad: true });
+  assert.equal(result.control.value, '');
+  assert.deepEqual(result.navigations, []);
 });
 
 test('explicit switcher selection stores preference and performs user-initiated navigation', () => {
@@ -78,6 +83,14 @@ test('explicit switcher selection stores preference and performs user-initiated 
   result.listeners.change();
   assert.equal(result.values.get('gala-language-preference'), 'fr');
   assert.deepEqual(result.navigations, ['https://example.com/fr/post/']);
+});
+
+test('selecting all languages removes the preference and opens the publication root', () => {
+  const result = harness('fr', { currentLanguage: 'fr' });
+  result.control.value = '';
+  result.listeners.change();
+  assert.equal(result.values.has('gala-language-preference'), false);
+  assert.deepEqual(result.navigations, ['https://example.com/']);
 });
 
 test('changing either language control keeps the other control synchronized', () => {

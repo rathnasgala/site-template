@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (stored != null && optionFor(control, stored) != null) control.value = stored;
     control.addEventListener('change', () => {
       try {
-        localStorage.setItem(LANGUAGE_STORAGE_KEY, control.value);
+        if (control.value === '') localStorage.removeItem(LANGUAGE_STORAGE_KEY);
+        else localStorage.setItem(LANGUAGE_STORAGE_KEY, control.value);
       } catch {
         // Selection and explicit navigation still work when storage is unavailable.
       }
@@ -32,8 +33,5 @@ document.addEventListener('DOMContentLoaded', () => {
       const selected = optionFor(control, control.value);
       if (selected?.dataset.url) window.location.assign(selected.dataset.url);
     });
-    if (stored == null || !control.hasAttribute('data-apply-on-load')) return;
-    const selected = optionFor(control, stored);
-    if (selected?.dataset.url) window.location.assign(selected.dataset.url);
   });
 });

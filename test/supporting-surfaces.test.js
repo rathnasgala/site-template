@@ -22,3 +22,11 @@ test('code blocks receive an accessible progressive copy control', async () => {
   assert.match(source, /dataset\.copyCode/);
   assert.match(source, /Copy code block/);
 });
+
+test('carousel galleries progressively gain keyboard controls without hiding the fallback', async () => {
+  const source = await readFile(new URL('../src/assets/interactions.js', import.meta.url), 'utf8');
+  assert.match(source, /\[data-gala-carousel]/);
+  assert.match(source, /event\.key === 'ArrowRight'/);
+  assert.match(source, /gala-gallery--ready/);
+  assert.match(source, /Image \$\{index \+ 1} of \$\{items\.length}/);
+});

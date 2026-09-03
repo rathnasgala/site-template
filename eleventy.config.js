@@ -9,6 +9,7 @@ import { createHash } from 'node:crypto';
 import { groupArticleCards } from './lib/article-cards.js';
 import { readBuildSettings } from './lib/build-settings.js';
 import { createArticleIndexes, resolvePageSize } from './lib/article-pagination.js';
+import { siteUrl } from './lib/seo.js';
 import {
   canonicalLanguage,
   formatUiMessage,
@@ -82,6 +83,13 @@ export default async function (eleventyConfig) {
   eleventyConfig.addGlobalData('attributionTier', attributionTier);
   eleventyConfig.addGlobalData('buildIdentity', buildIdentity);
   eleventyConfig.addGlobalData('themeBootstrap', themeBootstrap);
+  eleventyConfig.addGlobalData('rslLicenseUrl', site.aiPublishing.rslEnabled
+    ? siteUrl({
+        canonicalBaseUrl: site.hosting.canonicalBaseUrl,
+        pathPrefix: site.hosting.pathPrefix ?? '/',
+        relativePath: '/license.xml'
+      })
+    : null);
   const articleCards = groupArticleCards(
     manifest.posts,
     site.site.defaultLanguage,

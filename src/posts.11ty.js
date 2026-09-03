@@ -1,9 +1,10 @@
 import { renderMarkdownDocument } from '../lib/render-markdown.js';
-import { articleHreflang, postSeo } from '../lib/seo.js';
+import { articleHreflang, postSeo, siteUrl } from '../lib/seo.js';
 import { engagementFor } from '../lib/engagement-snapshot.js';
 import { resolveShareTargets } from '../lib/share-targets.js';
 import { prismSessionBootstrap } from '../lib/prism-session.js';
 import { readingMinutes } from '../lib/reading-time.js';
+import { articleMarkdownPath, articleProvenancePath } from '../lib/ai-discovery.js';
 
 export default class ValidatedPostPages {
   data() {
@@ -34,6 +35,18 @@ export default class ValidatedPostPages {
           ? renderedDocument(post).tableOfContents
           : [],
         readingMinutes: ({ post }) => readingMinutes(post?.body),
+        postMarkdownUrl: ({ post, site }) => post?.publicationState === 'published'
+          ? siteUrl({
+              canonicalBaseUrl: site.hosting.canonicalBaseUrl,
+              pathPrefix: site.hosting.pathPrefix ?? '/',
+              relativePath: articleMarkdownPath(post)
+            }) : null,
+        postProvenanceUrl: ({ post, site }) => post?.publicationState === 'published'
+          ? siteUrl({
+              canonicalBaseUrl: site.hosting.canonicalBaseUrl,
+              pathPrefix: site.hosting.pathPrefix ?? '/',
+              relativePath: articleProvenancePath(post)
+            }) : null,
         prismConfigurations: ({ buildManifest, post }) => (buildManifest.configurations ?? []).filter(
           (configuration) => configuration.articleId === post.id
             && configuration.language === post.language && configuration.state === 'PUBLISHED'),
@@ -41,8 +54,14 @@ export default class ValidatedPostPages {
           (buildManifest.configurations ?? []).filter((configuration) =>
             configuration.articleId === post.id && configuration.language === post.language
               && configuration.state === 'PUBLISHED')),
-        seo: ({ post, site }) => post?.publicationState === 'published'
-          ? postSeo({ post, site, renderedHtml: renderedDocument(post).html })
+        seo: ({ post, site, postMarkdownUrl, postProvenanceUrl }) => post?.publicationState === 'published'
+          ? postSeo({
+              post,
+              site,
+              renderedHtml: renderedDocument(post).html,
+              markdownUrl: postMarkdownUrl,
+              provenanceUrl: postProvenanceUrl
+            })
           : null
       }
     };

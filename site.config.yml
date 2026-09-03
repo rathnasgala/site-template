@@ -4,7 +4,7 @@ schemaVersion: 1
 framework:
   themePackage:
     name: "@rathnasgala/theme"
-    version: 2.0.31
+    version: 2.0.32
 site:
   id: unavailable
   ownerId: unavailable
@@ -54,11 +54,23 @@ contact:
 # within the minimum and maximum shown in the publication's Pagination settings.
 pagination:
   pageSize: unavailable
+# Author-owned AI discovery and reuse declarations. Gala emits no RSL declaration until at least
+# one right is selected and confirmation matches the exact policy digest shown by the settings UI.
+# Build attestations are independent and remain off unless explicitly enabled.
+aiPublishing:
+  indexing: not-declared
+  aiSearch: not-declared
+  modelTraining: not-declared
+  reuse: not-declared
+  commercialUse: not-declared
+  licenseUrl: unavailable
+  confirmation: unavailable
+  attestBuilds: false
 # Author-owned, scaffold-initialized uncompressed byte ceilings for Gala-managed
 # assets and ordinary HTML. Authored media and third-party analytics are excluded;
 # their performance impact remains the author's responsibility under FR-1903.
 performance:
   budgets:
-    managedJavaScriptBytes: 87040
-    managedCssBytes: 34816
+    managedJavaScriptBytes: 94208
+    managedCssBytes: 36864
     ordinaryHtmlBytes: 32768

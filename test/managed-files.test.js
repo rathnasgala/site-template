@@ -9,6 +9,7 @@ const expectedRuntimeFiles = [
   'eleventy.config.js',
   'lib/article-pagination.js',
   'lib/article-cards.js',
+  'lib/ai-discovery.js',
   'lib/accent.js',
   'lib/build-manifest.js',
   'lib/build-settings.js',
@@ -32,7 +33,9 @@ const expectedRuntimeFiles = [
   'scripts/lint.js',
   'src/404.njk',
   'src/accent.11ty.js',
+  'src/article-markdown.11ty.js',
   'src/article-pages.11ty.js',
+  'src/article-provenance.11ty.js',
   'src/cname.11ty.js',
   'src/_data/buildManifest.js',
   'src/_data/engagementSnapshot.js',
@@ -48,6 +51,7 @@ const expectedRuntimeFiles = [
   'src/assets/reader.js',
   'src/assets/article-groups.js',
   'src/assets/interactions.js',
+  'src/assets/newsletter.js',
   'src/assets/engagement-comments.js',
   'src/assets/engagement-transport.js',
   'src/assets/favicon.svg',
@@ -66,15 +70,17 @@ const expectedRuntimeFiles = [
   'src/contact.njk',
   'src/index.njk',
   'src/feed.11ty.js',
+  'src/llms.11ty.js',
   'src/languages.11ty.js',
   'src/posts.11ty.js',
   'src/prism-configurations.11ty.js',
   'src/redirects.11ty.js',
+  'src/robots.11ty.js',
+  'src/rsl.11ty.js',
   'src/search-index.11ty.js',
   'src/search.njk',
   'src/sitemap.11ty.js',
-  'static/favicon.ico',
-  'static/robots.txt'
+  'static/favicon.ico'
 ].sort();
 
 test('managed manifest covers exactly immutable framework runtime files', async () => {

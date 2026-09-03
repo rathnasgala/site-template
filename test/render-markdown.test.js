@@ -58,6 +58,29 @@ Claim.[^1]
   assert.match(rendered, /Supporting detail/);
 });
 
+test('renders answer-first authoring constructs as semantic notes', () => {
+  const rendered = renderMarkdown(`
+> [!ANSWER]
+> The direct answer.
+
+> [!DEFINITION]
+> A precise definition.
+
+> [!PREREQUISITES]
+> Install the supported runtime.
+
+> [!SOURCES]
+> https://example.com/source
+
+> [!FAQ]
+> A visible frequently asked question.
+`);
+  for (const type of ['answer', 'definition', 'prerequisites', 'sources', 'faq']) {
+    assert.match(rendered, new RegExp(`admonition-${type}`));
+  }
+  assert.doesNotMatch(rendered, /\[!(?:ANSWER|DEFINITION|PREREQUISITES|SOURCES|FAQ)]/);
+});
+
 test('rejects the maintained OWASP-derived XSS regression corpus', () => {
   for (const payload of xssPayloads) {
     let rendered;
@@ -167,6 +190,63 @@ test('keeps script-only providers as provider-labelled outbound facades', () => 
   assert.match(rendered, /class="gala-embed gala-embed--x"/);
   assert.match(rendered, />View post on X</);
   assert.doesNotMatch(rendered, /data-gala-embed-load="(?:gist|x)"/);
+});
+
+test('renders strict image galleries with an accessible no-script fallback', () => {
+  const grid = renderMarkdown(`
+\`\`\`gallery
+![Front panel](media/front-panel.jpg "Front controls")
+![Rear panel](media/rear-panel.jpg "Rear connections")
+\`\`\`
+`);
+  assert.match(grid, /class="gala-gallery gala-gallery--grid"/);
+  assert.match(grid, /aria-label="Image gallery"/);
+  assert.match(grid, /src="media\/front-panel\.jpg" alt="Front panel"/);
+  assert.match(grid, /<figcaption>Front controls<\/figcaption>/);
+  assert.doesNotMatch(grid, /data-gala-carousel/);
+
+  const carousel = renderMarkdown(`
+\`\`\`gallery carousel
+![First view](media/first-view.webp)
+![Second view](media/second-view.png)
+\`\`\`
+`);
+  assert.match(carousel, /class="gala-gallery gala-gallery--carousel"/);
+  assert.match(carousel, /data-gala-carousel/);
+  assert.match(carousel, /aria-label="Previous image"/);
+  assert.match(carousel, /aria-label="Next image"/);
+  assert.match(carousel, /aria-live="polite"/);
+
+  const escaped = renderMarkdown(`
+\`\`\`gallery
+![Front <script>alert(1)</script>](media/front.jpg "Caption <img src=x>")
+![Rear & controls](media/rear.jpg)
+\`\`\`
+`);
+  assert.doesNotMatch(escaped, /<script>|<img src=x>/);
+  assert.match(escaped, /alt="Front &lt;script&gt;alert\(1\)&lt;\/script&gt;"/);
+  assert.match(escaped, /Caption &lt;img src=x&gt;/);
+});
+
+test('rejects malformed galleries and more than one video', () => {
+  for (const malformed of [
+    '```gallery\n![Only one](media/one.png)\n```',
+    '```gallery slides\n![One](media/one.png)\n![Two](media/two.png)\n```',
+    '```gallery\n![](media/one.png)\n![Two](media/two.png)\n```',
+    '```gallery\n![One](https://example.com/one.png)\n![Two](media/two.png)\n```',
+    '```gallery\n![One](media/ONE.png)\n![Two](media/two.png)\n```',
+  ]) {
+    assert.throws(() => renderMarkdown(malformed), /Gallery/);
+  }
+
+  assert.throws(() => renderMarkdown(`
+{% embed https://www.youtube.com/watch?v=M7lc1UVf-VE %}
+{% embed https://youtu.be/M7lc1UVf-VE %}
+`), /one external video/);
+  assert.doesNotThrow(() => renderMarkdown(`
+{% embed https://www.youtube.com/watch?v=M7lc1UVf-VE %}
+{% embed https://codepen.io/chriscoyier/pen/gfdDu %}
+`));
 });
 
 test('warns and renders an ordinary safe link for an unsupported embed URL', () => {

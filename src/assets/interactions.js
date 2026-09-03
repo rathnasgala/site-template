@@ -81,6 +81,38 @@ if (actionRail && actionDock) {
   }).observe(actionDock);
 }
 
+document.querySelectorAll('[data-gala-carousel]').forEach((carousel) => {
+  const track = carousel.querySelector('.gala-gallery__track');
+  const items = [...carousel.querySelectorAll('.gala-gallery__item')];
+  const previous = carousel.querySelector('[data-gala-carousel-previous]');
+  const next = carousel.querySelector('[data-gala-carousel-next]');
+  const status = carousel.querySelector('[data-gala-carousel-status]');
+  if (!track || items.length < 2 || !previous || !next) return;
+  let index = 0;
+  const announce = () => {
+    previous.disabled = index === 0;
+    next.disabled = index === items.length - 1;
+    if (status) status.textContent = `Image ${index + 1} of ${items.length}`;
+  };
+  const show = (requested) => {
+    index = Math.max(0, Math.min(items.length - 1, requested));
+    track.scrollTo({
+      left: items[index].offsetLeft - track.offsetLeft,
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    });
+    announce();
+  };
+  previous.addEventListener('click', () => show(index - 1));
+  next.addEventListener('click', () => show(index + 1));
+  track.addEventListener('keydown', (event) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    show(index + (event.key === 'ArrowRight' ? 1 : -1));
+  });
+  carousel.classList.add('gala-gallery--ready');
+  announce();
+});
+
 function presentFollowState(control, following) {
   const label = following ? 'Unfollow article' : 'Follow article';
   control.setAttribute('aria-pressed', String(following));

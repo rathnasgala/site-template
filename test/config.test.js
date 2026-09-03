@@ -5,7 +5,8 @@ import path from 'node:path';
 import test from 'node:test';
 import { parse } from 'yaml';
 import {
-  loadSiteConfiguration, validateCanonicalUrlTemplate, validatePagination, validateProfile
+  aiPublishingPolicyDigest, loadSiteConfiguration, validateAiPublishing,
+  validateAppearanceTheme, validateCanonicalUrlTemplate, validatePagination, validateProfile
 } from '../lib/site-config.js';
 import { languageDestination, publicationUrl } from '../eleventy.config.js';
 import {
@@ -146,6 +147,28 @@ test('stores exact managed theme identity separately from the visual theme', () 
   assert.equal(config.design.theme, 'editorial');
 });
 
+test('accepts only an exact official appearance-theme artifact pin', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'gala-appearance-theme-'));
+  await mkdir(path.join(root, 'static', 'assets'), { recursive: true });
+  const css = Buffer.from(':root{--gala-radius:1rem}\n');
+  const cssSha256 = (await import('node:crypto')).createHash('sha256').update(css).digest('hex');
+  const selected = {
+    id: 'quiet-paper', version: '1.2.0', repository: 'rathnasgala/theme-quiet-paper',
+    commitSha: 'a'.repeat(40), cssSha256, cssBytes: css.length,
+    baseManagedCssBytes: 36864
+  };
+  await writeFile(path.join(root, 'static', 'assets', 'appearance-theme.css'), css);
+  assert.deepEqual(await validateAppearanceTheme(selected, root), selected);
+  await writeFile(path.join(root, 'static', 'assets', 'appearance-theme.css'), 'altered');
+  await assert.rejects(() => validateAppearanceTheme(selected, root), /wrong size|integrity/);
+  await assert.rejects(() => validateAppearanceTheme({
+    ...selected, repository: 'someone/theme-quiet-paper'
+  }, root), /identity/);
+  await assert.rejects(() => validateAppearanceTheme({
+    ...selected, branch: 'main'
+  }, root), /fields/);
+});
+
 test('hosting provider is fixed to GitHub Pages in v1', () => {
   assert.equal(config.hosting.provider, 'github-pages');
   assert.equal(config.hosting.canonicalPolicy, 'self');
@@ -186,6 +209,54 @@ test('scaffolds author-owned contact settings disabled by default', () => {
     websiteEnabled: false,
     phoneEnabled: false
   });
+});
+
+test('emits no AI rights declaration or attestation permission by default', () => {
+  assert.deepEqual(validateAiPublishing(config.aiPublishing), {
+    indexing: 'not-declared', aiSearch: 'not-declared', modelTraining: 'not-declared',
+    reuse: 'not-declared', commercialUse: 'not-declared', licenseUrl: '',
+    confirmation: '', attestBuilds: false,
+    policyDigest: aiPublishingPolicyDigest({
+      indexing: 'not-declared', aiSearch: 'not-declared', modelTraining: 'not-declared',
+      reuse: 'not-declared', commercialUse: 'not-declared', licenseUrl: ''
+    }),
+    declared: false, rslEnabled: false
+  });
+});
+
+test('requires an exact confirmation digest for AI rights declarations', () => {
+  const policy = {
+    indexing: 'allow', aiSearch: 'allow', modelTraining: 'block',
+    reuse: 'attribution-required', commercialUse: 'license-required',
+    licenseUrl: 'https://example.com/licensing', attestBuilds: true
+  };
+  assert.throws(() => validateAiPublishing(policy), /not confirmed/);
+  const confirmation = aiPublishingPolicyDigest({
+    ...policy, licenseUrl: 'https://example.com/licensing'
+  });
+  assert.deepEqual(validateAiPublishing({ ...policy, confirmation }), {
+    ...policy,
+    licenseUrl: 'https://example.com/licensing',
+    confirmation,
+    policyDigest: confirmation,
+    declared: true,
+    rslEnabled: true
+  });
+  assert.throws(() => validateAiPublishing({
+    ...policy, licenseUrl: 'unavailable', confirmation
+  }), /licenseUrl is required/);
+});
+
+test('rejects rights combinations RSL cannot represent without changing their meaning', () => {
+  assert.throws(() => validateAiPublishing({ indexing: 'allow' }), /all five rights choices/);
+  assert.throws(() => validateAiPublishing({
+    indexing: 'allow', aiSearch: 'allow', modelTraining: 'block',
+    reuse: 'block', commercialUse: 'block'
+  }), /reuse cannot block/);
+  assert.throws(() => validateAiPublishing({
+    indexing: 'block', aiSearch: 'block', modelTraining: 'block',
+    reuse: 'block', commercialUse: 'allow'
+  }), /commercial use to be blocked/);
 });
 
 test('scaffolds the platform default and validates only a bounded integer override', () => {

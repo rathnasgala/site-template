@@ -23,7 +23,10 @@ test('reads signed-build artifacts at Java Instant precision and rejects invalid
     await writeFile(file, JSON.stringify({
       schemaVersion: 1,
       generatedAt,
-      paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 }
+      paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 },
+      contributorCredits: {
+        'one-post': { authors: ['Author One', 'Author Two'], editors: ['Editor One'] }
+      }
     }));
     assert.equal((await readBuildSettings(file)).generatedAt, generatedAt);
   }
@@ -31,21 +34,24 @@ test('reads signed-build artifacts at Java Instant precision and rejects invalid
   await writeFile(file, JSON.stringify({
     schemaVersion: 1,
     generatedAt: '2026-08-30T20:00:00Z',
-    paginationPolicy: { minimumPageSize: 30, maximumPageSize: 20, defaultPageSize: 24 }
+    paginationPolicy: { minimumPageSize: 30, maximumPageSize: 20, defaultPageSize: 24 },
+    contributorCredits: {}
   }));
   await assert.rejects(() => readBuildSettings(file), /Unsupported build settings schema/);
 
   await writeFile(file, JSON.stringify({
     schemaVersion: 1,
     generatedAt: 'not-a-time',
-    paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 }
+    paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 },
+    contributorCredits: {}
   }));
   await assert.rejects(() => readBuildSettings(file), /Unsupported build settings schema/);
 
   await writeFile(file, JSON.stringify({
     schemaVersion: 1,
     generatedAt: '2026-08-30T20:00:00.1234567890Z',
-    paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 }
+    paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 },
+    contributorCredits: {}
   }));
   await assert.rejects(() => readBuildSettings(file), /Unsupported build settings schema/);
 });

@@ -238,13 +238,64 @@ test('builds complete SEO metadata with approved fallbacks and absolute post-loc
     'https://example.com/blog/en/',
     'https://example.com/blog/en/post/'
   ]);
-  assert.equal(seo.blogPosting.author.name, 'Default Author');
-  assert.equal(seo.blogPosting.author.url, 'https://example.com/authors/default');
-  assert.equal(seo.blogPosting.author.image, 'https://images.example.com/author.jpg');
+  assert.equal(seo.blogPosting.author[0].name, 'Default Author');
+  assert.equal(seo.blogPosting.author[0].url, 'https://example.com/authors/default');
+  assert.equal(seo.blogPosting.author[0].image, 'https://images.example.com/author.jpg');
   assert.equal(seo.blogPosting.publisher.name, 'Example Press');
   assert.equal(seo.blogPosting.publisher.logo.url, 'https://press.example.com/logo.svg');
   assert.equal(seo.blogPosting.image, seo.imageUrl);
   assert.doesNotMatch(seo.structuredDataJson, /<\/script/i);
+});
+
+test('uses verified multi-author credits in the article schema without exposing editors as authors', () => {
+  const seo = postSeo({
+    site: {
+      site: { name: 'Site Title', author: 'Fallback Author' },
+      hosting: { canonicalBaseUrl: 'https://example.com', pathPrefix: '/' }
+    },
+    renderedHtml: '<p>Credited body.</p>',
+    post: {
+      language: 'en',
+      pageUrl: 'https://example.com/en/post/',
+      canonicalUrl: 'https://example.com/en/post/',
+      contributorCredits: {
+        authors: ['Author One', 'Author Two'],
+        editors: ['Editor One']
+      },
+      frontmatter: { title: 'Post', publishAfterDate: '2026-09-02' }
+    }
+  });
+
+  assert.equal(seo.author, 'Author One, Author Two');
+  assert.deepEqual(seo.blogPosting.author.map(({ name }) => name), ['Author One', 'Author Two']);
+  assert.doesNotMatch(seo.structuredDataJson, /Editor One/);
+});
+
+test('uses TechArticle, FAQ, citations, Markdown, and provenance only from validated fields', () => {
+  const seo = postSeo({
+    site: {
+      site: { name: 'Technical Notes', author: 'Writer' },
+      hosting: { canonicalBaseUrl: 'https://example.com', pathPrefix: '/' }
+    },
+    renderedHtml: '<p>A concise answer.</p>',
+    markdownUrl: 'https://example.com/en/post/index.md',
+    provenanceUrl: 'https://example.com/en/post/provenance/',
+    post: {
+      language: 'en', pageUrl: 'https://example.com/en/post/',
+      canonicalUrl: 'https://example.com/en/post/',
+      frontmatter: {
+        title: 'Technical answer', publishAfterDate: '2026-09-01', contentType: 'technical',
+        sources: ['https://standards.example/spec'],
+        faq: [{ question: 'Does this use structured data?', answer: 'Yes.' }]
+      }
+    }
+  });
+  assert.equal(seo.blogPosting['@type'], 'TechArticle');
+  assert.deepEqual(seo.blogPosting.citation, ['https://standards.example/spec']);
+  assert.equal(seo.blogPosting.encoding.encodingFormat, 'text/markdown');
+  assert.equal(seo.blogPosting.subjectOf.url, 'https://example.com/en/post/provenance/');
+  assert.equal(seo.faqPage['@type'], 'FAQPage');
+  assert.match(seo.structuredDataJson, /FAQPage/);
 });
 
 test('uses authored descriptions and text-only cards while falling back from author to site title', () => {

@@ -11,6 +11,9 @@
     {% if prismBootstrap %}<script>{{ prismBootstrap | safe }}</script>{% endif %}
     <title>{{ post.frontmatter.title or title }} · {{ site.site.name }}</title>
     {% if post %}<link rel="canonical" href="{{ post.canonicalUrl }}">{% elif indexPage %}<link rel="canonical" href="{{ indexPage.canonicalUrl }}">{% endif %}
+    {% if postMarkdownUrl %}<link rel="alternate" type="text/markdown" href="{{ postMarkdownUrl }}">{% endif %}
+    {% if postProvenanceUrl %}<link rel="describedby" href="{{ postProvenanceUrl }}">{% endif %}
+    {% if rslLicenseUrl %}<link rel="license" type="application/rsl+xml" href="{{ rslLicenseUrl }}">{% endif %}
     {% if indexPage.previousUrl %}<link rel="prev" href="{{ indexPage.previousUrl | publicationUrl(page.url) }}">{% endif %}
     {% if indexPage.nextUrl %}<link rel="next" href="{{ indexPage.nextUrl | publicationUrl(page.url) }}">{% endif %}
     {% for alternate in hreflangLinks %}<link rel="alternate" hreflang="{{ alternate.hreflang }}" href="{{ alternate.href }}">{% endfor %}
@@ -28,9 +31,10 @@
     {% if seo.imageUrl %}<meta name="twitter:image" content="{{ seo.imageUrl }}">{% endif %}
     <script type="application/ld+json">{{ seo.structuredDataJson | safe }}</script>
     {% endif %}
-    {% if post.publicationState == "tombstoned" %}<meta name="robots" content="noindex">{% endif %}
+    {% if post.publicationState == "tombstoned" or site.aiPublishing.indexing == "block" %}<meta name="robots" content="noindex,nofollow">{% endif %}
     <link rel="stylesheet" href="{{ '/assets/theme.css' | publicationUrl(page.url) }}">
     <link rel="stylesheet" href="{{ '/assets/accent.css' | publicationUrl(page.url) }}">
+    {% if site.appearanceTheme %}<link rel="stylesheet" href="{{ '/assets/appearance-theme.css' | publicationUrl(page.url) }}" data-gala-appearance-theme="{{ site.appearanceTheme.id | escape }}@{{ site.appearanceTheme.version | escape }}">{% endif %}
     <link rel="stylesheet" href="{{ '/custom.css' | publicationUrl(page.url) }}">
     <link rel="icon" href="{{ '/assets/favicon.svg' | publicationUrl(page.url) }}" type="image/svg+xml">
     <script src="{{ '/assets/reader.js' | publicationUrl(page.url) }}" defer></script>
@@ -62,6 +66,25 @@
       </nav>
     </header>
     <main id="main-content">{{ content | safe }}</main>
+    {% if site.site.id and site.site.id != "unavailable" %}
+    <aside class="gala-newsletter" data-gala-newsletter
+      data-site-id="{{ site.site.id | escape }}"
+      data-api-base-url="{{ site.platform.apiBaseUrl or 'https://api.gala67.com' }}"
+      data-language="{{ (currentLanguage or '') | escape }}" hidden>
+      <div>
+        <h2>Get new articles by email</h2>
+        <p>One confirmation email, then only new articles from this publication. Unsubscribe in one click.</p>
+      </div>
+      <form>
+        <label for="gala-newsletter-email">Email address</label>
+        <span class="gala-newsletter__controls">
+          <input id="gala-newsletter-email" name="email" type="email" autocomplete="email" required maxlength="320">
+          <button type="submit">Subscribe</button>
+        </span>
+        <p data-newsletter-status role="status" aria-live="polite"></p>
+      </form>
+    </aside>
+    {% endif %}
     <footer class="gala-page-footer">
       <section class="gala-page-footer__identity" aria-label="Publication author">
         {% if site.site.authorProfile.avatarUrl %}<img src="{{ site.site.authorProfile.avatarUrl | escape }}" alt="" width="40" height="40">{% endif %}

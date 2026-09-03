@@ -12,7 +12,7 @@ const templateRoot = fileURLToPath(new URL('..', import.meta.url));
 const eleventy = path.join(templateRoot, 'node_modules', '@11ty', 'eleventy', 'cmd.cjs');
 const PERFORMANCE_BUDGETS = {
   managedJavaScriptBytes: 67_584,
-  managedCssBytes: 34_816,
+  managedCssBytes: 36_864,
   ordinaryHtmlBytes: 32_768
 };
 
@@ -85,11 +85,17 @@ performance:
           id: '01K00000000000000000000000',
           rawFrontmatter: {
             title: 'Validated', publishAfterDate: '2026-06-15', language: 'en',
-            coverImage: 'media/cover image.png'
+            description: 'A directly useful answer.', contentType: 'technical',
+            coverImage: 'media/cover image.png',
+            sources: ['https://source.example/reference?a=1&b=2'],
+            faq: [{ question: 'What is <validated>?', answer: 'A safe & visible answer.' }]
           },
           frontmatter: {
             title: 'Validated', publishAfterDate: '2026-06-15', language: 'en',
-            coverImage: 'media/cover image.png'
+            description: 'A directly useful answer.', contentType: 'technical',
+            coverImage: 'media/cover image.png',
+            sources: ['https://source.example/reference?a=1&b=2'],
+            faq: [{ question: 'What is <validated>?', answer: 'A safe & visible answer.' }]
           },
           contentBody: 'Validated **body**.',
           body: 'Validated **body**.',
@@ -158,6 +164,17 @@ performance:
         }
       ]
     }));
+    await writeFile(path.join(root, '.gala', 'build', 'build-settings.json'), JSON.stringify({
+      schemaVersion: 1,
+      generatedAt: '2026-06-15T12:30:00Z',
+      paginationPolicy: { minimumPageSize: 12, maximumPageSize: 100, defaultPageSize: 24 },
+      contributorCredits: {
+        validated: {
+          authors: ['Author One', 'Author Two'],
+          editors: ['Editor One']
+        }
+      }
+    }));
     await writeFile(path.join(root, '.engagement-snapshot.json'), JSON.stringify({
       schemaVersion: 1,
       refreshedAt: '2026-06-15T00:00:00Z',
@@ -207,6 +224,8 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   const published = await readFile(path.join(root, '_site', 'en', 'validated', 'index.html'), 'utf8');
   assert.match(published, /<strong>body<\/strong>/);
   assert.match(published, /1 min read/);
+  assert.match(published, /By Author One, Author Two · Edited by Editor One/);
+  assert.match(published, /"author":\[\{"@type":"Person","name":"Author One"\},\{"@type":"Person","name":"Author Two"\}\]/);
   assert.ok(await bytes(path.join(root, '_site', 'favicon.ico')) > 0);
   assert.match(published, /href="\.\.\/\.\.\/assets\/theme\.css"/);
   assert.doesNotMatch(published, /wrong-environment-prefix/);
@@ -218,7 +237,7 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
     published,
     /data-copy-url="https:\/\/canonical.example\/validated\?source=gala&amp;language=en"/
   );
-  assert.match(published, /<meta name="description" content="Validated body\.">/);
+  assert.match(published, /<meta name="description" content="A directly useful answer\.">/);
   assert.match(published, /<meta property="og:type" content="article">/);
   assert.match(published, /<meta property="og:url" content="https:\/\/canonical\.example\/validated\?source=gala&amp;language=en">/);
   assert.match(published, /<meta name="twitter:card" content="summary_large_image">/);
@@ -226,7 +245,12 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
     published,
     /<meta property="og:image" content="https:\/\/example\.com\/blog\/en\/validated\/media\/cover%20image\.png">/
   );
-  assert.match(published, /"@type":"BlogPosting"/);
+  assert.match(published, /"@type":"TechArticle"/);
+  assert.match(published, /"@type":"FAQPage"/);
+  assert.match(published, /class="gala-article-sources"/);
+  assert.match(published, /href="https:\/\/source\.example\/reference\?a=1&amp;b=2"/);
+  assert.match(published, /What is &lt;validated&gt;\?/);
+  assert.match(published, /A safe &amp; visible answer\./);
   assert.match(published, /"@type":"BreadcrumbList"/);
   assert.match(published, /href="https:\/\/example\.com\/blog\/feed\/en\.xml"/);
   assert.match(
@@ -242,6 +266,9 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
     /rel="alternate" hreflang="x-default" href="https:\/\/example.com\/blog\/en\/validated\/"/
   );
   assert.match(published, /data-language-preference/);
+  assert.match(published, /<link rel="alternate" type="text\/markdown" href="https:\/\/example\.com\/blog\/en\/validated\/index\.md">/);
+  assert.match(published, /<link rel="describedby" href="https:\/\/example\.com\/blog\/en\/validated\/provenance\/">/);
+  assert.doesNotMatch(published, /<link rel="license"/);
   assert.match(
     published,
     /href="\.\.\/\.\.\/s\/version\/"[^>]*>a{8}<\/a>/
@@ -270,12 +297,29 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
   assert.match(published, /data-url="https:\/\/example.com\/blog\/fr\/validated\/"/);
   const tombstone = await readFile(path.join(root, '_site', 'fr', 'deleted-post', 'index.html'), 'utf8');
   assert.match(tombstone, /POST deleted on 2026-06-14/);
-  assert.match(tombstone, /<meta name="robots" content="noindex">/);
+  assert.match(tombstone, /<meta name="robots" content="noindex,nofollow">/);
   assert.doesNotMatch(tombstone, /data-copy-url=/);
   const sitemap = await readFile(path.join(root, '_site', 'sitemap.xml'), 'utf8');
   assert.match(sitemap, /<loc>https:\/\/example.com\/blog\/en\/validated\/<\/loc>/);
   assert.match(sitemap, /hreflang="x-default"/);
   assert.doesNotMatch(sitemap, /deleted-post/);
+  const llms = await readFile(path.join(root, '_site', 'llms.txt'), 'utf8');
+  assert.match(llms, /https:\/\/example\.com\/blog\/en\/validated\/index\.md/);
+  const markdown = await readFile(path.join(root, '_site', 'en', 'validated', 'index.md'), 'utf8');
+  assert.match(markdown, /^# Validated/m);
+  const provenancePage = await readFile(
+    path.join(root, '_site', 'en', 'validated', 'provenance', 'index.html'), 'utf8'
+  );
+  assert.match(provenancePage, /<h1>Article provenance<\/h1>/);
+  const provenanceJson = /<script type="application\/json" id="gala-provenance">([^<]+)<\/script>/
+    .exec(provenancePage)?.[1];
+  assert.ok(provenanceJson, 'the provenance page must carry its machine-readable record');
+  const provenance = JSON.parse(provenanceJson);
+  assert.equal(provenance.commit, 'a'.repeat(40));
+  assert.match(provenance.sourceSha256, /^[a-f0-9]{64}$/);
+  const robots = await readFile(path.join(root, '_site', 'robots.txt'), 'utf8');
+  assert.equal(robots, 'Sitemap: https://example.com/blog/sitemap.xml\n');
+  await assert.rejects(readFile(path.join(root, '_site', 'license.xml')), /ENOENT/);
   const index = await readFile(path.join(root, '_site', 'index.html'), 'utf8');
   assert.match(index, /class="gala-card-index"/);
   assert.match(index, /href="\.\/en\/validated\/"/);
@@ -378,6 +422,31 @@ test('Eleventy emits only current manifest pages and renders tombstones in place
     () => readFile(path.join(root, '_site', 'not-validated', 'index.html')),
     { code: 'ENOENT' }
   );
+});
+
+test('Eleventy verifies and renders a selected immutable appearance theme after managed CSS', async () => {
+  const root = await fixture();
+  const css = Buffer.from(':root{--gala-radius:1rem}\n');
+  const cssSha256 = (await import('node:crypto')).createHash('sha256').update(css).digest('hex');
+  await mkdir(path.join(root, 'static', 'assets'), { recursive: true });
+  await writeFile(path.join(root, 'static', 'assets', 'appearance-theme.css'), css);
+  await writeFile(path.join(root, 'site.config.yml'), `${await readFile(path.join(root, 'site.config.yml'), 'utf8')}
+appearanceTheme:
+  id: quiet-paper
+  version: 1.2.0
+  repository: "rathnasgala/theme-quiet-paper"
+  commitSha: ${'a'.repeat(40)}
+  cssSha256: ${cssSha256}
+  cssBytes: ${css.length}
+  baseManagedCssBytes: 36864
+`);
+  await execute(process.execPath, [eleventy], {
+    cwd: root,
+    env: { ...process.env, GALA_BUILD_INSTANT: '2026-06-15T12:30:00Z' }
+  });
+  const page = await readFile(path.join(root, '_site', 'en', 'validated', 'index.html'), 'utf8');
+  assert.match(page, /href="\.\.\/\.\.\/assets\/appearance-theme\.css" data-gala-appearance-theme="quiet-paper@1\.2\.0"/);
+  assert.equal(await readFile(path.join(root, '_site', 'assets', 'appearance-theme.css'), 'utf8'), css.toString());
 });
 
 test('Eleventy localizes the Tamil index and gives language preferences real destinations', async () => {

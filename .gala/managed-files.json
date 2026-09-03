@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "themePackage": {
     "name": "@rathnasgala/theme",
-    "version": "2.0.32",
+    "version": "2.0.33",
     "availableDesignThemes": [
       "editorial",
       "modern",
@@ -15,7 +15,7 @@
     "managedCssBytes": 36864
   },
   "files": {
-    ".gala/publish.yml.template": "8bd6a0afde830e68de9b02e1d5f793f8e8438443d7fec46873042bf968eec619",
+    ".gala/publish.yml.template": "e57c962506014ab05a4e061e6d91b684239107b6982fe497a9f3e56d7f442675",
     ".gitignore": "b5fa24e10155097a0d372926fd2e59e6072e7cc2cb6399bbfb4beb8b33ea315b",
     "eleventy.config.js": "dc5a27b7595da396191176c15f95fc407f02852c025e3418c3f58d32794bfbc1",
     "lib/ai-discovery.js": "2339d8d1baa03d5a92f4d4d627796dc6c1a9288d2fad6f8fe3e8ed2e349766d6",

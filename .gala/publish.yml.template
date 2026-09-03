@@ -15,7 +15,8 @@ concurrency:
 
 permissions:
   contents: write
-__ATTESTATION_PERMISSIONS__
+  id-token: write
+  attestations: write
 
 jobs:
   publish:

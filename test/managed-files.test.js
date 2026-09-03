@@ -116,13 +116,16 @@ test('doctor never owns mutable author or platform data', async () => {
   }
 });
 
-test('author workflow passes both bounded rotation secret slots to the reusable publisher', async () => {
+test('author workflow grants required permissions and passes both rotation secret slots', async () => {
   const workflow = await readFile(
     new URL('../.gala/publish.yml.template', import.meta.url), 'utf8'
   );
   assert.match(workflow, /site-secret: \$\{\{ secrets\.GALA_SITE_SECRET \}\}/);
   assert.match(workflow,
     /previous-site-secret: \$\{\{ secrets\.GALA_PREVIOUS_SITE_SECRET \}\}/);
+  assert.match(workflow, /^  contents: write$/m);
+  assert.match(workflow, /^  id-token: write$/m);
+  assert.match(workflow, /^  attestations: write$/m);
 });
 
 /*
